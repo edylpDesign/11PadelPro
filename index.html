@@ -5,67 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>11Padel Point Pro - Suite</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- SDK Modular de Firebase (v10) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { 
-            getAuth, 
-            signInWithEmailAndPassword, 
-            signOut, 
-            onAuthStateChanged,
-            createUserWithEmailAndPassword 
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            setDoc, 
-            getDoc, 
-            getDocs, 
-            collection, 
-            updateDoc, 
-            deleteDoc 
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-        // Tus credenciales directas de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyA-x62LGZKHJcSY3ry0ZimP6vIAwSniU-4",
-            authDomain: "padel-pro-4c4d7.firebaseapp.com",
-            projectId: "padel-pro-4c4d7",
-            storageBucket: "padel-pro-4c4d7.firebasestorage.app",
-            messagingSenderId: "764384530544",
-            appId: "1:764384530544:web:c146696d3bbda2534ee4b5"
-        };
-
-        // App Principal (Admin y usuarios activos)
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // App Secundaria (Para registrar clientes en Authentication sin expulsar la sesión actual)
-        const secondaryApp = initializeApp(firebaseConfig, "SecondaryAuthBridge");
-        const secondaryAuth = getAuth(secondaryApp);
-
-        window.fb = {
-            auth,
-            db,
-            secondaryAuth,
-            signInWithEmailAndPassword,
-            signOut,
-            onAuthStateChanged,
-            createUserWithEmailAndPassword,
-            doc,
-            setDoc,
-            getDoc,
-            getDocs,
-            collection,
-            updateDoc,
-            deleteDoc
-        };
-
-        window.initFirebaseBridge();
-    </script>
-
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         :root {
@@ -112,93 +51,346 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .brand-logos-zone { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .logo-app-img { height: 44px; width: auto; max-width: 140px; object-fit: contain; border-radius: 8px; background: white; padding: 2px; }
-        .sponsor-main-badge-link {
-            display: flex; align-items: center; gap: 6px;
-            background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 25px;
-            border: 1px solid rgba(255,255,255,0.4); text-decoration: none; color: white;
+        .brand-logos-zone {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-        .sponsor-main-logo { height: 28px; width: 28px; object-fit: cover; border-radius: 50%; background: white; }
-        .sponsor-main-label { font-size: 0.72rem; font-weight: 700; }
+        .logo-app-img {
+            height: 44px;
+            width: auto;
+            max-width: 140px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: white;
+            padding: 2px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .sponsor-main-badge-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.4);
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.2s;
+        }
+        .sponsor-main-badge-link:active { transform: scale(0.95); }
+        .sponsor-main-logo {
+            height: 28px;
+            width: 28px;
+            object-fit: cover;
+            border-radius: 50%;
+            background: white;
+        }
+        .sponsor-main-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
 
         .user-nav-actions { display: flex; align-items: center; gap: 6px; }
         .badge-chip { background: rgba(255,255,255,0.25); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; color: white; font-weight: bold; border: 1px solid rgba(255,255,255,0.4); }
 
         .sponsors-banner-wrapper {
-            background: white; border-radius: 14px; padding: 10px 12px; margin-bottom: 14px;
-            box-shadow: var(--padel-shadow); border: 1px solid rgba(0,0,0,0.06); text-align: center;
+            background: white;
+            border-radius: 14px;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            box-shadow: var(--padel-shadow);
+            border: 1px solid rgba(0,0,0,0.06);
+            text-align: center;
         }
-        .sponsors-label { font-size: 0.68rem; font-weight: bold; color: var(--padel-gray); text-transform: uppercase; margin-bottom: 8px; }
-        .sponsors-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 6px; }
+        .sponsors-label {
+            font-size: 0.68rem;
+            font-weight: bold;
+            color: var(--padel-gray);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .sponsors-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 6px;
+        }
         .sponsor-box-btn {
-            background: var(--padel-light); border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 6px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-decoration: none; color: var(--padel-dark); height: 65px;
+            background: var(--padel-light);
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--padel-dark);
+            height: 65px;
+            transition: all 0.2s;
+            overflow: hidden;
         }
-        .sponsor-btn-img { max-height: 38px; max-width: 100%; object-fit: contain; }
-        .sponsor-btn-fallback { font-size: 0.75rem; font-weight: bold; color: var(--padel-blue); }
+        .sponsor-box-btn:active {
+            transform: scale(0.95);
+            border-color: var(--padel-green);
+        }
+        .sponsor-btn-img {
+            max-height: 38px;
+            max-width: 100%;
+            object-fit: contain;
+        }
+        .sponsor-btn-fallback {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--padel-blue);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
         .sponsors-text { font-size: 0.8rem; font-weight: 700; color: var(--padel-orange); margin-top: 4px; }
 
-        .card { background: white; border-radius: 15px; box-shadow: var(--padel-shadow); overflow: hidden; margin-bottom: 16px; }
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--padel-shadow);
+            overflow: hidden;
+            margin-bottom: 16px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
         .card-header {
             background: linear-gradient(90deg, var(--padel-blue) 0%, var(--padel-green) 100%);
-            color: white; padding: 12px 18px; font-size: 1.1rem; font-weight: 700;
-            display: flex; justify-content: space-between; align-items: center;
+            color: white;
+            padding: 12px 18px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .card-body { padding: 16px; }
 
         .btn {
-            padding: 10px 16px; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 700;
-            cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
         }
+        .btn:active { transform: scale(0.98); }
         .btn-green { background: linear-gradient(135deg, var(--padel-green) 0%, #1e8449 100%); color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-wa { background: #25d366; color: white; }
         .btn-dark { background: var(--padel-light-gray); color: var(--padel-dark); border: 1px solid #cbd5e1; }
         .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
         .btn-xs-delete { background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; }
 
         .mode-box-card {
-            background: white; border-radius: 14px; padding: 16px; margin-bottom: 12px; cursor: pointer;
-            display: flex; align-items: center; gap: 14px; box-shadow: var(--padel-shadow); border-left: 5px solid var(--padel-green);
+            background: white;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--padel-shadow);
+            border-left: 5px solid var(--padel-green);
+            transition: transform 0.2s;
         }
+        .mode-box-card:active { transform: scale(0.98); }
         .mode-box-card.pozo { border-left-color: var(--padel-blue); }
         .mode-box-card.padron { border-left-color: var(--padel-purple); }
         .mode-icon-circle {
-            width: 48px; height: 48px; min-width: 48px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: white; background: var(--padel-green);
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: white;
+            background: var(--padel-green);
         }
         .mode-box-card.pozo .mode-icon-circle { background: var(--padel-blue); }
         .mode-box-card.padron .mode-icon-circle { background: var(--padel-purple); }
+
+        .tabs { display: flex; background: var(--padel-light-gray); border-radius: 10px; overflow: hidden; margin-bottom: 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); }
+        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-weight: 700; font-size: 0.82rem; transition: 0.2s; color: var(--padel-dark); }
+        .tab.active { background: linear-gradient(135deg, var(--padel-blue) 0%, var(--padel-green) 100%); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .scroll-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 12px; scrollbar-width: none; }
+        .scroll-chips::-webkit-scrollbar { display: none; }
+        .chip-pill {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            color: var(--padel-dark);
+            border: 2px solid transparent;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        .chip-pill.active {
+            background: linear-gradient(135deg, var(--padel-blue) 0%, var(--padel-green) 100%);
+            color: white;
+        }
+
+        .match-card-clean {
+            background: white;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-left: 5px solid var(--padel-green);
+        }
+        .court-badge-divider {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--padel-orange);
+            margin: 8px 0;
+        }
+        .team-row-live { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+        .score-display-btn {
+            width: 54px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 900;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+        .score-yellow { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
+        .score-green { background: linear-gradient(135deg, var(--padel-green) 0%, #1e8449 100%); color: white; }
+
+        .pozo-player-row {
+            background: var(--padel-light);
+            border: 1px solid var(--padel-light-gray);
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .punto-control-box { display: flex; align-items: center; gap: 6px; }
+        .score-btn-round {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: var(--padel-dark);
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        .score-input-pozo {
+            width: 50px;
+            height: 34px;
+            background: white;
+            border: 2px solid var(--padel-light-gray);
+            color: var(--padel-blue);
+            font-weight: 800;
+            font-size: 1.1rem;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .caguama-tag {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #f59e0b;
+            border-radius: 14px;
+            padding: 3px 8px;
+            font-size: 0.78rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
 
         .table-responsive { width: 100%; overflow-x: auto; border-radius: 10px; }
         table { width: 100%; border-collapse: collapse; background: white; font-size: 0.82rem; }
         th { background: linear-gradient(135deg, var(--padel-blue) 0%, var(--padel-green) 100%); color: white; padding: 10px 8px; font-weight: 700; text-align: center; }
         td { padding: 9px 8px; border-bottom: 1px solid var(--padel-light-gray); text-align: center; white-space: nowrap; font-weight: 600; }
+        .pos-1 { background: rgba(255, 215, 0, 0.2) !important; font-weight: bold; }
+        .pos-2 { background: rgba(192, 192, 192, 0.15) !important; }
+        .pos-3 { background: rgba(205, 127, 50, 0.15) !important; }
 
-        input, select { width: 100%; padding: 10px 14px; border: 2px solid var(--padel-light-gray); border-radius: 10px; font-size: 0.9rem; outline: none; }
+        input, select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid var(--padel-light-gray);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        input:focus { border-color: var(--padel-green); }
+
         .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: 0.2s; z-index: 2000; padding: 12px;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: 0.2s; z-index: 2000;
+            padding: 12px;
         }
         .modal.active { opacity: 1; pointer-events: all; }
-        .modal-content { background: white; border-radius: 16px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; padding: 20px; }
+        .modal-content {
+            background: white; border-radius: 16px; width: 100%; max-width: 500px;
+            max-height: 85vh; overflow-y: auto; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
         .hidden { display: none !important; }
 
         .toast {
             position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
             background: var(--padel-dark); color: white; padding: 10px 20px; border-radius: 40px;
             font-size: 0.85rem; z-index: 3000; opacity: 0; pointer-events: none; transition: 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- HEADER TOP -->
+        <!-- HEADER TOP CON MARCA DUAL -->
         <header>
             <div class="brand-logos-zone">
                 <img src="img/logo_11padel.png" alt="11Padel Point Pro" class="logo-app-img" id="mainAppLogo" onerror="this.src='img/logo.png'; this.onerror=()=>this.style.display='none'">
-                <a href="#" target="_blank" class="sponsor-main-badge-link" id="sponsorMainLink">
+                
+                <a href="#" target="_blank" class="sponsor-main-badge-link" id="sponsorMainLink" title="Patrocinador Principal">
                     <img src="img/patrocinador_principal.png" alt="Sponsor" class="sponsor-main-logo" id="sponsorMainImg" onerror="this.style.display='none'">
                     <span class="sponsor-main-label" id="sponsorMainLabel">★ Patrocinador</span>
                     <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i>
@@ -212,43 +404,47 @@
             </div>
         </header>
 
-        <!-- BANNER DE 3 PATROCINADORES -->
+        <!-- BANNER DE 3 PATROCINADORES CON BOTONES INDEPENDIENTES -->
         <div class="sponsors-banner-wrapper hidden" id="sponsorsBannerBlock">
-            <div class="sponsors-label"><i class="fas fa-ad"></i> Patrocinadores Oficiales • Toca para visitar</div>
+            <div class="sponsors-label"><i class="fas fa-ad"></i> Patrocinadores Oficiales • Toca cada uno para visitar</div>
+            
             <div class="sponsors-grid-3">
-                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor1">
+                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor1" title="Visitar Patrocinador 1">
                     <img src="img/banner_patrocinador1.png" alt="Sponsor 1" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-shield-alt"></i> Sponsor 1</div>
                 </a>
-                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor2">
+
+                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor2" title="Visitar Patrocinador 2">
                     <img src="img/banner_patrocinador2.png" alt="Sponsor 2" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-award"></i> Sponsor 2</div>
                 </a>
-                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor3">
+
+                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor3" title="Visitar Patrocinador 3">
                     <img src="img/banner_patrocinador3.png" alt="Sponsor 3" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-star"></i> Sponsor 3</div>
                 </a>
             </div>
+
             <div class="sponsors-text" id="sponsorsTextDisplay">Patrocinado por: 11Padel Oficial</div>
         </div>
 
-        <!-- LOGIN FIREBASE -->
+        <!-- LOGIN AUTÓNOMO -->
         <div id="viewLogin" class="card">
-            <div class="card-header"><i class="fas fa-lock"></i> Acceso Protegido de Club</div>
+            <div class="card-header"><i class="fas fa-lock"></i> Acceso al Sistema</div>
             <div class="card-body" style="max-width: 380px; margin: 0 auto;">
                 <div style="margin-bottom: 12px;">
                     <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Correo Electrónico</label>
-                    <input type="email" id="loginEmail" placeholder="cliente@club.com">
+                    <input type="email" id="loginEmail" value="admin@11padel.com">
                 </div>
                 <div style="margin-bottom: 16px;">
                     <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Contraseña</label>
-                    <input type="password" id="loginPass" placeholder="******">
+                    <input type="password" id="loginPass" value="admin123">
                 </div>
-                <button class="btn btn-green" style="width:100%;" onclick="iniciarSesion()">Entrar a mi Club</button>
+                <button class="btn btn-green" style="width:100%;" onclick="iniciarSesion()">Iniciar Sesión</button>
             </div>
         </div>
 
-        <!-- PANEL ADMIN: CONFIGURACIÓN DE ENLACES + CLIENTES EN FIREBASE -->
+        <!-- PANEL ADMIN -->
         <div id="viewAdmin" class="card hidden">
             <div class="card-header">
                 <span><i class="fas fa-shield-alt"></i> Panel de Administración y Enlaces</span>
@@ -287,8 +483,8 @@
                 </div>
 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <span style="font-size:0.85rem; font-weight:bold;">Clientes en Firebase</span>
-                    <button class="btn btn-sm btn-green" onclick="abrirModalNuevoCliente()">+ Cliente en Firebase</button>
+                    <span style="font-size:0.85rem; font-weight:bold;">Control de Clientes</span>
+                    <button class="btn btn-sm btn-green" onclick="abrirModalNuevoCliente()">+ Cliente</button>
                 </div>
 
                 <div class="table-responsive">
@@ -297,6 +493,7 @@
                             <tr>
                                 <th>Email</th>
                                 <th>Club</th>
+                                <th>Contraseña</th>
                                 <th>Vencimiento</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
@@ -308,38 +505,232 @@
             </div>
         </div>
 
-        <!-- HUB PRINCIPAL -->
+        <!-- HUB DE MODOS DE JUEGO -->
         <div id="viewHubModos" class="hidden">
             <p style="font-size:0.85rem; font-weight:bold; color:var(--padel-gray); margin-bottom:10px;">Selecciona el modo de juego:</p>
 
-            <div class="mode-box-card" onclick="showToast('Modo 8 Loco seleccionado')">
-                <div class="mode-icon-circle"><i class="fas fa-dice"></i></div>
+            <div class="mode-box-card" onclick="entrarModo('americano')">
+                <div class="mode-icon-circle">
+                    <i class="fas fa-dice"></i>
+                </div>
                 <div>
-                    <h3 style="font-size:1.1rem;">Modo 8 Loco / Americano</h3>
+                    <h3 style="font-size:1.1rem; color:var(--padel-dark);">Modo 8 Loco / Americano</h3>
                     <p style="font-size:0.8rem; color:var(--padel-gray);">Partidos por parejas rotativas o fijas.</p>
                 </div>
             </div>
 
-            <div class="mode-box-card pozo" onclick="showToast('Modo Pozo seleccionado')">
-                <div class="mode-icon-circle"><i class="fas fa-trophy"></i></div>
+            <div class="mode-box-card pozo" onclick="entrarModo('pozo')">
+                <div class="mode-icon-circle">
+                    <i class="fas fa-trophy"></i>
+                </div>
                 <div>
-                    <h3 style="font-size:1.1rem;">Modo Pozo / Rey de la Pista</h3>
+                    <h3 style="font-size:1.1rem; color:var(--padel-dark);">Modo Pozo / Rey de la Pista</h3>
                     <p style="font-size:0.8rem; color:var(--padel-gray);">Puntos totales directos individuales por ronda.</p>
                 </div>
+            </div>
+
+            <div class="mode-box-card padron" onclick="abrirPadronJugadores()">
+                <div class="mode-icon-circle">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <h3 style="font-size:1.1rem; color:var(--padel-dark);">Padrón de Jugadores</h3>
+                    <p style="font-size:0.8rem; color:var(--padel-gray);">Base de jugadores registrada por tu club.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- LIGAS DEL MODO SELECCIONADO -->
+        <div id="viewLigasModo" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <button class="btn btn-sm btn-dark" onclick="backToHubModos()"><i class="fas fa-arrow-left"></i> Modos</button>
+                <button class="btn btn-sm btn-green" onclick="abrirModalCrearLiga()">+ Crear Liga</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span id="tituloModoLigas">Ligas</span>
+                </div>
+                <div class="card-body">
+                    <div id="listaLigasContenedor"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PADRÓN DE JUGADORES -->
+        <div id="viewPadron" class="card hidden">
+            <div class="card-header">
+                <span><i class="fas fa-users"></i> Padrón de Jugadores</span>
+                <button class="btn btn-sm btn-dark" onclick="backToHubModos()"><i class="fas fa-arrow-left"></i> Volver</button>
+            </div>
+            <div class="card-body">
+                <div style="display:flex; gap:8px; margin-bottom:14px;">
+                    <input type="text" id="inputNuevoJugador" placeholder="Nombre completo">
+                    <button class="btn btn-sm btn-green" onclick="agregarJugadorPadron()">Añadir</button>
+                </div>
+                <div id="listaJugadoresPadron"></div>
+            </div>
+        </div>
+
+        <!-- DETALLE DE LIGA -->
+        <div id="viewLigaDetalle" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <button class="btn btn-sm btn-dark" onclick="backToLigasModo()"><i class="fas fa-arrow-left"></i> Ligas</button>
+                <button class="btn btn-sm btn-green" id="btnNuevaJornadaLiga" onclick="abrirModalNuevaJornada()">+ Nueva Jornada</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span id="ligaDetalleNombre">Liga</span>
+                    <button class="btn btn-sm btn-danger" id="btnTerminarLigaOficial" onclick="terminarLigaOficial()">🏁 Cerrar Liga</button>
+                </div>
+                <div class="card-body">
+                    <p id="ligaDetalleSub" style="font-size:0.8rem; color:var(--padel-gray); margin-bottom:12px;"></p>
+
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchLigaTab('tabla')">📊 TABLA GENERAL</div>
+                        <div class="tab" onclick="switchLigaTab('jornadas')">📅 JORNADAS</div>
+                    </div>
+
+                    <div id="tabLigaTabla" class="tab-content active">
+                        <div class="table-responsive">
+                            <table id="tablaLigaGeneral">
+                                <thead id="tablaLigaGeneralHead"></thead>
+                                <tbody id="tablaLigaGeneralBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="tabLigaJornadas" class="tab-content">
+                        <div id="listaJornadasContenedor"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JORNADA EN VIVO: MODO POZO -->
+        <div id="viewJornadaPozoVivo" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <button class="btn btn-sm btn-dark" onclick="backToLigaDetalle()"><i class="fas fa-arrow-left"></i></button>
+                <div style="text-align:center;">
+                    <h3 id="pozoLiveTitulo" style="font-size:1.1rem; color:var(--padel-blue);">Jornada Pozo</h3>
+                    <span style="font-size:0.75rem; color:var(--padel-green); font-weight:bold;">PUNTOS TOTALES DIRECTOS</span>
+                </div>
+                <button class="btn btn-sm btn-wa" onclick="compartirWhatsAppPozo()"><i class="fab fa-whatsapp"></i></button>
+            </div>
+
+            <div class="scroll-chips" id="pozoRoundsNav"></div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span id="pozoRondaActualLabel">Ronda 1</span>
+                </div>
+                <div class="card-body" id="pozoPlayersRondaContainer"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" style="font-size:0.95rem;">Tabla de la Jornada</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Pos</th><th style="text-align:left;">Jugador</th><th>Puntos</th><th>🍺</th></tr>
+                            </thead>
+                            <tbody id="pozoLiveLeaderboardBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:8px;">
+                <button class="btn btn-dark btn-sm" style="flex:1;" onclick="agregarRondaPozo()">➕ Ronda Extra</button>
+                <button class="btn btn-green btn-sm" style="flex:1;" onclick="finalizarJornadaPozoOficial()">🏁 Finalizar Jornada</button>
+            </div>
+        </div>
+
+        <!-- JORNADA EN VIVO: MODO 8 LOCO -->
+        <div id="viewJornada8LocoVivo" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <button class="btn btn-sm btn-dark" onclick="backToLigaDetalle()"><i class="fas fa-arrow-left"></i></button>
+                <div style="text-align:center;">
+                    <h3 style="font-size:1.1rem; color:var(--padel-blue);" id="amLiveTitulo">Jornada 8 Loco</h3>
+                    <div style="font-size:0.75rem; color:var(--padel-gray);" id="amLiveFecha">Fecha</div>
+                </div>
+                <button class="btn btn-sm btn-wa" onclick="compartirWhatsApp8Loco()"><i class="fab fa-whatsapp"></i></button>
+            </div>
+
+            <div class="card" style="margin-bottom:12px;">
+                <div class="card-header" style="font-size:0.9rem;">Clasificación en Vivo</div>
+                <div class="card-body" style="padding:8px;">
+                    <div id="amLiveMiniLeaderboard"></div>
+                </div>
+            </div>
+
+            <div class="scroll-chips" id="amRoundsNav"></div>
+            <div id="amMatchesContainer"></div>
+
+            <div class="card" style="margin-bottom:12px;">
+                <div class="card-header" style="font-size:0.9rem;">Descansando 💤</div>
+                <div class="card-body" id="amRestingPlayer" style="display:flex; align-items:center; gap:8px;"></div>
+            </div>
+
+            <button class="btn btn-green" style="width:100%; padding:12px; font-size:1rem; margin-bottom:10px;" onclick="nextRound8Loco()">
+                Continuar Ronda ➔
+            </button>
+            <div style="display:flex; gap:8px;">
+                <button class="btn btn-dark btn-sm" style="flex:1;" onclick="agregarRondaExtra8Loco()">➕ Ronda Extra</button>
+                <button class="btn btn-danger btn-sm" style="flex:1;" onclick="finalizarJornada8LocoOficial()">🏁 Finalizar Jornada</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL NUEVO CLIENTE (CREACIÓN REAL EN AUTH + FIRESTORE) -->
+    <!-- MODALES -->
+    <div id="modalCrearLiga" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom:12px; color:var(--padel-blue);">Nueva Liga</h3>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Nombre de la Liga</label>
+                <input type="text" id="ligaNombreInput" placeholder="Ej: Liga Primavera">
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+                <button class="btn btn-dark btn-sm" onclick="closeModal('modalCrearLiga')">Cancelar</button>
+                <button class="btn btn-green btn-sm" onclick="guardarNuevaLiga()">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalNuevaJornada" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom:12px; color:var(--padel-blue);">Nueva Jornada</h3>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Nombre de la Jornada</label>
+                <input type="text" id="jornadaNombreInput" placeholder="Ej: Jornada 1">
+            </div>
+
+            <div style="background:var(--padel-light); padding:10px; border-radius:10px; border:1px solid #cbd5e1; margin-bottom:12px;">
+                <label style="font-size:0.75rem; color:var(--padel-blue); font-weight:bold;">+ Registrar Jugador al Vuelo:</label>
+                <div style="display:flex; gap:6px; margin-top:4px;">
+                    <input type="text" id="inputRegistroExpress" placeholder="Nombre completo">
+                    <button class="btn btn-sm btn-green" onclick="registrarJugadorExpress()">Añadir</button>
+                </div>
+            </div>
+
+            <p style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray); margin-bottom:6px;">Convocados (<span id="countConvocados">0</span>):</p>
+            <div id="pillsConvocadosContainer" style="display:flex; flex-wrap:wrap; gap:6px; max-height:160px; overflow-y:auto; margin-bottom:14px;"></div>
+
+            <button class="btn btn-green" style="width:100%;" onclick="iniciarJornadaConfirmada()">Iniciar Jornada ➔</button>
+        </div>
+    </div>
+
     <div id="modalNuevoCliente" class="modal">
         <div class="modal-content">
-            <h3 style="margin-bottom:12px; color:var(--padel-blue);">Crear Cliente en Firebase</h3>
+            <h3 style="margin-bottom:12px; color:var(--padel-blue);">Alta de Nuevo Cliente</h3>
             <div style="margin-bottom:10px;">
-                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Correo Electrónico</label>
+                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Correo</label>
                 <input type="email" id="nuevoClienteEmail" placeholder="cliente@club.com">
             </div>
             <div style="margin-bottom:10px;">
-                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Contraseña de Acceso (mínimo 6 caracteres)</label>
+                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Contraseña</label>
                 <input type="password" id="nuevoClientePass" value="123456">
             </div>
             <div style="margin-bottom:10px;">
@@ -348,7 +739,7 @@
             </div>
             <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
                 <button class="btn btn-dark btn-sm" onclick="closeModal('modalNuevoCliente')">Cancelar</button>
-                <button class="btn btn-green btn-sm" id="btnCrearClienteFirebase" onclick="guardarNuevoCliente()">Registrar en Firebase</button>
+                <button class="btn btn-green btn-sm" onclick="guardarNuevoCliente()">Guardar</button>
             </div>
         </div>
     </div>
@@ -356,9 +747,12 @@
     <div id="toast" class="toast">Notificación</div>
 
     <script>
-        let currentAppUser = null;
+        const DEFAULT_USERS = [
+            { email: "admin@11padel.com", pass: "admin123", name: "Admin General", isAdmin: true, active: true, expireDate: "2099-12-31", activeSessionToken: null }
+        ];
+        let appUsers = JSON.parse(localStorage.getItem("11padel_users_local")) || DEFAULT_USERS;
+        let currentUser = JSON.parse(sessionStorage.getItem("11padel_session_user")) || null;
 
-        // Configuración de patrocinadores
         let sponsorConfig = JSON.parse(localStorage.getItem("11padel_sponsor_config")) || {
             names: "11Padel Oficial",
             mainUrl: "https://instagram.com",
@@ -367,70 +761,69 @@
             banner3Url: "https://instagram.com"
         };
 
-        window.initFirebaseBridge = function() {
-            window.fb.onAuthStateChanged(window.fb.auth, async (user) => {
-                if (user) {
-                    try {
-                        const userDoc = await window.fb.getDoc(window.fb.doc(window.fb.db, "users", user.uid));
-                        if (userDoc.exists()) {
-                            currentAppUser = { uid: user.uid, email: user.email, ...userDoc.data() };
-                            if (!currentAppUser.active && !currentAppUser.isAdmin) {
-                                showToast("Cuenta suspendida o vencida", "error");
-                                cerrarSesion();
-                                return;
-                            }
-                            loadAppUI();
-                        } else {
-                            currentAppUser = { uid: user.uid, email: user.email, name: "Club", isAdmin: user.email.includes("admin"), active: true };
-                            loadAppUI();
-                        }
-                    } catch (e) {
-                        console.error("Error cargando perfil:", e);
-                    }
-                } else {
-                    currentAppUser = null;
-                    document.getElementById("userNavActions").classList.add("hidden");
-                    document.getElementById("viewAdmin").classList.add("hidden");
-                    document.getElementById("viewHubModos").classList.add("hidden");
-                    document.getElementById("sponsorsBannerBlock").classList.add("hidden");
-                    document.getElementById("viewLogin").classList.remove("hidden");
-                }
-            });
-        };
+        function saveUsers() { localStorage.setItem("11padel_users_local", JSON.stringify(appUsers)); }
+        function getUserStorageKey() { return `11padel_store_${currentUser.email.replace(/[^a-zA-Z0-9]/g, '_')}`; }
+        function getUserData() { 
+            return JSON.parse(localStorage.getItem(getUserStorageKey())) || { 
+                jugadores: ["Pepe moreno", "GERARDO ÁLVAREZ", "Miguel", "Andre", "Luciano", "Chuleta", "Javier", "Joselin", "Einar"], 
+                ligasAmericano: [], 
+                ligasPozo: [] 
+            }; 
+        }
+        function saveUserData(d) { localStorage.setItem(getUserStorageKey(), JSON.stringify(d)); }
 
-        async function iniciarSesion() {
+        function iniciarSesion() {
             const emailInput = document.getElementById("loginEmail");
             const passInput = document.getElementById("loginPass");
             if (!emailInput || !passInput) return;
 
             const email = emailInput.value.trim().toLowerCase();
             const pass = passInput.value.trim();
-            if (!email || !pass) return showToast("Completa correo y contraseña", "error");
+            const u = appUsers.find(x => x.email === email && x.pass === pass);
+            if (!u) return showToast("Credenciales inválidas", "error");
+            if (!u.isAdmin && !u.active) return showToast("Suscripción inactiva o vencida", "error");
 
-            try {
-                showToast("Conectando con Firebase...");
-                await window.fb.signInWithEmailAndPassword(window.fb.auth, email, pass);
-            } catch (error) {
-                console.error(error);
-                showToast("Error de acceso: " + error.code, "error");
-            }
+            const token = "tok_" + Date.now();
+            u.activeSessionToken = token;
+            saveUsers();
+            sessionStorage.setItem("11padel_token", token);
+            sessionStorage.setItem("11padel_session_user", JSON.stringify(u));
+            currentUser = u;
+            loadAppUI();
         }
 
-        async function cerrarSesion() {
-            await window.fb.signOut(window.fb.auth);
-            location.reload();
+        function cerrarSesion() {
+            if (currentUser) {
+                const u = appUsers.find(x => x.email === currentUser.email);
+                if (u) { u.activeSessionToken = null; saveUsers(); }
+            }
+            sessionStorage.clear();
+            currentUser = null;
+            
+            document.getElementById("userNavActions").classList.add("hidden");
+            document.getElementById("btnAdminPanel").classList.add("hidden");
+            document.getElementById("viewAdmin").classList.add("hidden");
+            document.getElementById("viewHubModos").classList.add("hidden");
+            document.getElementById("viewLigasModo").classList.add("hidden");
+            document.getElementById("viewPadron").classList.add("hidden");
+            document.getElementById("viewLigaDetalle").classList.add("hidden");
+            document.getElementById("viewJornadaPozoVivo").classList.add("hidden");
+            document.getElementById("viewJornada8LocoVivo").classList.add("hidden");
+            document.getElementById("sponsorsBannerBlock").classList.add("hidden");
+            document.getElementById("viewLogin").classList.remove("hidden");
         }
 
         function loadAppUI() {
             document.getElementById("viewLogin").classList.add("hidden");
+            document.getElementById("viewAdmin").classList.add("hidden");
             document.getElementById("viewHubModos").classList.remove("hidden");
             document.getElementById("userNavActions").classList.remove("hidden");
-            document.getElementById("labelUserName").textContent = currentAppUser.name || currentAppUser.email;
-            document.getElementById("sponsorsBannerBlock").classList.remove("hidden");
+            document.getElementById("labelUserName").textContent = currentUser.name;
 
+            document.getElementById("sponsorsBannerBlock").classList.remove("hidden");
             aplicarConfiguracionPatrocinios();
 
-            if (currentAppUser.isAdmin) {
+            if (currentUser && currentUser.isAdmin) {
                 document.getElementById("btnAdminPanel").classList.remove("hidden");
             } else {
                 document.getElementById("btnAdminPanel").classList.add("hidden");
@@ -438,6 +831,7 @@
         }
 
         function toggleAdminPanel() {
+            if (!currentUser || !currentUser.isAdmin) return;
             const adminCard = document.getElementById("viewAdmin");
             adminCard.classList.toggle("hidden");
             if (!adminCard.classList.contains("hidden")) {
@@ -446,7 +840,7 @@
                 document.getElementById("adminBanner1Url").value = sponsorConfig.banner1Url;
                 document.getElementById("adminBanner2Url").value = sponsorConfig.banner2Url;
                 document.getElementById("adminBanner3Url").value = sponsorConfig.banner3Url;
-                cargarClientesDesdeFirestore();
+                renderAdminUsers();
             }
         }
 
@@ -460,7 +854,7 @@
             sponsorConfig = { names, mainUrl, banner1Url, banner2Url, banner3Url };
             localStorage.setItem("11padel_sponsor_config", JSON.stringify(sponsorConfig));
             aplicarConfiguracionPatrocinios();
-            showToast("Patrocinios y enlaces actualizados");
+            showToast("Patrocinios actualizados");
         }
 
         function aplicarConfiguracionPatrocinios() {
@@ -471,121 +865,797 @@
             document.getElementById("linkBannerSponsor3").href = sponsorConfig.banner3Url;
         }
 
-        async function cargarClientesDesdeFirestore() {
+        function renderAdminUsers() {
+            if (!currentUser || !currentUser.isAdmin) return;
             const tbody = document.getElementById("adminUsersTableBody");
-            tbody.innerHTML = "<tr><td colspan='5'>Cargando clientes de Firebase...</td></tr>";
+            tbody.innerHTML = "";
+            appUsers.forEach(u => {
+                tbody.innerHTML += `<tr>
+                    <td>${u.email}</td>
+                    <td>${u.name}</td>
+                    <td>
+                        <input type="text" style="width:90px; text-align:center; padding:3px;" value="${u.pass}" onchange="cambiarPasswordCliente('${u.email}', this.value)">
+                    </td>
+                    <td>
+                        <input type="date" style="width:auto; padding:3px;" value="${u.expireDate}" onchange="cambiarFechaVencimiento('${u.email}', this.value)">
+                    </td>
+                    <td>${u.active ? '🟢 Activo' : '🔴 Inactivo'}</td>
+                    <td>
+                        ${!u.isAdmin ? `
+                            <button class="btn btn-sm btn-dark" style="padding:4px 8px; font-size:0.75rem;" onclick="renovarMes('${u.email}')">+30d</button>
+                            <button class="btn btn-sm ${u.active ? 'btn-danger':'btn-green'}" style="padding:4px 8px; font-size:0.75rem;" onclick="toggleStatusUser('${u.email}')">${u.active?'Bloquear':'Activar'}</button>
+                            <button class="btn-xs-delete" onclick="borrarCliente('${u.email}')"><i class="fas fa-trash"></i></button>
+                        ` : 'Master'}
+                    </td>
+                </tr>`;
+            });
+        }
 
-            try {
-                const querySnapshot = await window.fb.getDocs(window.fb.collection(window.fb.db, "users"));
-                tbody.innerHTML = "";
-                querySnapshot.forEach((docSnap) => {
-                    const u = { uid: docSnap.id, ...docSnap.data() };
-                    tbody.innerHTML += `<tr>
-                        <td>${u.email}</td>
-                        <td>${u.name || 'Club'}</td>
-                        <td>
-                            <input type="date" style="width:auto; padding:3px;" value="${u.expireDate || '2026-12-31'}" onchange="actualizarVencimientoCliente('${u.uid}', this.value)">
-                        </td>
-                        <td>${u.active ? '🟢 Activo' : '🔴 Inactivo'}</td>
-                        <td>
-                            ${!u.isAdmin ? `
-                                <button class="btn btn-sm ${u.active ? 'btn-danger':'btn-green'}" style="padding:4px 8px; font-size:0.75rem;" onclick="toggleStatusCliente('${u.uid}', ${!u.active})">${u.active?'Bloquear':'Activar'}</button>
-                                <button class="btn-xs-delete" onclick="borrarClienteFirestore('${u.uid}')"><i class="fas fa-trash"></i></button>
-                            ` : 'Master'}
-                        </td>
-                    </tr>`;
-                });
-            } catch (e) {
-                console.error(e);
-                tbody.innerHTML = "<tr><td colspan='5'>Error al leer datos de Firestore</td></tr>";
+        function cambiarPasswordCliente(email, nuevaPass) {
+            const passLimpia = nuevaPass.trim();
+            if (!passLimpia) return showToast("La clave no puede estar vacía", "error");
+            const u = appUsers.find(x => x.email === email);
+            if (u) {
+                u.pass = passLimpia;
+                saveUsers();
+                showToast("Contraseña actualizada");
             }
         }
 
-        async function guardarNuevoCliente() {
-            const email = document.getElementById("nuevoClienteEmail").value.trim().toLowerCase();
-            const pass = document.getElementById("nuevoClientePass").value.trim();
-            const name = document.getElementById("nuevoClienteNombre").value.trim();
-            const btn = document.getElementById("btnCrearClienteFirebase");
-
-            if (!email || !pass || !name) return showToast("Llena todos los campos", "error");
-            if (pass.length < 6) return showToast("La clave debe tener mínimo 6 caracteres", "error");
-
-            try {
-                btn.disabled = true;
-                btn.textContent = "Registrando...";
-
-                // Crear cuenta en la instancia secundaria de Auth sin alterar la sesión del admin
-                const cred = await window.fb.createUserWithEmailAndPassword(window.fb.secondaryAuth, email, pass);
-                const nuevoUid = cred.user.uid;
-
-                await window.fb.signOut(window.fb.secondaryAuth);
-
-                // Guardar en Firestore
-                await window.fb.setDoc(window.fb.doc(window.fb.db, "users", nuevoUid), {
-                    email: email,
-                    name: name,
-                    active: true,
-                    isAdmin: false,
-                    expireDate: "2026-12-31",
-                    createdAt: new Date().toISOString()
-                });
-
-                closeModal("modalNuevoCliente");
-                showToast(`¡Cliente ${email} registrado en Firebase!`);
-                cargarClientesDesdeFirestore();
-            } catch (err) {
-                console.error(err);
-                if (err.code === "auth/email-already-in-use") {
-                    showToast("Ese correo ya existe en Firebase Auth", "error");
-                } else {
-                    showToast("Error Firebase: " + err.message, "error");
-                }
-            } finally {
-                btn.disabled = false;
-                btn.textContent = "Registrar en Firebase";
+        function renovarMes(email) {
+            const u = appUsers.find(x => x.email === email);
+            if(u) {
+                let base = new Date();
+                if (u.expireDate && new Date(u.expireDate) > base) base = new Date(u.expireDate);
+                base.setDate(base.getDate() + 30);
+                u.expireDate = base.toISOString().split("T")[0];
+                u.active = true;
+                saveUsers();
+                renderAdminUsers();
+                showToast(`+30 días (${u.expireDate})`);
             }
         }
 
-        async function actualizarVencimientoCliente(uid, nuevaFecha) {
-            try {
-                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", uid), { expireDate: nuevaFecha });
-                showToast("Fecha guardada en Firestore");
-            } catch (e) {
-                showToast("Error al guardar fecha", "error");
+        function cambiarFechaVencimiento(email, nuevaFecha) {
+            const u = appUsers.find(x => x.email === email);
+            if (u) {
+                u.expireDate = nuevaFecha;
+                saveUsers();
+                showToast(`Fecha actualizada: ${nuevaFecha}`);
             }
         }
 
-        async function toggleStatusCliente(uid, nuevoEstado) {
-            try {
-                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", uid), { active: nuevoEstado });
-                cargarClientesDesdeFirestore();
-                showToast("Estado modificado");
-            } catch (e) {
-                showToast("Error al modificar estado", "error");
+        function borrarCliente(email) {
+            if (confirm(`¿Eliminar al cliente ${email}?`)) {
+                appUsers = appUsers.filter(x => x.email !== email);
+                saveUsers();
+                renderAdminUsers();
+                showToast("Cliente eliminado");
             }
         }
 
-        async function borrarClienteFirestore(uid) {
-            if (confirm("¿Eliminar este perfil de Firestore?")) {
-                try {
-                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, "users", uid));
-                    cargarClientesDesdeFirestore();
-                    showToast("Cliente eliminado de Firestore");
-                } catch (e) {
-                    showToast("Error al eliminar", "error");
-                }
-            }
+        function toggleStatusUser(email) {
+            const u = appUsers.find(x => x.email === email);
+            if(u) { u.active = !u.active; saveUsers(); renderAdminUsers(); }
         }
 
         function abrirModalNuevoCliente() { document.getElementById("modalNuevoCliente").classList.add("active"); }
-        function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+        function guardarNuevoCliente() {
+            const email = document.getElementById("nuevoClienteEmail").value.trim().toLowerCase();
+            const pass = document.getElementById("nuevoClientePass").value.trim();
+            const name = document.getElementById("nuevoClienteNombre").value.trim();
+            if(!email || !name) return showToast("Completa los datos", "error");
+            appUsers.push({ email, pass, name, isAdmin: false, active: true, expireDate: "2026-12-31", activeSessionToken: null });
+            saveUsers(); renderAdminUsers();
+            closeModal("modalNuevoCliente");
+            showToast("Cliente registrado");
+        }
+
         function showToast(msg, type="info") {
             const t = document.getElementById("toast");
             t.textContent = msg;
             t.style.background = type === "error" ? "#e74c3c" : "var(--padel-dark)";
             t.classList.add("show");
-            setTimeout(() => t.classList.remove("show"), 2500);
+            setTimeout(() => t.classList.remove("show"), 2000);
         }
+        function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+
+        // MODOS
+        let modoSeleccionado = null;
+
+        function entrarModo(modo) {
+            modoSeleccionado = modo;
+            document.getElementById("viewHubModos").classList.add("hidden");
+            document.getElementById("viewLigasModo").classList.remove("hidden");
+            
+            if(modo === 'americano') {
+                document.getElementById("tituloModoLigas").textContent = "Ligas: 8 Loco / Americano";
+            } else {
+                document.getElementById("tituloModoLigas").textContent = "Ligas: Pozo / Rey de la Pista";
+            }
+            renderLigasDelModo();
+        }
+
+        function backToHubModos() {
+            document.getElementById("viewLigasModo").classList.add("hidden");
+            document.getElementById("viewPadron").classList.add("hidden");
+            document.getElementById("viewHubModos").classList.remove("hidden");
+        }
+
+        function abrirPadronJugadores() {
+            document.getElementById("viewHubModos").classList.add("hidden");
+            document.getElementById("viewPadron").classList.remove("hidden");
+            renderPadron();
+        }
+
+        function renderLigasDelModo() {
+            const d = getUserData();
+            const lista = modoSeleccionado === 'americano' ? d.ligasAmericano : d.ligasPozo;
+            const cont = document.getElementById("listaLigasContenedor");
+            cont.innerHTML = "";
+            if(!lista.length) { cont.innerHTML = "<p style='color:var(--padel-gray); font-size:0.85rem;'>No hay ligas registradas en este modo.</p>"; return; }
+
+            lista.forEach(l => {
+                cont.innerHTML += `
+                    <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:var(--padel-light); border:1px solid #cbd5e1;">
+                        <div>
+                            <div style="font-weight:700; font-size:1rem; color:var(--padel-blue);">${l.nombre}</div>
+                            <div style="font-size:0.75rem; color:var(--padel-gray);">Jornadas: ${l.jornadas.length} | Estado: <span style="color:${l.finalizada?'#e74c3c':'var(--padel-green)'}; font-weight:bold;">${l.finalizada?'FINALIZADA':'EN JUEGO'}</span></div>
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn btn-sm btn-green" onclick="abrirLigaDetalle('${l.id}')">Entrar ➔</button>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarLiga('${l.id}')">🗑</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function abrirModalCrearLiga() {
+            document.getElementById("ligaNombreInput").value = "";
+            document.getElementById("modalCrearLiga").classList.add("active");
+        }
+
+        function guardarNuevaLiga() {
+            const nom = document.getElementById("ligaNombreInput").value.trim();
+            if(!nom) return showToast("Escribe un nombre", "error");
+            const d = getUserData();
+            const nueva = { id: "liga_" + Date.now(), nombre: nom, modo: modoSeleccionado, finalizada: false, jornadas: [] };
+            if(modoSeleccionado === 'americano') d.ligasAmericano.push(nueva);
+            else d.ligasPozo.push(nueva);
+            saveUserData(d);
+            closeModal("modalCrearLiga");
+            renderLigasDelModo();
+            showToast("Liga creada");
+        }
+
+        function eliminarLiga(id) {
+            if(confirm("¿Eliminar esta liga y todas sus jornadas?")) {
+                const d = getUserData();
+                if(modoSeleccionado === 'americano') d.ligasAmericano = d.ligasAmericano.filter(x => x.id !== id);
+                else d.ligasPozo = d.ligasPozo.filter(x => x.id !== id);
+                saveUserData(d);
+                renderLigasDelModo();
+            }
+        }
+
+        function agregarJugadorPadron() {
+            const inp = document.getElementById("inputNuevoJugador");
+            const nom = inp.value.trim();
+            if(!nom) return;
+            const d = getUserData();
+            if(d.jugadores.includes(nom)) return showToast("Ya registrado", "error");
+            d.jugadores.push(nom);
+            saveUserData(d);
+            inp.value = "";
+            renderPadron();
+            showToast("Jugador añadido");
+        }
+
+        function renderPadron() {
+            const d = getUserData();
+            const cont = document.getElementById("listaJugadoresPadron");
+            cont.innerHTML = "";
+            d.jugadores.forEach((j) => {
+                cont.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #cbd5e1;">
+                        <span style="font-weight:600;">${j}</span>
+                        <i class="fas fa-trash" style="color:#e74c3c; cursor:pointer;" onclick="eliminarJugador('${j}')"></i>
+                    </div>`;
+            });
+        }
+
+        function eliminarJugador(nom) {
+            const d = getUserData();
+            d.jugadores = d.jugadores.filter(x => x !== nom);
+            saveUserData(d);
+            renderPadron();
+        }
+
+        let ligaActiva = null;
+
+        function abrirLigaDetalle(id) {
+            const d = getUserData();
+            const lista = modoSeleccionado === 'americano' ? d.ligasAmericano : d.ligasPozo;
+            ligaActiva = lista.find(x => x.id === id);
+
+            document.getElementById("viewLigasModo").classList.add("hidden");
+            document.getElementById("viewLigaDetalle").classList.remove("hidden");
+
+            document.getElementById("ligaDetalleNombre").textContent = ligaActiva.nombre;
+            document.getElementById("ligaDetalleSub").textContent = `Modo: ${modoSeleccionado.toUpperCase()} • ${ligaActiva.jornadas.length} jornadas disputadas`;
+            
+            document.getElementById("btnNuevaJornadaLiga").classList.toggle("hidden", ligaActiva.finalizada);
+            document.getElementById("btnTerminarLigaOficial").classList.toggle("hidden", ligaActiva.finalizada);
+
+            renderTablaGeneralLiga();
+            renderListaJornadasLiga();
+        }
+
+        function backToLigasModo() {
+            document.getElementById("viewLigaDetalle").classList.add("hidden");
+            document.getElementById("viewLigasModo").classList.remove("hidden");
+            renderLigasDelModo();
+        }
+
+        function switchLigaTab(tab) {
+            document.querySelectorAll("#viewLigaDetalle .tabs .tab").forEach((t, i) => t.classList.toggle("active", (tab === 'tabla' ? i===0 : i===1)));
+            document.getElementById("tabLigaTabla").classList.toggle("active", tab === 'tabla');
+            document.getElementById("tabLigaJornadas").classList.toggle("active", tab === 'jornadas');
+        }
+
+        function terminarLigaOficial() {
+            if(confirm("¿Cerrar oficialmente esta liga? La tabla final quedará consolidada.")) {
+                ligaActiva.finalizada = true;
+                saveLigaActiva();
+                abrirLigaDetalle(ligaActiva.id);
+                showToast("Liga cerrada.");
+            }
+        }
+
+        function renderTablaGeneralLiga() {
+            const thead = document.getElementById("tablaLigaGeneralHead");
+            const tbody = document.getElementById("tablaLigaGeneralBody");
+            tbody.innerHTML = "";
+
+            if (modoSeleccionado === 'pozo') {
+                let hHtml = "<tr><th>Pos</th><th style='text-align:left;'>Jugador</th><th>Puntos Totales</th>";
+                ligaActiva.jornadas.forEach((j, idx) => hHtml += `<th>J${idx+1}</th>`);
+                hHtml += "<th>🍺</th></tr>";
+                thead.innerHTML = hHtml;
+
+                const jugadorStats = {};
+                ligaActiva.jornadas.forEach(j => {
+                    j.convocados.forEach(p => {
+                        if (!jugadorStats[p]) jugadorStats[p] = { name: p, total: 0, jornadas: [], caguamas: 0 };
+                    });
+                });
+
+                ligaActiva.jornadas.forEach(j => {
+                    Object.keys(jugadorStats).forEach(p => {
+                        let ptsJornada = 0;
+                        if (j.rondas) {
+                            j.rondas.forEach(r => {
+                                ptsJornada += (r[p] || 0);
+                            });
+                        }
+                        jugadorStats[p].jornadas.push(ptsJornada);
+                        jugadorStats[p].total += ptsJornada;
+                        jugadorStats[p].caguamas += (j.caguamas && j.caguamas[p] ? j.caguamas[p] : 0);
+                    });
+                });
+
+                const sorted = Object.values(jugadorStats).sort((a,b) => b.total - a.total);
+                sorted.forEach((p, idx) => {
+                    let rHtml = `<tr>
+                        <td>${idx === 0 ? '👑' : idx+1}</td>
+                        <td style="text-align:left; font-weight:700;">${p.name}</td>
+                        <td style="font-weight:bold; color:var(--padel-green); font-size:1rem;">${p.total}</td>`;
+                    p.jornadas.forEach(pts => rHtml += `<td>${pts}</td>`);
+                    rHtml += `<td style="color:var(--padel-orange); font-weight:bold;">🍺 ${p.caguamas}</td></tr>`;
+                    tbody.innerHTML += rHtml;
+                });
+                if (!sorted.length) tbody.innerHTML = "<tr><td colspan='4'>Sin jornadas jugadas</td></tr>";
+
+            } else {
+                thead.innerHTML = `<tr><th>Pos</th><th style="text-align:left;">Jugador</th><th>JJ</th><th>PJ</th><th>W</th><th>D</th><th>L</th><th>Pts</th><th>Prom</th><th>+/-</th><th>🍺</th></tr>`;
+                const stats = {};
+                ligaActiva.jornadas.forEach(j => {
+                    const jPart = new Set();
+                    if (j.rounds) {
+                        j.rounds.forEach(r => {
+                            r.matches.forEach(m => {
+                                m.p1.forEach(p => { stats[p] = stats[p] || initStats(p); stats[p].pj++; stats[p].pf += m.score1; stats[p].pc += m.score2; jPart.add(p); if(m.score1 > m.score2) stats[p].w++; else if(m.score1 < m.score2) stats[p].l++; else stats[p].d++; });
+                                m.p2.forEach(p => { stats[p] = stats[p] || initStats(p); stats[p].pj++; stats[p].pf += m.score2; stats[p].pc += m.score1; jPart.add(p); if(m.score2 > m.score1) stats[p].w++; else if(m.score2 < m.score1) stats[p].l++; else stats[p].d++; });
+                            });
+                        });
+                    }
+                    jPart.forEach(p => stats[p].jj++);
+                    if(j.caguamas) Object.entries(j.caguamas).forEach(([p, c]) => { stats[p] = stats[p] || initStats(p); stats[p].caguamas += c; });
+                });
+
+                const sorted = Object.values(stats).sort((a,b) => b.pts - a.pts || b.diff - a.diff);
+                sorted.forEach((p, idx) => {
+                    p.diff = p.pf - p.pc;
+                    p.pts = (p.w * 3) + (p.d * 1);
+                    p.prom = p.jj > 0 ? (p.pts / p.jj).toFixed(1) : "0.0";
+                    tbody.innerHTML += `<tr>
+                        <td>${idx === 0 ? '👑' : idx+1}</td>
+                        <td style="text-align:left; font-weight:700;">${p.name}</td>
+                        <td>${p.jj}</td><td>${p.pj}</td><td>${p.w}</td><td>${p.d}</td><td>${p.l}</td>
+                        <td style="font-weight:bold; color:var(--padel-green);">${p.pts}</td>
+                        <td>${p.prom}</td>
+                        <td style="color:${p.diff>0?'var(--padel-green)':p.diff<0?'#e74c3c':'inherit'}">${p.diff>0?'+'+p.diff:p.diff}</td>
+                        <td style="color:var(--padel-orange); font-weight:bold;">🍺 ${p.caguamas}</td>
+                    </tr>`;
+                });
+                if (!sorted.length) tbody.innerHTML = "<tr><td colspan='11'>Sin jornadas jugadas</td></tr>";
+            }
+        }
+
+        function initStats(name) { return { name, jj: 0, pj: 0, w: 0, d: 0, l: 0, pf: 0, pc: 0, diff: 0, pts: 0, prom: 0, caguamas: 0 }; }
+
+        function renderListaJornadasLiga() {
+            const cont = document.getElementById("listaJornadasContenedor");
+            cont.innerHTML = "";
+            if(!ligaActiva.jornadas.length) { cont.innerHTML = "<p style='color:var(--padel-gray); font-size:0.85rem;'>No hay jornadas.</p>"; return; }
+            ligaActiva.jornadas.forEach(j => {
+                cont.innerHTML += `
+                    <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:var(--padel-light); border:1px solid #cbd5e1;">
+                        <div>
+                            <div style="font-weight:700; color:var(--padel-blue);">${j.nombre}</div>
+                            <div style="font-size:0.75rem; color:var(--padel-gray);">${j.convocados.length} jugadores • ${j.finalizada ? 'Finalizada' : 'En Vivo'}</div>
+                        </div>
+                        <button class="btn btn-sm btn-green" onclick="cargarJornadaEnVivo('${j.id}')">Entrar ➔</button>
+                    </div>`;
+            });
+        }
+
+        function saveLigaActiva() {
+            const d = getUserData();
+            if(modoSeleccionado === 'americano') {
+                const idx = d.ligasAmericano.findIndex(x => x.id === ligaActiva.id);
+                d.ligasAmericano[idx] = ligaActiva;
+            } else {
+                const idx = d.ligasPozo.findIndex(x => x.id === ligaActiva.id);
+                d.ligasPozo[idx] = ligaActiva;
+            }
+            saveUserData(d);
+        }
+
+        let convocadosSeleccionados = [];
+
+        function abrirModalNuevaJornada() {
+            document.getElementById("jornadaNombreInput").value = `Jornada ${ligaActiva.jornadas.length + 1}`;
+            convocadosSeleccionados = [...getUserData().jugadores];
+            renderPillsConvocados();
+            document.getElementById("modalNuevaJornada").classList.add("active");
+        }
+
+        function registrarJugadorExpress() {
+            const inp = document.getElementById("inputRegistroExpress");
+            const nom = inp.value.trim();
+            if(!nom) return;
+            const d = getUserData();
+            if(!d.jugadores.includes(nom)) { d.jugadores.push(nom); saveUserData(d); }
+            if(!convocadosSeleccionados.includes(nom)) convocadosSeleccionados.push(nom);
+            inp.value = "";
+            renderPillsConvocados();
+            showToast(`${nom} añadido`);
+        }
+
+        function renderPillsConvocados() {
+            const d = getUserData();
+            const cont = document.getElementById("pillsConvocadosContainer");
+            cont.innerHTML = "";
+            d.jugadores.forEach(j => {
+                const isSel = convocadosSeleccionados.includes(j);
+                cont.innerHTML += `<div class="chip-pill ${isSel?'active':''}" onclick="toggleConvocado('${j}')">${isSel?'✓ ':''}${j}</div>`;
+            });
+            document.getElementById("countConvocados").textContent = convocadosSeleccionados.length;
+        }
+
+        function toggleConvocado(nom) {
+            if (convocadosSeleccionados.includes(nom)) convocadosSeleccionados = convocadosSeleccionados.filter(x => x !== nom);
+            else convocadosSeleccionados.push(nom);
+            renderPillsConvocados();
+        }
+
+        function iniciarJornadaConfirmada() {
+            const nom = document.getElementById("jornadaNombreInput").value.trim() || "Jornada";
+            if (convocadosSeleccionados.length < 2) return showToast("Mínimo 2 jugadores", "error");
+
+            let nuevaJornada = null;
+            if (modoSeleccionado === 'pozo') {
+                const primeraRonda = {};
+                convocadosSeleccionados.forEach(p => primeraRonda[p] = 0);
+                nuevaJornada = {
+                    id: "jorn_" + Date.now(),
+                    nombre: nom,
+                    fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
+                    convocados: [...convocadosSeleccionados],
+                    rondas: [primeraRonda],
+                    rondaActual: 1,
+                    caguamas: {},
+                    finalizada: false
+                };
+            } else {
+                const rounds = generarCalendario8Loco(convocadosSeleccionados);
+                nuevaJornada = {
+                    id: "jorn_" + Date.now(),
+                    nombre: nom,
+                    fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
+                    convocados: [...convocadosSeleccionados],
+                    rounds: rounds,
+                    currentRound: 1,
+                    caguamas: {},
+                    finalizada: false
+                };
+            }
+            convocadosSeleccionados.forEach(p => nuevaJornada.caguamas[p] = 0);
+
+            ligaActiva.jornadas.push(nuevaJornada);
+            saveLigaActiva();
+            closeModal("modalNuevaJornada");
+            cargarJornadaEnVivo(nuevaJornada.id);
+        }
+
+        let jornadaActiva = null;
+
+        function cargarJornadaEnVivo(id) {
+            jornadaActiva = ligaActiva.jornadas.find(x => x.id === id);
+            document.getElementById("viewLigaDetalle").classList.add("hidden");
+
+            if (modoSeleccionado === 'pozo') {
+                document.getElementById("viewJornadaPozoVivo").classList.remove("hidden");
+                document.getElementById("pozoLiveTitulo").textContent = `${ligaActiva.nombre} - ${jornadaActiva.nombre}`;
+                renderPozoRoundsNav();
+                showPozoRound(jornadaActiva.rondaActual || 1);
+                updatePozoLiveLeaderboard();
+            } else {
+                document.getElementById("viewJornada8LocoVivo").classList.remove("hidden");
+                document.getElementById("amLiveTitulo").textContent = jornadaActiva.nombre;
+                document.getElementById("amLiveFecha").textContent = `${jornadaActiva.fecha} | En juego`;
+                render8LocoRoundsNav();
+                show8LocoRound(jornadaActiva.currentRound || 1);
+                update8LocoLiveLeaderboard();
+            }
+        }
+
+        function backToLigaDetalle() {
+            saveLigaActiva();
+            document.getElementById("viewJornadaPozoVivo").classList.add("hidden");
+            document.getElementById("viewJornada8LocoVivo").classList.add("hidden");
+            document.getElementById("viewLigaDetalle").classList.remove("hidden");
+            abrirLigaDetalle(ligaActiva.id);
+        }
+
+        // POZO
+        function renderPozoRoundsNav() {
+            const cont = document.getElementById("pozoRoundsNav");
+            cont.innerHTML = "";
+            for (let i = 1; i <= jornadaActiva.rondas.length; i++) {
+                cont.innerHTML += `<div class="chip-pill ${i === jornadaActiva.rondaActual ? 'active' : ''}" onclick="showPozoRound(${i})">Ronda ${i}</div>`;
+            }
+        }
+
+        function showPozoRound(num) {
+            jornadaActiva.rondaActual = num;
+            renderPozoRoundsNav();
+            document.getElementById("pozoRondaActualLabel").textContent = `Ronda ${num} de ${jornadaActiva.rondas.length}`;
+            const rondaData = jornadaActiva.rondas[num - 1];
+            const cont = document.getElementById("pozoPlayersRondaContainer");
+            cont.innerHTML = "";
+
+            jornadaActiva.convocados.forEach(p => {
+                const pts = rondaData[p] !== undefined ? rondaData[p] : 0;
+                const cags = jornadaActiva.caguamas[p] || 0;
+                cont.innerHTML += `
+                    <div class="pozo-player-row">
+                        <div>
+                            <div style="font-weight:700; font-size:0.95rem; color:var(--padel-dark);">${p}</div>
+                            <button class="caguama-tag" onclick="sumarCaguamaPozo('${p}')">🍺 ${cags}</button>
+                        </div>
+                        <div class="punto-control-box">
+                            <button class="score-btn-round" onclick="ajustarPuntoPozo('${p}', -1)">−</button>
+                            <input type="number" class="score-input-pozo" value="${pts}" onchange="setPuntoPozo('${p}', this.value)">
+                            <button class="score-btn-round" onclick="ajustarPuntoPozo('${p}', 1)">+</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function ajustarPuntoPozo(jugador, delta) {
+            const rData = jornadaActiva.rondas[jornadaActiva.rondaActual - 1];
+            rData[jugador] = Math.max(0, (rData[jugador] || 0) + delta);
+            showPozoRound(jornadaActiva.rondaActual);
+            updatePozoLiveLeaderboard();
+            saveLigaActiva();
+        }
+
+        function setPuntoPozo(jugador, val) {
+            const rData = jornadaActiva.rondas[jornadaActiva.rondaActual - 1];
+            rData[jugador] = Math.max(0, parseInt(val) || 0);
+            showPozoRound(jornadaActiva.rondaActual);
+            updatePozoLiveLeaderboard();
+            saveLigaActiva();
+        }
+
+        function sumarCaguamaPozo(jugador) {
+            jornadaActiva.caguamas[jugador] = (jornadaActiva.caguamas[jugador] || 0) + 1;
+            showPozoRound(jornadaActiva.rondaActual);
+            updatePozoLiveLeaderboard();
+            saveLigaActiva();
+            showToast(`🍺 +1 para ${jugador}`);
+        }
+
+        function agregarRondaPozo() {
+            const nuevaRonda = {};
+            jornadaActiva.convocados.forEach(p => nuevaRonda[p] = 0);
+            jornadaActiva.rondas.push(nuevaRonda);
+            saveLigaActiva();
+            showPozoRound(jornadaActiva.rondas.length);
+            showToast(`¡Ronda ${jornadaActiva.rondas.length} agregada!`);
+        }
+
+        function updatePozoLiveLeaderboard() {
+            const totales = {};
+            jornadaActiva.convocados.forEach(p => totales[p] = 0);
+
+            jornadaActiva.rondas.forEach(r => {
+                Object.entries(r).forEach(([p, pts]) => {
+                    totales[p] = (totales[p] || 0) + pts;
+                });
+            });
+
+            const sorted = Object.entries(totales).sort((a,b) => b[1] - a[1]);
+            const tbody = document.getElementById("pozoLiveLeaderboardBody");
+            tbody.innerHTML = "";
+            sorted.forEach(([p, pts], idx) => {
+                tbody.innerHTML += `<tr>
+                    <td>${idx === 0 ? '👑' : idx+1}</td>
+                    <td style="text-align:left; font-weight:700;">${p}</td>
+                    <td style="font-weight:bold; color:var(--padel-green); font-size:1rem;">${pts}</td>
+                    <td style="color:var(--padel-orange); font-weight:bold;">🍺 ${jornadaActiva.caguamas[p] || 0}</td>
+                </tr>`;
+            });
+        }
+
+        function finalizarJornadaPozoOficial() {
+            if(confirm("¿Finalizar jornada de Pozo y acumular puntos en la liga?")) {
+                jornadaActiva.finalizada = true;
+                saveLigaActiva();
+                backToLigaDetalle();
+                showToast("Jornada finalizada");
+            }
+        }
+
+        function compartirWhatsAppPozo() {
+            let txt = `*🎾 11PADEL POINT PRO - JORNADA DE POZO*\n`;
+            txt += `🏆 *Liga:* ${ligaActiva.nombre} (${jornadaActiva.nombre})\n\n`;
+            txt += `*PUNTOS TOTALES:*\n`;
+
+            const totales = {};
+            jornadaActiva.convocados.forEach(p => totales[p] = 0);
+            jornadaActiva.rondas.forEach(r => {
+                Object.entries(r).forEach(([p, pts]) => totales[p] = (totales[p] || 0) + pts);
+            });
+
+            Object.entries(totales).sort((a,b) => b[1] - a[1]).forEach(([p, pts], idx) => {
+                txt += `${idx+1}. ${p} - *${pts} Pts* | 🍺 ${jornadaActiva.caguamas[p] || 0}\n`;
+            });
+
+            txt += `\n━━━━━━━━━━━━━━━━━━━━\n`;
+            txt += `*Patrocinado por:* ${sponsorConfig.names}\n`;
+
+            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
+        }
+
+        // 8 LOCO
+        function generarCalendario8Loco(players) {
+            const N = players.length;
+            const courts = Math.floor(N / 4);
+            const restingPerRound = N - (courts * 4);
+            const totalRounds = (N % 4 === 0) ? (N - 1) : N;
+
+            const paired = {};
+            players.forEach(p1 => { paired[p1] = {}; players.forEach(p2 => paired[p1][p2] = (p1 === p2 ? 999 : 0)); });
+            const restCount = {}; players.forEach(p => restCount[p] = 0);
+            const rounds = [];
+
+            for (let r = 0; r < totalRounds; r++) {
+                let resting = [];
+                if (restingPerRound > 0) {
+                    const sorted = [...players].sort((a,b) => restCount[a] - restCount[b] || Math.random() - 0.5);
+                    resting = sorted.slice(0, restingPerRound);
+                    resting.forEach(p => restCount[p]++);
+                }
+                let active = players.filter(p => !resting.includes(p));
+                let matches = [];
+                let unassigned = [...active];
+
+                for (let c = 0; c < courts; c++) {
+                    let bestPair1 = [unassigned[0], unassigned[1]];
+                    let bestPair2 = [unassigned[2], unassigned[3]];
+                    paired[bestPair1[0]][bestPair1[1]]++; paired[bestPair1[1]][bestPair1[0]]++;
+                    paired[bestPair2[0]][bestPair2[1]]++; paired[bestPair2[1]][bestPair2[0]]++;
+
+                    matches.push({
+                        id: `m_${r}_${c}`,
+                        court: `Pista ${c+1}`,
+                        p1: bestPair1,
+                        p2: bestPair2,
+                        score1: 0,
+                        score2: 0
+                    });
+                    unassigned.splice(0, 4);
+                }
+                rounds.push({ matches, resting });
+            }
+            return rounds;
+        }
+
+        function render8LocoRoundsNav() {
+            const cont = document.getElementById("amRoundsNav");
+            cont.innerHTML = "";
+            for (let i = 1; i <= jornadaActiva.rounds.length; i++) {
+                cont.innerHTML += `<div class="chip-pill ${i === jornadaActiva.currentRound ? 'active' : ''}" onclick="show8LocoRound(${i})">Ronda ${i}</div>`;
+            }
+        }
+
+        function show8LocoRound(num) {
+            jornadaActiva.currentRound = num;
+            render8LocoRoundsNav();
+            const current = jornadaActiva.rounds[num - 1];
+            const cont = document.getElementById("amMatchesContainer");
+            cont.innerHTML = "";
+
+            current.matches.forEach((m) => {
+                cont.innerHTML += `
+                    <div class="match-card-clean">
+                        <div class="team-row-live">
+                            <div>
+                                <div style="font-size:0.9rem; font-weight:700; color:var(--padel-blue);">${m.p1.join(' & ')}</div>
+                                <div style="display:flex; gap:4px;">
+                                    <button class="caguama-tag" onclick="sumarCaguama8Loco('${m.p1[0]}')">🍺 ${jornadaActiva.caguamas[m.p1[0]]||0}</button>
+                                    <button class="caguama-tag" onclick="sumarCaguama8Loco('${m.p1[1]}')">🍺 ${jornadaActiva.caguamas[m.p1[1]]||0}</button>
+                                </div>
+                            </div>
+                            <button class="score-display-btn score-yellow" onclick="setScore8LocoPrompt('${m.id}', 'score1', ${m.score1})">
+                                ${m.score1.toString().padStart(2, '0')}
+                            </button>
+                        </div>
+
+                        <div class="court-badge-divider"><i class="fas fa-table-tennis"></i> ${m.court}</div>
+
+                        <div class="team-row-live">
+                            <div>
+                                <div style="font-size:0.9rem; font-weight:700; color:var(--padel-blue);">${m.p2.join(' & ')}</div>
+                                <div style="display:flex; gap:4px;">
+                                    <button class="caguama-tag" onclick="sumarCaguama8Loco('${m.p2[0]}')">🍺 ${jornadaActiva.caguamas[m.p2[0]]||0}</button>
+                                    <button class="caguama-tag" onclick="sumarCaguama8Loco('${m.p2[1]}')">🍺 ${jornadaActiva.caguamas[m.p2[1]]||0}</button>
+                                </div>
+                            </div>
+                            <button class="score-display-btn score-green" onclick="setScore8LocoPrompt('${m.id}', 'score2', ${m.score2})">
+                                ${m.score2.toString().padStart(2, '0')}
+                            </button>
+                        </div>
+                    </div>`;
+            });
+
+            const restCont = document.getElementById("amRestingPlayer");
+            if(current.resting && current.resting.length) {
+                restCont.innerHTML = current.resting.map(p => `<span class="badge-chip" style="background:white; color:var(--padel-dark); border:1px solid #cbd5e1;">${p}</span>`).join(' ');
+            } else restCont.innerHTML = "<span style='color:var(--padel-gray); font-size:0.8rem;'>Todos en pista</span>";
+        }
+
+        function setScore8LocoPrompt(mId, type, currentVal) {
+            const val = prompt("Nuevo puntaje:", currentVal);
+            if (val === null) return;
+            const parsed = Math.max(0, parseInt(val) || 0);
+            for (let r of jornadaActiva.rounds) {
+                const m = r.matches.find(x => x.id === mId);
+                if (m) {
+                    m[type] = parsed;
+                    show8LocoRound(jornadaActiva.currentRound);
+                    update8LocoLiveLeaderboard();
+                    saveLigaActiva();
+                    break;
+                }
+            }
+        }
+
+        function sumarCaguama8Loco(p) {
+            jornadaActiva.caguamas[p] = (jornadaActiva.caguamas[p] || 0) + 1;
+            show8LocoRound(jornadaActiva.currentRound);
+            saveLigaActiva();
+            showToast(`🍺 +1 para ${p}`);
+        }
+
+        function update8LocoLiveLeaderboard() {
+            const stats = {};
+            jornadaActiva.convocados.forEach(p => stats[p] = { name: p, w: 0, d: 0, l: 0, pts: 0, diff: 0, pf: 0, pc: 0 });
+
+            jornadaActiva.rounds.forEach(r => {
+                r.matches.forEach(m => {
+                    if(m.score1 === 0 && m.score2 === 0) return;
+                    m.p1.forEach(p => recordLiveStats(stats[p], m.score1, m.score2));
+                    m.p2.forEach(p => recordLiveStats(stats[p], m.score2, m.score1));
+                });
+            });
+
+            const sorted = Object.values(stats).sort((a,b) => b.pts - a.pts || b.diff - a.diff);
+            const cont = document.getElementById("amLiveMiniLeaderboard");
+            cont.innerHTML = "";
+
+            sorted.slice(0, 4).forEach((p, idx) => {
+                const crown = idx === 0 ? '👑' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '';
+                cont.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:0.85rem;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span style="font-size:0.8rem; width:16px;">${crown}</span>
+                            <span style="font-weight:700; color:var(--padel-dark);">${p.name}</span>
+                        </div>
+                        <div style="display:flex; gap:16px; font-weight:600;">
+                            <span>${p.w}</span>
+                            <span>${p.d}</span>
+                            <span>${p.l}</span>
+                            <span style="font-weight:bold; color:${p.diff>0?'var(--padel-green)':p.diff<0?'#e74c3c':'inherit'}">${p.diff>0?'+'+p.diff:p.diff}</span>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function recordLiveStats(item, pf, pc) {
+            if (!item) return;
+            item.pf += pf; item.pc += pc; item.diff = item.pf - item.pc;
+            if (pf > pc) { item.w++; item.pts += 3; }
+            else if (pf < pc) { item.l++; }
+            else { item.d++; item.pts += 1; }
+        }
+
+        function nextRound8Loco() {
+            if(jornadaActiva.currentRound < jornadaActiva.rounds.length) {
+                show8LocoRound(jornadaActiva.currentRound + 1);
+            } else showToast("Última ronda completada");
+        }
+
+        function agregarRondaExtra8Loco() {
+            const extra = generarCalendario8Loco(jornadaActiva.convocados);
+            jornadaActiva.rounds.push(extra[0]);
+            saveLigaActiva();
+            show8LocoRound(jornadaActiva.rounds.length);
+            showToast("Ronda extra agregada");
+        }
+
+        function finalizarJornada8LocoOficial() {
+            if(confirm("¿Finalizar jornada de 8 Loco y acumular puntos en la liga?")) {
+                jornadaActiva.finalizada = true;
+                saveLigaActiva();
+                backToLigaDetalle();
+            }
+        }
+
+        function compartirWhatsApp8Loco() {
+            let txt = `*🎾 11PADEL POINT PRO - JORNADA 8 LOCO*\n`;
+            txt += `🏆 *Liga:* ${ligaActiva.nombre} (${jornadaActiva.nombre})\n\n`;
+            txt += `*RESULTADOS:*\n`;
+            jornadaActiva.rounds.forEach((r, idx) => {
+                txt += `*-- Ronda ${idx+1} --*\n`;
+                r.matches.forEach(m => {
+                    txt += `${m.court}: ${m.p1.join('&')} (${m.score1}) vs (${m.score2}) ${m.p2.join('&')}\n`;
+                });
+            });
+
+            txt += `\n━━━━━━━━━━━━━━━━━━━━\n`;
+            txt += `*Patrocinado por:* ${sponsorConfig.names}\n`;
+
+            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if(currentUser) loadAppUI();
+            else cerrarSesion();
+        });
     </script>
 </body>
 </html>

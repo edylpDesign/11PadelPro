@@ -6,12 +6,15 @@
     <title>11Padel Point Pro - Torneos & Ligas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Precarga rápida de imágenes -->
+    <!-- Precarga rápida de imágenes principales y secundarias -->
     <link rel="preload" as="image" href="img/logo_11padel.png">
     <link rel="preload" as="image" href="img/patrocinador_principal.png">
     <link rel="preload" as="image" href="img/banner_patrocinador1.png">
     <link rel="preload" as="image" href="img/banner_patrocinador2.png">
     <link rel="preload" as="image" href="img/banner_patrocinador3.png">
+    <link rel="preload" as="image" href="img/banner_patrocinador4.png">
+    <link rel="preload" as="image" href="img/banner_patrocinador5.png">
+    <link rel="preload" as="image" href="img/banner_patrocinador6.png">
 
     <!-- SDK Modular de Firebase (v10) -->
     <script type="module">
@@ -20,7 +23,8 @@
             getAuth, 
             signInWithEmailAndPassword, 
             signOut, 
-            onAuthStateChanged 
+            onAuthStateChanged,
+            updatePassword 
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { 
             getFirestore, 
@@ -48,6 +52,7 @@
             signInWithEmailAndPassword, 
             signOut, 
             onAuthStateChanged, 
+            updatePassword,
             doc, 
             setDoc, 
             getDoc 
@@ -88,52 +93,116 @@
 
         .container { max-width: 720px; margin: 0 auto; width: 100%; }
 
+        /* HEADER CON LOGOS AL TRIPLE Y AGRUPADOS AL CENTRO */
         header {
+            position: relative;
             background: linear-gradient(90deg, var(--padel-blue) 0%, var(--padel-green) 100%);
-            border-radius: 15px;
-            padding: 12px 16px;
+            border-radius: 18px;
+            padding: 16px 20px;
             color: white;
             box-shadow: var(--padel-shadow);
             border: 2px solid white;
             margin-bottom: 14px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            justify-content: center;
+            min-height: 140px;
         }
-        .brand-logos-zone { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        .brand-logos-zone {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 26px;
+            width: 100%;
+            max-width: 580px;
+            margin: 0 auto;
+        }
+
+        /* Logo de la app al triple de tamaño */
         .logo-app-img {
-            height: 44px;
+            height: 110px;
             width: auto;
-            max-width: 140px;
+            max-width: 220px;
             object-fit: contain;
-            border-radius: 8px;
+            border-radius: 14px;
             background: white;
-            padding: 2px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+            transition: transform 0.2s;
         }
+        .logo-app-img:hover { transform: scale(1.03); }
+
+        /* Patrocinador Principal al triple */
         .sponsor-main-badge-link {
             display: flex;
             align-items: center;
-            gap: 6px;
-            background: rgba(255,255,255,0.2);
-            padding: 4px 10px;
-            border-radius: 25px;
-            border: 1px solid rgba(255,255,255,0.4);
+            gap: 12px;
+            background: rgba(255,255,255,0.22);
+            padding: 8px 16px;
+            border-radius: 18px;
+            border: 2px solid rgba(255,255,255,0.5);
             cursor: pointer;
             text-decoration: none;
             color: white;
-            transition: transform 0.2s;
+            transition: transform 0.2s, background 0.2s;
+            height: 110px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.18);
         }
-        .sponsor-main-badge-link:active { transform: scale(0.95); }
-        .sponsor-main-logo { height: 26px; width: 26px; object-fit: cover; border-radius: 50%; background: white; }
-        .sponsor-main-label { font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+        .sponsor-main-badge-link:active { transform: scale(0.96); }
 
+        .sponsor-main-logo {
+            height: 86px;
+            width: 86px;
+            object-fit: contain;
+            border-radius: 12px;
+            background: white;
+            padding: 4px;
+        }
+
+        .sponsor-main-meta {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+        }
+        .sponsor-main-label {
+            font-size: 0.95rem;
+            font-weight: 800;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+        .sponsor-main-sub {
+            font-size: 0.72rem;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        /* Botón de configuración discreto para Administrador */
+        .btn-header-gear {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .btn-header-gear:hover { background: rgba(0,0,0,0.45); }
+
+        /* BANNERS DE PATROCINADORES (2 FILAS) */
         .sponsors-banner-wrapper {
             background: white;
             border-radius: 14px;
-            padding: 10px 12px;
+            padding: 12px 14px;
             margin-bottom: 14px;
             box-shadow: var(--padel-shadow);
             border: 1px solid rgba(0,0,0,0.06);
@@ -154,7 +223,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
         .sponsor-box-btn {
             background: var(--padel-light);
@@ -167,14 +236,14 @@
             justify-content: center;
             text-decoration: none;
             color: var(--padel-dark);
-            height: 65px;
+            height: 68px;
             transition: all 0.2s;
             overflow: hidden;
         }
         .sponsor-box-btn:active { transform: scale(0.95); border-color: var(--padel-green); }
-        .sponsor-btn-img { max-height: 38px; max-width: 100%; object-fit: contain; }
+        .sponsor-btn-img { max-height: 48px; max-width: 100%; object-fit: contain; }
         .sponsor-btn-fallback { font-size: 0.75rem; font-weight: bold; color: var(--padel-blue); display: flex; align-items: center; gap: 4px; }
-        .sponsors-text { font-size: 0.8rem; font-weight: 700; color: var(--padel-orange); margin-top: 4px; }
+        .sponsors-text { font-size: 0.85rem; font-weight: 800; color: var(--padel-orange); margin-top: 6px; }
 
         .card {
             background: white;
@@ -312,29 +381,50 @@
             font-size: 0.85rem; z-index: 3000; opacity: 0; pointer-events: none; transition: 0.3s;
         }
         .toast.show { opacity: 1; }
+
+        /* CRÉDITOS DEL DESARROLLADOR */
+        .app-credits-footer {
+            text-align: center;
+            padding: 18px 10px 26px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--padel-dark);
+            opacity: 0.85;
+            letter-spacing: 0.4px;
+        }
+        .app-credits-footer span {
+            font-weight: 800;
+            color: var(--padel-court);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- HEADER TOP -->
+        <!-- HEADER TOP CON LOGOS 3X MÁS GRANDES Y AGRUPADOS AL CENTRO -->
         <header>
             <div class="brand-logos-zone">
+                <!-- Logo 11Padel Pro -->
                 <img src="img/logo_11padel.png" alt="11Padel Point Pro" class="logo-app-img" onerror="this.style.display='none'">
                 
+                <!-- Logo Patrocinador Principal -->
                 <a href="#" target="_blank" class="sponsor-main-badge-link" id="sponsorMainLink" title="Patrocinador Oficial">
-                    <img src="img/patrocinador_principal.png" alt="Sponsor" class="sponsor-main-logo" id="sponsorMainImg" onerror="this.style.display='none'">
-                    <span class="sponsor-main-label" id="sponsorMainLabel">★ Patrocinador</span>
-                    <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i>
+                    <img src="img/patrocinador_principal.png" alt="Sponsor Principal" class="sponsor-main-logo" id="sponsorMainImg" onerror="this.style.display='none'">
+                    <div class="sponsor-main-meta">
+                        <span class="sponsor-main-label" id="sponsorMainLabel">★ Patrocinador</span>
+                        <span class="sponsor-main-sub">Oficial del Torneo <i class="fas fa-external-link-alt"></i></span>
+                    </div>
                 </a>
             </div>
 
-            <!-- Botón discreto para ti -->
-            <button class="btn btn-sm btn-dark" onclick="abrirModalAuthAdmin()" title="Administración"><i class="fas fa-cog"></i></button>
+            <!-- Botón discreto de Administrador -->
+            <button class="btn-header-gear" onclick="abrirModalAuthAdmin()" title="Administración"><i class="fas fa-cog"></i></button>
         </header>
 
-        <!-- BANNER DE PATROCINADORES -->
+        <!-- BANNERS DE PATROCINADORES (FILA 1 Y FILA 2 SECUNDARIOS) -->
         <div class="sponsors-banner-wrapper" id="sponsorsBannerBlock">
             <div class="sponsors-label"><i class="fas fa-ad"></i> Patrocinadores Oficiales • Toca cada uno para visitar</div>
+            
+            <!-- FILA 1: Patrocinadores 1, 2 y 3 -->
             <div class="sponsors-grid-3">
                 <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor1" title="Visitar Patrocinador 1">
                     <img src="img/banner_patrocinador1.png" alt="Sponsor 1" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
@@ -349,48 +439,87 @@
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-star"></i> Sponsor 3</div>
                 </a>
             </div>
-            <div class="sponsors-text" id="sponsorsTextDisplay">Patrocinado por: 11Padel Oficial</div>
+
+            <!-- FILA 2: Patrocinadores Secundarios 4, 5 y 6 -->
+            <div class="sponsors-grid-3">
+                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor4" title="Visitar Patrocinador 4">
+                    <img src="img/banner_patrocinador4.png" alt="Sponsor 4" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> Sponsor 4</div>
+                </a>
+                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor5" title="Visitar Patrocinador 5">
+                    <img src="img/banner_patrocinador5.png" alt="Sponsor 5" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-medal"></i> Sponsor 5</div>
+                </a>
+                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor6" title="Visitar Patrocinador 6">
+                    <img src="img/banner_patrocinador6.png" alt="Sponsor 6" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-crown"></i> Sponsor 6</div>
+                </a>
+            </div>
+
+            <div class="sponsors-text" id="sponsorsTextDisplay">Patrocinado por: SB TOTAL PADEL</div>
         </div>
 
-        <!-- PANEL DE GESTIÓN DE PATROCINADORES (SOLO PARA ADMIN AUTENTICADO) -->
+        <!-- PANEL DE GESTIÓN DE PATROCINADORES (ADMIN AUTENTICADO) -->
         <div id="viewAdminSponsors" class="card hidden">
             <div class="card-header">
-                <span><i class="fas fa-shield-alt"></i> Administrador: Patrocinadores Cloud</span>
+                <span><i class="fas fa-shield-alt"></i> Panel de Patrocinadores (Cloud)</span>
                 <button class="btn btn-sm btn-dark" onclick="cerrarSesionAdmin()"><i class="fas fa-sign-out-alt"></i> Salir</button>
             </div>
             <div class="card-body">
-                <p style="font-size:0.8rem; color:var(--padel-gray); margin-bottom:12px;">Los cambios guardados aquí se publicarán en los teléfonos de todos los usuarios en tiempo real.</p>
+                <p style="font-size:0.8rem; color:var(--padel-gray); margin-bottom:12px;">Los enlaces y nombres que guardes aquí se actualizarán automáticamente en los teléfonos de todos tus usuarios.</p>
 
-                <div style="margin-bottom:8px;">
-                    <label style="font-size:0.75rem; font-weight:bold;">Texto Patrocinadores (WhatsApp):</label>
-                    <input type="text" id="adminSponsorsInput" placeholder="Ej: Corona | Bullpadel | Nike">
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:0.75rem; font-weight:bold;">Texto Patrocinadores (Para WhatsApp y Pie):</label>
+                    <input type="text" id="adminSponsorsInput" placeholder="Ej: SB TOTAL PADEL | Corona | Bullpadel">
                 </div>
 
-                <div style="margin-bottom:8px;">
+                <div style="margin-bottom:10px;">
                     <label style="font-size:0.75rem; font-weight:bold;">Enlace Patrocinador Principal (Header):</label>
-                    <input type="url" id="adminMainSponsorUrl" placeholder="https://instagram.com/patrocinador_principal">
+                    <input type="url" id="adminMainSponsorUrl" placeholder="https://instagram.com/tu_patrocinador_principal">
                 </div>
 
+                <div style="font-size:0.8rem; font-weight:bold; color:var(--padel-blue); margin:12px 0 6px 0;">Fila 1 (Banners 1, 2 y 3):</div>
                 <div style="margin-bottom:8px;">
-                    <label style="font-size:0.75rem; font-weight:bold;">Enlace Banner 1 (Izquierdo):</label>
+                    <label style="font-size:0.72rem; font-weight:bold;">Banner 1 (Izquierda):</label>
                     <input type="url" id="adminBanner1Url" placeholder="https://instagram.com/patrocinador_1">
                 </div>
-
                 <div style="margin-bottom:8px;">
-                    <label style="font-size:0.75rem; font-weight:bold;">Enlace Banner 2 (Centro):</label>
+                    <label style="font-size:0.72rem; font-weight:bold;">Banner 2 (Centro):</label>
                     <input type="url" id="adminBanner2Url" placeholder="https://instagram.com/patrocinador_2">
                 </div>
-
                 <div style="margin-bottom:12px;">
-                    <label style="font-size:0.75rem; font-weight:bold;">Enlace Banner 3 (Derecho):</label>
+                    <label style="font-size:0.72rem; font-weight:bold;">Banner 3 (Derecha):</label>
                     <input type="url" id="adminBanner3Url" placeholder="https://instagram.com/patrocinador_3">
                 </div>
 
+                <div style="font-size:0.8rem; font-weight:bold; color:var(--padel-purple); margin:12px 0 6px 0;">Fila 2 - Patrocinadores Secundarios (Banners 4, 5 y 6):</div>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:0.72rem; font-weight:bold;">Banner 4 (Izquierda):</label>
+                    <input type="url" id="adminBanner4Url" placeholder="https://instagram.com/patrocinador_4">
+                </div>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:0.72rem; font-weight:bold;">Banner 5 (Centro):</label>
+                    <input type="url" id="adminBanner5Url" placeholder="https://instagram.com/patrocinador_5">
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label style="font-size:0.72rem; font-weight:bold;">Banner 6 (Derecha):</label>
+                    <input type="url" id="adminBanner6Url" placeholder="https://instagram.com/patrocinador_6">
+                </div>
+
                 <button class="btn btn-green" style="width:100%;" id="btnGuardarPatrocinios" onclick="guardarPatrociniosCloud()">Guardar y Publicar Patrocinadores</button>
+
+                <!-- Cambio seguro de contraseña -->
+                <div style="margin-top:18px; padding-top:14px; border-top:1px solid #cbd5e1;">
+                    <label style="font-size:0.75rem; font-weight:bold; color:var(--padel-dark);">Cambiar Contraseña de Administrador:</label>
+                    <div style="display:flex; gap:8px; margin-top:4px;">
+                        <input type="password" id="inputNuevaClaveAdmin" placeholder="Nueva clave (mínimo 6 caracteres)">
+                        <button class="btn btn-sm btn-dark" onclick="actualizarClaveAdminDirecto()">Actualizar</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- HUB DE MODOS DE JUEGO (ABIERTO AL PÚBLICO) -->
+        <!-- HUB DE MODOS DE JUEGO (ABIERTO DIRECTO) -->
         <div id="viewHubModos">
             <p style="font-size:0.85rem; font-weight:bold; color:var(--padel-gray); margin-bottom:10px;">Selecciona el modo de juego:</p>
 
@@ -555,6 +684,11 @@
                 <button class="btn btn-danger btn-sm" style="flex:1;" onclick="finalizarJornada8LocoOficial()">🏁 Finalizar Jornada</button>
             </div>
         </div>
+
+        <!-- PIE DE PÁGINA / CRÉDITOS -->
+        <footer class="app-credits-footer">
+            Desarrollado por <span>EdyLPDsng</span> • 11Padel Point Pro
+        </footer>
     </div>
 
     <!-- MODALES -->
@@ -623,13 +757,16 @@
             ligasPozo: []
         };
 
-        // PATROCINADORES CLOUD
+        // PATROCINADORES CLOUD CON SOPORTE PARA 6 BANNERS
         let sponsorConfig = {
-            names: "11Padel Oficial",
+            names: "SB TOTAL PADEL",
             mainUrl: "https://instagram.com",
             banner1Url: "https://instagram.com",
             banner2Url: "https://instagram.com",
-            banner3Url: "https://instagram.com"
+            banner3Url: "https://instagram.com",
+            banner4Url: "https://instagram.com",
+            banner5Url: "https://instagram.com",
+            banner6Url: "https://instagram.com"
         };
 
         function saveLocalData() {
@@ -655,10 +792,10 @@
             try {
                 const snap = await window.fb.getDoc(window.fb.doc(window.fb.db, "platform_config", "sponsors"));
                 if (snap.exists()) {
-                    sponsorConfig = snap.data();
+                    sponsorConfig = Object.assign(sponsorConfig, snap.data());
                 }
             } catch (e) {
-                console.log("Cargando patrocinios predeterminados...");
+                console.log("Cargando patrocinios por defecto...");
             }
             aplicarPatrociniosUI();
         }
@@ -669,6 +806,9 @@
             document.getElementById("linkBannerSponsor1").href = sponsorConfig.banner1Url;
             document.getElementById("linkBannerSponsor2").href = sponsorConfig.banner2Url;
             document.getElementById("linkBannerSponsor3").href = sponsorConfig.banner3Url;
+            document.getElementById("linkBannerSponsor4").href = sponsorConfig.banner4Url || "https://instagram.com";
+            document.getElementById("linkBannerSponsor5").href = sponsorConfig.banner5Url || "https://instagram.com";
+            document.getElementById("linkBannerSponsor6").href = sponsorConfig.banner6Url || "https://instagram.com";
         }
 
         function abrirModalAuthAdmin() {
@@ -713,6 +853,9 @@
             document.getElementById("adminBanner1Url").value = sponsorConfig.banner1Url || "";
             document.getElementById("adminBanner2Url").value = sponsorConfig.banner2Url || "";
             document.getElementById("adminBanner3Url").value = sponsorConfig.banner3Url || "";
+            document.getElementById("adminBanner4Url").value = sponsorConfig.banner4Url || "";
+            document.getElementById("adminBanner5Url").value = sponsorConfig.banner5Url || "";
+            document.getElementById("adminBanner6Url").value = sponsorConfig.banner6Url || "";
         }
 
         async function cerrarSesionAdmin() {
@@ -727,15 +870,17 @@
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Publicando...";
 
             sponsorConfig = {
-                names: document.getElementById("adminSponsorsInput").value.trim() || "11Padel Oficial",
+                names: document.getElementById("adminSponsorsInput").value.trim() || "SB TOTAL PADEL",
                 mainUrl: document.getElementById("adminMainSponsorUrl").value.trim() || "https://instagram.com",
                 banner1Url: document.getElementById("adminBanner1Url").value.trim() || "https://instagram.com",
                 banner2Url: document.getElementById("adminBanner2Url").value.trim() || "https://instagram.com",
-                banner3Url: document.getElementById("adminBanner3Url").value.trim() || "https://instagram.com"
+                banner3Url: document.getElementById("adminBanner3Url").value.trim() || "https://instagram.com",
+                banner4Url: document.getElementById("adminBanner4Url").value.trim() || "https://instagram.com",
+                banner5Url: document.getElementById("adminBanner5Url").value.trim() || "https://instagram.com",
+                banner6Url: document.getElementById("adminBanner6Url").value.trim() || "https://instagram.com"
             };
 
             try {
-                // Se guarda en Firebase con la firma criptográfica del admin
                 await window.fb.setDoc(window.fb.doc(window.fb.db, "platform_config", "sponsors"), sponsorConfig);
                 aplicarPatrociniosUI();
                 showToast("¡Patrocinadores publicados en todo el mundo!");
@@ -744,6 +889,28 @@
             } finally {
                 btn.disabled = false;
                 btn.textContent = "Guardar y Publicar Patrocinadores";
+            }
+        }
+
+        async function actualizarClaveAdminDirecto() {
+            const nuevaClave = document.getElementById("inputNuevaClaveAdmin").value.trim();
+            if (!nuevaClave || nuevaClave.length < 6) {
+                return showToast("La clave debe tener al menos 6 caracteres", "error");
+            }
+
+            const user = window.fb.auth.currentUser;
+            if (user && user.email === "admin@11padel.com") {
+                try {
+                    await window.fb.updatePassword(user, nuevaClave);
+                    document.getElementById("inputNuevaClaveAdmin").value = "";
+                    showToast("¡Contraseña de Administrador actualizada!");
+                } catch (err) {
+                    if (err.code === "auth/requires-recent-login") {
+                        showToast("Por seguridad, sal y vuelve a entrar antes de cambiarla", "error");
+                    } else {
+                        showToast("Error: " + err.message, "error");
+                    }
+                }
             }
         }
 
@@ -949,8 +1116,8 @@
                     if (j.rounds) {
                         j.rounds.forEach(r => {
                             (r.matches || []).forEach(m => {
-                                m.p1.forEach(p => { stats[p] = stats[p] || initStats(p); stats[p].pj++; stats[p].pf += m.score1; stats[p].pc += m.score2; jPart.add(p); if(m.score1 > m.score2) stats[p].w++; else if(m.score1 < m.score2) stats[p].d++; else stats[p].l++; });
-                                m.p2.forEach(p => { stats[p] = stats[p] || initStats(p); stats[p].pj++; stats[p].pf += m.score2; stats[p].pc += m.score1; jPart.add(p); if(m.score2 > m.score1) stats[p].w++; else if(m.score2 < m.score1) stats[p].d++; else stats[p].l++; });
+                                m.p1.forEach(p => { stats[p] = stats[p] || initStats(p); stats[p].pj++; stats[p].pf += m.score1; stats[p].pc += m.score2; jPart.add(p); if(m.score1 > m.score2) stats[p].w++; else if(m.score1 < m.score2) stats[p].l++; else stats[p].d++; });
+                                m.p2.forEach(p => { stats[p] = stats[p] || initStats(p); stats[p].pj++; stats[p].pf += m.score2; stats[p].pc += m.score1; jPart.add(p); if(m.score2 > m.score1) stats[p].w++; else if(m.score2 < m.score1) stats[p].d++; else stats[p].d++; });
                             });
                         });
                     }
@@ -1391,8 +1558,8 @@
             if (!item) return;
             item.pf += pf; item.pc += pc; item.diff = item.pf - item.pc;
             if (pf > pc) { item.w++; item.pts += 3; }
-            else if (pf < pc) { item.d++; item.pts += 1; }
-            else { item.l++; }
+            else if (pf < pc) { item.l++; }
+            else { item.d++; item.pts += 1; }
         }
 
         function nextRound8Loco() {

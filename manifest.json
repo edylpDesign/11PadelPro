@@ -1,0 +1,23 @@
+{
+  "name": "11Padel Point Pro",
+  "short_name": "11Padel Pro",
+  "description": "App de Torneos y Ligas de Pádel",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#2980b9",
+  "theme_color": "#2980b9",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "img/app_icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "img/app_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

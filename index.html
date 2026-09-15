@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>11Padel Point Pro - Suite Segura</title>
+    <title>11Padel Point Pro - Torneos & Ligas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Precarga rápida de imágenes -->
+    <link rel="preload" as="image" href="img/logo_11padel.png">
+    <link rel="preload" as="image" href="img/patrocinador_principal.png">
+    <link rel="preload" as="image" href="img/banner_patrocinador1.png">
+    <link rel="preload" as="image" href="img/banner_patrocinador2.png">
+    <link rel="preload" as="image" href="img/banner_patrocinador3.png">
+
     <!-- SDK Modular de Firebase (v10) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -13,18 +20,13 @@
             getAuth, 
             signInWithEmailAndPassword, 
             signOut, 
-            onAuthStateChanged,
-            createUserWithEmailAndPassword 
+            onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { 
             getFirestore, 
             doc, 
             setDoc, 
-            getDoc, 
-            getDocs, 
-            collection, 
-            updateDoc, 
-            deleteDoc 
+            getDoc 
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -40,28 +42,18 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // App secundaria para registrar clientes en Authentication sin tumbar la sesión del admin
-        const secondaryApp = initializeApp(firebaseConfig, "SecondaryAuthBridge");
-        const secondaryAuth = getAuth(secondaryApp);
-
-        window.fb = {
-            auth,
-            db,
-            secondaryAuth,
-            signInWithEmailAndPassword,
-            signOut,
-            onAuthStateChanged,
-            createUserWithEmailAndPassword,
-            doc,
-            setDoc,
-            getDoc,
-            getDocs,
-            collection,
-            updateDoc,
-            deleteDoc
+        window.fb = { 
+            auth, 
+            db, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged, 
+            doc, 
+            setDoc, 
+            getDoc 
         };
 
-        window.initAppAuth();
+        window.initPadelApp();
     </script>
 
     <style>
@@ -77,7 +69,7 @@
             --padel-dark: #2c3e50;
             --padel-gray: #7f8c8d;
             --padel-light-gray: #ecf0f1;
-            --padel-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            --padel-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
         }
 
         body {
@@ -137,9 +129,6 @@
         .sponsor-main-badge-link:active { transform: scale(0.95); }
         .sponsor-main-logo { height: 26px; width: 26px; object-fit: cover; border-radius: 50%; background: white; }
         .sponsor-main-label { font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
-
-        .user-nav-actions { display: flex; align-items: center; gap: 6px; }
-        .badge-chip { background: rgba(255,255,255,0.25); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; color: white; font-weight: bold; border: 1px solid rgba(255,255,255,0.4); }
 
         .sponsors-banner-wrapper {
             background: white;
@@ -229,7 +218,6 @@
         .btn-wa { background: #25d366; color: white; }
         .btn-dark { background: var(--padel-light-gray); color: var(--padel-dark); border: 1px solid #cbd5e1; }
         .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
-        .btn-xs-delete { background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; }
 
         .mode-box-card {
             background: white;
@@ -303,7 +291,6 @@
         table { width: 100%; border-collapse: collapse; background: white; font-size: 0.82rem; }
         th { background: linear-gradient(135deg, var(--padel-blue) 0%, var(--padel-green) 100%); color: white; padding: 10px 8px; font-weight: 700; text-align: center; }
         td { padding: 9px 8px; border-bottom: 1px solid var(--padel-light-gray); text-align: center; white-space: nowrap; font-weight: 600; }
-        .pos-1 { background: rgba(255, 215, 0, 0.2) !important; font-weight: bold; }
 
         input, select { width: 100%; padding: 10px 14px; border: 2px solid var(--padel-light-gray); border-radius: 10px; font-size: 0.9rem; outline: none; }
         input:focus { border-color: var(--padel-green); }
@@ -332,24 +319,21 @@
         <!-- HEADER TOP -->
         <header>
             <div class="brand-logos-zone">
-                <img src="img/logo_11padel.png" alt="11Padel Point Pro" class="logo-app-img" id="mainAppLogo" onerror="this.src='img/logo.png'; this.onerror=()=>this.style.display='none'">
+                <img src="img/logo_11padel.png" alt="11Padel Point Pro" class="logo-app-img" onerror="this.style.display='none'">
                 
-                <a href="#" target="_blank" class="sponsor-main-badge-link" id="sponsorMainLink" title="Patrocinador Principal">
+                <a href="#" target="_blank" class="sponsor-main-badge-link" id="sponsorMainLink" title="Patrocinador Oficial">
                     <img src="img/patrocinador_principal.png" alt="Sponsor" class="sponsor-main-logo" id="sponsorMainImg" onerror="this.style.display='none'">
                     <span class="sponsor-main-label" id="sponsorMainLabel">★ Patrocinador</span>
                     <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i>
                 </a>
             </div>
 
-            <div class="user-nav-actions hidden" id="userNavActions">
-                <span id="labelUserName" class="badge-chip">Usuario</span>
-                <button id="btnAdminPanel" class="btn btn-sm btn-dark hidden" onclick="toggleAdminPanel()"><i class="fas fa-users-cog"></i> Admin</button>
-                <button class="btn btn-sm btn-dark" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i></button>
-            </div>
+            <!-- Botón discreto para ti -->
+            <button class="btn btn-sm btn-dark" onclick="abrirModalAuthAdmin()" title="Administración"><i class="fas fa-cog"></i></button>
         </header>
 
-        <!-- BANNER DE 3 PATROCINADORES -->
-        <div class="sponsors-banner-wrapper hidden" id="sponsorsBannerBlock">
+        <!-- BANNER DE PATROCINADORES -->
+        <div class="sponsors-banner-wrapper" id="sponsorsBannerBlock">
             <div class="sponsors-label"><i class="fas fa-ad"></i> Patrocinadores Oficiales • Toca cada uno para visitar</div>
             <div class="sponsors-grid-3">
                 <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor1" title="Visitar Patrocinador 1">
@@ -368,90 +352,50 @@
             <div class="sponsors-text" id="sponsorsTextDisplay">Patrocinado por: 11Padel Oficial</div>
         </div>
 
-        <!-- LOGIN -->
-        <div id="viewLogin" class="card">
-            <div class="card-header"><i class="fas fa-lock"></i> Acceso Protegido de Club</div>
-            <div class="card-body" style="max-width: 380px; margin: 0 auto;">
-                <div style="margin-bottom: 12px;">
-                    <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Correo Electrónico</label>
-                    <input type="email" id="loginEmail" placeholder="correo@club.com">
-                </div>
-                <div style="margin-bottom: 16px;">
-                    <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Contraseña</label>
-                    <input type="password" id="loginPass" placeholder="******">
-                </div>
-                <button class="btn btn-green" style="width:100%;" id="btnLoginAction" onclick="iniciarSesion()">Entrar a mi Club</button>
-            </div>
-        </div>
-
-        <!-- PANEL ADMIN: CLIENTES, FECHA MANUAL, +30D, BORRADO Y ENLACES -->
-        <div id="viewAdmin" class="card hidden">
+        <!-- PANEL DE GESTIÓN DE PATROCINADORES (SOLO PARA ADMIN AUTENTICADO) -->
+        <div id="viewAdminSponsors" class="card hidden">
             <div class="card-header">
-                <span><i class="fas fa-shield-alt"></i> Panel de Cobros y Licencias</span>
-                <button class="btn btn-sm btn-dark" onclick="toggleAdminPanel()">Cerrar</button>
+                <span><i class="fas fa-shield-alt"></i> Administrador: Patrocinadores Cloud</span>
+                <button class="btn btn-sm btn-dark" onclick="cerrarSesionAdmin()"><i class="fas fa-sign-out-alt"></i> Salir</button>
             </div>
             <div class="card-body">
-                <div style="background:var(--padel-light); padding:12px; border-radius:12px; border:1px solid #cbd5e1; margin-bottom:16px;">
-                    <h5 style="color:var(--padel-orange); margin-bottom:10px;"><i class="fas fa-link"></i> Enlaces y Patrocinadores Oficiales</h5>
-                    
-                    <div style="margin-bottom:8px;">
-                        <label style="font-size:0.75rem; font-weight:bold;">Patrocinadores (WhatsApp):</label>
-                        <input type="text" id="adminSponsorsInput" placeholder="Ej: Corona | Bullpadel | Nike">
-                    </div>
+                <p style="font-size:0.8rem; color:var(--padel-gray); margin-bottom:12px;">Los cambios guardados aquí se publicarán en los teléfonos de todos los usuarios en tiempo real.</p>
 
-                    <div style="margin-bottom:8px;">
-                        <label style="font-size:0.75rem; font-weight:bold;">Enlace del Logo Patrocinador Principal (Header):</label>
-                        <input type="url" id="adminMainSponsorUrl" placeholder="https://instagram.com/patrocinador_principal">
-                    </div>
-
-                    <div style="margin-bottom:8px;">
-                        <label style="font-size:0.75rem; font-weight:bold;">Enlace Banner 1 (Izquierdo):</label>
-                        <input type="url" id="adminBanner1Url" placeholder="https://instagram.com/patrocinador_1">
-                    </div>
-
-                    <div style="margin-bottom:8px;">
-                        <label style="font-size:0.75rem; font-weight:bold;">Enlace Banner 2 (Centro):</label>
-                        <input type="url" id="adminBanner2Url" placeholder="https://instagram.com/patrocinador_2">
-                    </div>
-
-                    <div style="margin-bottom:12px;">
-                        <label style="font-size:0.75rem; font-weight:bold;">Enlace Banner 3 (Derecho):</label>
-                        <input type="url" id="adminBanner3Url" placeholder="https://instagram.com/patrocinador_3">
-                    </div>
-
-                    <button class="btn btn-sm btn-green" style="width:100%;" onclick="guardarConfiguracionPatrocinios()">Guardar Enlaces de Patrocinadores</button>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:0.75rem; font-weight:bold;">Texto Patrocinadores (WhatsApp):</label>
+                    <input type="text" id="adminSponsorsInput" placeholder="Ej: Corona | Bullpadel | Nike">
                 </div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <span style="font-size:0.85rem; font-weight:bold;">Clubes Registrados</span>
-                    <button class="btn btn-sm btn-green" onclick="abrirModalNuevoCliente()">+ Cliente en Firebase</button>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:0.75rem; font-weight:bold;">Enlace Patrocinador Principal (Header):</label>
+                    <input type="url" id="adminMainSponsorUrl" placeholder="https://instagram.com/patrocinador_principal">
                 </div>
 
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Email</th>
-                                <th>Club</th>
-                                <th>Vencimiento</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminUsersTableBody"></tbody>
-                    </table>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:0.75rem; font-weight:bold;">Enlace Banner 1 (Izquierdo):</label>
+                    <input type="url" id="adminBanner1Url" placeholder="https://instagram.com/patrocinador_1">
                 </div>
+
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:0.75rem; font-weight:bold;">Enlace Banner 2 (Centro):</label>
+                    <input type="url" id="adminBanner2Url" placeholder="https://instagram.com/patrocinador_2">
+                </div>
+
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:0.75rem; font-weight:bold;">Enlace Banner 3 (Derecho):</label>
+                    <input type="url" id="adminBanner3Url" placeholder="https://instagram.com/patrocinador_3">
+                </div>
+
+                <button class="btn btn-green" style="width:100%;" id="btnGuardarPatrocinios" onclick="guardarPatrociniosCloud()">Guardar y Publicar Patrocinadores</button>
             </div>
         </div>
 
-        <!-- HUB DE MODOS DE JUEGO -->
-        <div id="viewHubModos" class="hidden">
+        <!-- HUB DE MODOS DE JUEGO (ABIERTO AL PÚBLICO) -->
+        <div id="viewHubModos">
             <p style="font-size:0.85rem; font-weight:bold; color:var(--padel-gray); margin-bottom:10px;">Selecciona el modo de juego:</p>
 
             <div class="mode-box-card" onclick="entrarModo('americano')">
-                <div class="mode-icon-circle">
-                    <i class="fas fa-dice"></i>
-                </div>
+                <div class="mode-icon-circle"><i class="fas fa-dice"></i></div>
                 <div>
                     <h3 style="font-size:1.1rem; color:var(--padel-dark);">Modo 8 Loco / Americano</h3>
                     <p style="font-size:0.8rem; color:var(--padel-gray);">Partidos por parejas rotativas o fijas.</p>
@@ -459,22 +403,18 @@
             </div>
 
             <div class="mode-box-card pozo" onclick="entrarModo('pozo')">
-                <div class="mode-icon-circle">
-                    <i class="fas fa-trophy"></i>
-                </div>
+                <div class="mode-icon-circle"><i class="fas fa-trophy"></i></div>
                 <div>
                     <h3 style="font-size:1.1rem; color:var(--padel-dark);">Modo Pozo / Rey de la Pista</h3>
-                    <p style="font-size:0.8rem; color:var(--padel-gray);">Puntos totales directos individuales por ronda.</p>
+                    <p style="font-size:0.8rem; color:var(--padel-gray);">Puntos individuales directos por ronda.</p>
                 </div>
             </div>
 
             <div class="mode-box-card padron" onclick="abrirPadronJugadores()">
-                <div class="mode-icon-circle">
-                    <i class="fas fa-users"></i>
-                </div>
+                <div class="mode-icon-circle"><i class="fas fa-users"></i></div>
                 <div>
                     <h3 style="font-size:1.1rem; color:var(--padel-dark);">Padrón de Jugadores</h3>
-                    <p style="font-size:0.8rem; color:var(--padel-gray);">Base de jugadores registrada en la nube.</p>
+                    <p style="font-size:0.8rem; color:var(--padel-gray);">Administra tu lista de jugadores habituales.</p>
                 </div>
             </div>
         </div>
@@ -487,12 +427,8 @@
             </div>
 
             <div class="card">
-                <div class="card-header">
-                    <span id="tituloModoLigas">Ligas</span>
-                </div>
-                <div class="card-body">
-                    <div id="listaLigasContenedor"></div>
-                </div>
+                <div class="card-header"><span id="tituloModoLigas">Ligas</span></div>
+                <div class="card-body"><div id="listaLigasContenedor"></div></div>
             </div>
         </div>
 
@@ -505,7 +441,7 @@
             <div class="card-body">
                 <div style="display:flex; gap:8px; margin-bottom:14px;">
                     <input type="text" id="inputNuevoJugador" placeholder="Nombre completo">
-                    <button class="btn btn-sm btn-green" onclick="agregarJugadorCloud()">Añadir</button>
+                    <button class="btn btn-sm btn-green" onclick="agregarJugadorLocal()">Añadir</button>
                 </div>
                 <div id="listaJugadoresPadron"></div>
             </div>
@@ -547,13 +483,13 @@
             </div>
         </div>
 
-        <!-- JORNADA EN VIVO: MODO POZO -->
+        <!-- JORNADA EN VIVO: POZO -->
         <div id="viewJornadaPozoVivo" class="hidden">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                 <button class="btn btn-sm btn-dark" onclick="backToLigaDetalle()"><i class="fas fa-arrow-left"></i></button>
                 <div style="text-align:center;">
                     <h3 id="pozoLiveTitulo" style="font-size:1.1rem; color:var(--padel-blue);">Jornada Pozo</h3>
-                    <span style="font-size:0.75rem; color:var(--padel-green); font-weight:bold;">PUNTOS TOTALES DIRECTOS</span>
+                    <span style="font-size:0.75rem; color:var(--padel-green); font-weight:bold;">PUNTOS DIRECTOS</span>
                 </div>
                 <button class="btn btn-sm btn-wa" onclick="compartirWhatsAppPozo()"><i class="fab fa-whatsapp"></i></button>
             </div>
@@ -561,9 +497,7 @@
             <div class="scroll-chips" id="pozoRoundsNav"></div>
 
             <div class="card">
-                <div class="card-header">
-                    <span id="pozoRondaActualLabel">Ronda 1</span>
-                </div>
+                <div class="card-header"><span id="pozoRondaActualLabel">Ronda 1</span></div>
                 <div class="card-body" id="pozoPlayersRondaContainer"></div>
             </div>
 
@@ -587,7 +521,7 @@
             </div>
         </div>
 
-        <!-- JORNADA EN VIVO: MODO 8 LOCO -->
+        <!-- JORNADA EN VIVO: 8 LOCO -->
         <div id="viewJornada8LocoVivo" class="hidden">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                 <button class="btn btn-sm btn-dark" onclick="backToLigaDetalle()"><i class="fas fa-arrow-left"></i></button>
@@ -624,6 +558,24 @@
     </div>
 
     <!-- MODALES -->
+    <div id="modalAuthAdmin" class="modal">
+        <div class="modal-content" style="max-width: 360px;">
+            <h3 style="margin-bottom:12px; color:var(--padel-blue);"><i class="fas fa-lock"></i> Acceso Administrador</h3>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Correo</label>
+                <input type="email" id="adminAuthEmail" value="admin@11padel.com">
+            </div>
+            <div style="margin-bottom:14px;">
+                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Contraseña</label>
+                <input type="password" id="adminAuthPass" placeholder="******">
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button class="btn btn-dark btn-sm" onclick="closeModal('modalAuthAdmin')">Cancelar</button>
+                <button class="btn btn-green btn-sm" id="btnAdminLogin" onclick="ejecutarLoginAdmin()">Ingresar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalCrearLiga" class="modal">
         <div class="modal-content">
             <h3 style="margin-bottom:12px; color:var(--padel-blue);">Nueva Liga</h3>
@@ -633,7 +585,7 @@
             </div>
             <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
                 <button class="btn btn-dark btn-sm" onclick="closeModal('modalCrearLiga')">Cancelar</button>
-                <button class="btn btn-green btn-sm" onclick="guardarNuevaLigaCloud()">Crear</button>
+                <button class="btn btn-green btn-sm" onclick="guardarNuevaLiga()">Crear</button>
             </div>
         </div>
     </div>
@@ -661,40 +613,18 @@
         </div>
     </div>
 
-    <div id="modalNuevoCliente" class="modal">
-        <div class="modal-content">
-            <h3 style="margin-bottom:12px; color:var(--padel-blue);">Registrar Cliente en Firebase</h3>
-            <div style="margin-bottom:10px;">
-                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Correo</label>
-                <input type="email" id="nuevoClienteEmail" placeholder="cliente@club.com">
-            </div>
-            <div style="margin-bottom:10px;">
-                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Contraseña de Acceso (mínimo 6 caracteres)</label>
-                <input type="password" id="nuevoClientePass" value="123456">
-            </div>
-            <div style="margin-bottom:10px;">
-                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Nombre del Club</label>
-                <input type="text" id="nuevoClienteNombre" placeholder="Padel Center">
-            </div>
-            <div style="margin-bottom:10px;">
-                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Fecha de Corte</label>
-                <input type="date" id="nuevoClienteFecha" value="2026-12-31">
-            </div>
-            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
-                <button class="btn btn-dark btn-sm" onclick="closeModal('modalNuevoCliente')">Cancelar</button>
-                <button class="btn btn-green btn-sm" id="btnCrearClienteFirebase" onclick="guardarNuevoClienteFirebase()">Registrar</button>
-            </div>
-        </div>
-    </div>
-
     <div id="toast" class="toast">Notificación</div>
 
     <script>
-        let currentAuthUser = null;
-        let currentClubDoc = null;
-        let userData = { jugadores: [], ligasAmericano: [], ligasPozo: [] };
+        // DATOS LOCALES (PRIVADOS DE CADA DISPOSITIVO)
+        let localData = JSON.parse(localStorage.getItem("11padel_data")) || {
+            jugadores: ["Pepe moreno", "GERARDO ÁLVAREZ", "Miguel", "Andre", "Luciano", "Chuleta", "Javier", "Joselin"],
+            ligasAmericano: [],
+            ligasPozo: []
+        };
 
-        let sponsorConfig = JSON.parse(localStorage.getItem("11padel_sponsor_config")) || {
+        // PATROCINADORES CLOUD
+        let sponsorConfig = {
             names: "11Padel Oficial",
             mainUrl: "https://instagram.com",
             banner1Url: "https://instagram.com",
@@ -702,171 +632,100 @@
             banner3Url: "https://instagram.com"
         };
 
-        window.initAppAuth = function() {
-            window.fb.onAuthStateChanged(window.fb.auth, async (user) => {
-                if (user) {
-                    currentAuthUser = user;
-                    try {
-                        const snap = await window.fb.getDoc(window.fb.doc(window.fb.db, "users", user.uid));
-                        if (snap.exists()) {
-                            currentClubDoc = snap.data();
-                        } else {
-                            const esAdmin = (user.email === "admin@11padel.com");
-                            currentClubDoc = {
-                                email: user.email,
-                                name: esAdmin ? "Admin Central" : "Club",
-                                isAdmin: esAdmin,
-                                active: true,
-                                expireDate: "2099-12-31"
-                            };
-                            await window.fb.setDoc(window.fb.doc(window.fb.db, "users", user.uid), currentClubDoc);
-                        }
+        function saveLocalData() {
+            localStorage.setItem("11padel_data", JSON.stringify(localData));
+        }
 
-                        // Validar corte y estado
-                        if (!currentClubDoc.isAdmin && !currentClubDoc.active) {
-                            showToast("Cuenta suspendida por falta de pago", "error");
-                            await window.fb.signOut(window.fb.auth);
-                            return;
-                        }
+        window.initPadelApp = async function() {
+            await cargarPatrociniosCloud();
 
-                        const hoy = new Date().toISOString().split("T")[0];
-                        if (!currentClubDoc.isAdmin && currentClubDoc.expireDate && currentClubDoc.expireDate < hoy) {
-                            showToast("Suscripción vencida (" + currentClubDoc.expireDate + ")", "error");
-                            await window.fb.signOut(window.fb.auth);
-                            return;
-                        }
-
-                        await cargarDatosClubCloud(user.uid);
-                        await cargarConfigPatrociniosCloud();
-                        loadAppUI();
-
-                    } catch (e) {
-                        console.error("Error al cargar perfil:", e);
-                        showToast("Error de conexión a Firestore", "error");
-                    }
+            // Escuchar si el admin ya tiene sesión abierta
+            window.fb.onAuthStateChanged(window.fb.auth, (user) => {
+                if (user && user.email === "admin@11padel.com") {
+                    document.getElementById("viewAdminSponsors").classList.remove("hidden");
+                    cargarFormularioSponsors();
                 } else {
-                    currentAuthUser = null;
-                    currentClubDoc = null;
-                    document.getElementById("userNavActions").classList.add("hidden");
-                    document.getElementById("btnAdminPanel").classList.add("hidden");
-                    document.getElementById("viewAdmin").classList.add("hidden");
-                    document.getElementById("viewHubModos").classList.add("hidden");
-                    document.getElementById("viewLigasModo").classList.add("hidden");
-                    document.getElementById("viewPadron").classList.add("hidden");
-                    document.getElementById("viewLigaDetalle").classList.add("hidden");
-                    document.getElementById("viewJornadaPozoVivo").classList.add("hidden");
-                    document.getElementById("viewJornada8LocoVivo").classList.add("hidden");
-                    document.getElementById("sponsorsBannerBlock").classList.add("hidden");
-                    document.getElementById("viewLogin").classList.remove("hidden");
+                    document.getElementById("viewAdminSponsors").classList.add("hidden");
                 }
             });
         };
 
-        async function iniciarSesion() {
-            const email = document.getElementById("loginEmail").value.trim().toLowerCase();
-            const pass = document.getElementById("loginPass").value.trim();
-            const btn = document.getElementById("btnLoginAction");
-
-            if (!email || !pass) return showToast("Introduce correo y contraseña", "error");
-
-            btn.disabled = true;
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Entrando...";
-
-            try {
-                await window.fb.signInWithEmailAndPassword(window.fb.auth, email, pass);
-            } catch (err) {
-                console.error(err);
-                if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
-                    showToast("Credenciales incorrectas", "error");
-                } else {
-                    showToast("Error Firebase: " + err.message, "error");
-                }
-            } finally {
-                btn.disabled = false;
-                btn.textContent = "Entrar a mi Club";
-            }
-        }
-
-        async function cerrarSesion() {
-            await window.fb.signOut(window.fb.auth);
-        }
-
-        async function cargarDatosClubCloud(uid) {
-            try {
-                const snap = await window.fb.getDoc(window.fb.doc(window.fb.db, "club_data", uid));
-                if (snap.exists()) {
-                    userData = snap.data();
-                    userData.jugadores = userData.jugadores || [];
-                    userData.ligasAmericano = userData.ligasAmericano || [];
-                    userData.ligasPozo = userData.ligasPozo || [];
-                } else {
-                    userData = {
-                        jugadores: ["Pepe moreno", "GERARDO ÁLVAREZ", "Miguel", "Andre", "Luciano", "Chuleta", "Javier", "Joselin"],
-                        ligasAmericano: [],
-                        ligasPozo: []
-                    };
-                    await window.fb.setDoc(window.fb.doc(window.fb.db, "club_data", uid), userData);
-                }
-            } catch (e) {
-                console.error("Error al cargar club_data:", e);
-            }
-        }
-
-        async function syncCloud() {
-            if (!currentAuthUser) return;
-            try {
-                const cleanData = JSON.parse(JSON.stringify(userData));
-                await window.fb.setDoc(window.fb.doc(window.fb.db, "club_data", currentAuthUser.uid), cleanData);
-            } catch (e) {
-                console.error("Error al sincronizar:", e);
-                showToast("Error al guardar en la nube: " + (e.message || ""), "error");
-            }
-        }
-
-        async function cargarConfigPatrociniosCloud() {
+        // GESTIÓN SEGURA DE PATROCINADORES
+        async function cargarPatrociniosCloud() {
             try {
                 const snap = await window.fb.getDoc(window.fb.doc(window.fb.db, "platform_config", "sponsors"));
                 if (snap.exists()) {
                     sponsorConfig = snap.data();
                 }
-                aplicarConfiguracionPatrocinios();
             } catch (e) {
-                aplicarConfiguracionPatrocinios();
+                console.log("Cargando patrocinios predeterminados...");
             }
+            aplicarPatrociniosUI();
         }
 
-        function loadAppUI() {
-            document.getElementById("viewLogin").classList.add("hidden");
-            document.getElementById("viewAdmin").classList.add("hidden");
-            document.getElementById("viewHubModos").classList.remove("hidden");
-            document.getElementById("userNavActions").classList.remove("hidden");
-            document.getElementById("labelUserName").textContent = currentClubDoc.name || currentClubDoc.email;
+        function aplicarPatrociniosUI() {
+            document.getElementById("sponsorsTextDisplay").textContent = `Patrocinado por: ${sponsorConfig.names}`;
+            document.getElementById("sponsorMainLink").href = sponsorConfig.mainUrl;
+            document.getElementById("linkBannerSponsor1").href = sponsorConfig.banner1Url;
+            document.getElementById("linkBannerSponsor2").href = sponsorConfig.banner2Url;
+            document.getElementById("linkBannerSponsor3").href = sponsorConfig.banner3Url;
+        }
 
-            document.getElementById("sponsorsBannerBlock").classList.remove("hidden");
-            aplicarConfiguracionPatrocinios();
-
-            if (currentClubDoc && currentClubDoc.isAdmin) {
-                document.getElementById("btnAdminPanel").classList.remove("hidden");
+        function abrirModalAuthAdmin() {
+            if (window.fb.auth.currentUser && window.fb.auth.currentUser.email === "admin@11padel.com") {
+                document.getElementById("viewAdminSponsors").classList.remove("hidden");
+                cargarFormularioSponsors();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                document.getElementById("btnAdminPanel").classList.add("hidden");
+                document.getElementById("modalAuthAdmin").classList.add("active");
             }
         }
 
-        function toggleAdminPanel() {
-            if (!currentClubDoc || !currentClubDoc.isAdmin) return;
-            const adminCard = document.getElementById("viewAdmin");
-            adminCard.classList.toggle("hidden");
-            if (!adminCard.classList.contains("hidden")) {
-                document.getElementById("adminSponsorsInput").value = sponsorConfig.names || "";
-                document.getElementById("adminMainSponsorUrl").value = sponsorConfig.mainUrl || "";
-                document.getElementById("adminBanner1Url").value = sponsorConfig.banner1Url || "";
-                document.getElementById("adminBanner2Url").value = sponsorConfig.banner2Url || "";
-                document.getElementById("adminBanner3Url").value = sponsorConfig.banner3Url || "";
-                cargarClientesDesdeFirestore();
+        async function ejecutarLoginAdmin() {
+            const email = document.getElementById("adminAuthEmail").value.trim().toLowerCase();
+            const pass = document.getElementById("adminAuthPass").value.trim();
+            const btn = document.getElementById("btnAdminLogin");
+
+            if (!email || !pass) return showToast("Escribe correo y contraseña", "error");
+
+            btn.disabled = true;
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
+
+            try {
+                await window.fb.signInWithEmailAndPassword(window.fb.auth, email, pass);
+                closeModal("modalAuthAdmin");
+                document.getElementById("adminAuthPass").value = "";
+                document.getElementById("viewAdminSponsors").classList.remove("hidden");
+                cargarFormularioSponsors();
+                showToast("Acceso Administrador concedido");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+                showToast("Credenciales de Admin inválidas", "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Ingresar";
             }
         }
 
-        async function guardarConfiguracionPatrocinios() {
+        function cargarFormularioSponsors() {
+            document.getElementById("adminSponsorsInput").value = sponsorConfig.names || "";
+            document.getElementById("adminMainSponsorUrl").value = sponsorConfig.mainUrl || "";
+            document.getElementById("adminBanner1Url").value = sponsorConfig.banner1Url || "";
+            document.getElementById("adminBanner2Url").value = sponsorConfig.banner2Url || "";
+            document.getElementById("adminBanner3Url").value = sponsorConfig.banner3Url || "";
+        }
+
+        async function cerrarSesionAdmin() {
+            await window.fb.signOut(window.fb.auth);
+            document.getElementById("viewAdminSponsors").classList.add("hidden");
+            showToast("Sesión de Administrador cerrada");
+        }
+
+        async function guardarPatrociniosCloud() {
+            const btn = document.getElementById("btnGuardarPatrocinios");
+            btn.disabled = true;
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Publicando...";
+
             sponsorConfig = {
                 names: document.getElementById("adminSponsorsInput").value.trim() || "11Padel Oficial",
                 mainUrl: document.getElementById("adminMainSponsorUrl").value.trim() || "https://instagram.com",
@@ -875,156 +734,17 @@
                 banner3Url: document.getElementById("adminBanner3Url").value.trim() || "https://instagram.com"
             };
 
-            localStorage.setItem("11padel_sponsor_config", JSON.stringify(sponsorConfig));
             try {
+                // Se guarda en Firebase con la firma criptográfica del admin
                 await window.fb.setDoc(window.fb.doc(window.fb.db, "platform_config", "sponsors"), sponsorConfig);
-            } catch (e) {
-                console.error(e);
-            }
-
-            aplicarConfiguracionPatrocinios();
-            showToast("Patrocinios sincronizados");
-        }
-
-        function aplicarConfiguracionPatrocinios() {
-            document.getElementById("sponsorsTextDisplay").textContent = `Patrocinado por: ${sponsorConfig.names}`;
-            document.getElementById("sponsorMainLink").href = sponsorConfig.mainUrl;
-            document.getElementById("linkBannerSponsor1").href = sponsorConfig.banner1Url;
-            document.getElementById("linkBannerSponsor2").href = sponsorConfig.banner2Url;
-            document.getElementById("linkBannerSponsor3").href = sponsorConfig.banner3Url;
-        }
-
-        async function cargarClientesDesdeFirestore() {
-            const tbody = document.getElementById("adminUsersTableBody");
-            tbody.innerHTML = "<tr><td colspan='5'>Cargando clientes de Firebase...</td></tr>";
-
-            try {
-                const querySnapshot = await window.fb.getDocs(window.fb.collection(window.fb.db, "users"));
-                tbody.innerHTML = "";
-                querySnapshot.forEach((docSnap) => {
-                    const u = { uid: docSnap.id, ...docSnap.data() };
-                    tbody.innerHTML += `<tr>
-                        <td>${u.email}</td>
-                        <td>${u.name || 'Club'}</td>
-                        <td>
-                            <input type="date" style="width:auto; padding:3px;" value="${u.expireDate || '2026-12-31'}" onchange="actualizarVencimientoCliente('${u.uid}', this.value)">
-                        </td>
-                        <td>${u.active ? '🟢 Activo' : '🔴 Inactivo'}</td>
-                        <td>
-                            ${!u.isAdmin ? `
-                                <button class="btn btn-sm btn-dark" style="padding:4px 8px; font-size:0.75rem;" onclick="renovar30Dias('${u.uid}', '${u.expireDate}')">+30d</button>
-                                <button class="btn btn-sm ${u.active ? 'btn-danger':'btn-green'}" style="padding:4px 8px; font-size:0.75rem;" onclick="toggleStatusCliente('${u.uid}', ${!u.active})">${u.active?'Bloquear':'Activar'}</button>
-                                <button class="btn-xs-delete" onclick="borrarClienteFirestore('${u.uid}')"><i class="fas fa-trash"></i></button>
-                            ` : 'Master'}
-                        </td>
-                    </tr>`;
-                });
-            } catch (e) {
-                console.error(e);
-                tbody.innerHTML = "<tr><td colspan='5'>Error al leer datos de Firestore</td></tr>";
-            }
-        }
-
-        async function guardarNuevoClienteFirebase() {
-            const email = document.getElementById("nuevoClienteEmail").value.trim().toLowerCase();
-            const pass = document.getElementById("nuevoClientePass").value.trim();
-            const name = document.getElementById("nuevoClienteNombre").value.trim();
-            const fecha = document.getElementById("nuevoClienteFecha").value || "2026-12-31";
-            const btn = document.getElementById("btnCrearClienteFirebase");
-
-            if (!email || !pass || !name) return showToast("Completa todos los campos", "error");
-            if (pass.length < 6) return showToast("La clave debe tener mínimo 6 caracteres", "error");
-
-            try {
-                btn.disabled = true;
-                btn.textContent = "Registrando...";
-
-                // Registra en Authentication seguro con la app secundaria
-                const cred = await window.fb.createUserWithEmailAndPassword(window.fb.secondaryAuth, email, pass);
-                const nuevoUid = cred.user.uid;
-                await window.fb.signOut(window.fb.secondaryAuth);
-
-                // Registra en Firestore (SIN guardar la contraseña)
-                await window.fb.setDoc(window.fb.doc(window.fb.db, "users", nuevoUid), {
-                    email: email,
-                    name: name,
-                    active: true,
-                    isAdmin: false,
-                    expireDate: fecha,
-                    createdAt: new Date().toISOString()
-                });
-
-                closeModal("modalNuevoCliente");
-                showToast(`¡Club ${name} registrado con éxito!`);
-                cargarClientesDesdeFirestore();
+                aplicarPatrociniosUI();
+                showToast("¡Patrocinadores publicados en todo el mundo!");
             } catch (err) {
-                console.error(err);
-                if (err.code === "auth/email-already-in-use") {
-                    showToast("Ese correo ya existe en Firebase Auth", "error");
-                } else {
-                    showToast("Error Firebase: " + err.message, "error");
-                }
+                showToast("Error de permisos: " + err.message, "error");
             } finally {
                 btn.disabled = false;
-                btn.textContent = "Registrar";
+                btn.textContent = "Guardar y Publicar Patrocinadores";
             }
-        }
-
-        async function actualizarVencimientoCliente(uid, nuevaFecha) {
-            try {
-                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", uid), { expireDate: nuevaFecha });
-                showToast("Fecha guardada");
-            } catch (e) {
-                showToast("Error al guardar fecha", "error");
-            }
-        }
-
-        async function renovar30Dias(uid, fechaActual) {
-            let base = new Date();
-            if (fechaActual && new Date(fechaActual) > base) base = new Date(fechaActual);
-            base.setDate(base.getDate() + 30);
-            const nueva = base.toISOString().split("T")[0];
-            try {
-                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", uid), { expireDate: nueva, active: true });
-                cargarClientesDesdeFirestore();
-                showToast("+30 días otorgados");
-            } catch (e) {
-                showToast("Error al renovar", "error");
-            }
-        }
-
-        async function toggleStatusCliente(uid, nuevoEstado) {
-            try {
-                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", uid), { active: nuevoEstado });
-                cargarClientesDesdeFirestore();
-                showToast(nuevoEstado ? "Club Activado" : "Club Suspendido");
-            } catch (e) {
-                showToast("Error al cambiar estado", "error");
-            }
-        }
-
-        async function borrarClienteFirestore(uid) {
-            if (confirm("¿Eliminar este club de Firebase y todos sus torneos?")) {
-                try {
-                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, "users", uid));
-                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, "club_data", uid));
-                    cargarClientesDesdeFirestore();
-                    showToast("Club eliminado permanentemente");
-                } catch (e) {
-                    showToast("Error al eliminar", "error");
-                }
-            }
-        }
-
-        function abrirModalNuevoCliente() { document.getElementById("modalNuevoCliente").classList.add("active"); }
-        function closeModal(id) { document.getElementById(id).classList.remove("active"); }
-
-        function showToast(msg, type="info") {
-            const t = document.getElementById("toast");
-            t.textContent = msg;
-            t.style.background = type === "error" ? "#e74c3c" : "var(--padel-dark)";
-            t.classList.add("show");
-            setTimeout(() => t.classList.remove("show"), 2200);
         }
 
         // ======================== MODOS DE JUEGO ========================
@@ -1056,7 +776,7 @@
         }
 
         function renderLigasDelModo() {
-            const lista = modoSeleccionado === 'americano' ? userData.ligasAmericano : userData.ligasPozo;
+            const lista = modoSeleccionado === 'americano' ? localData.ligasAmericano : localData.ligasPozo;
             const cont = document.getElementById("listaLigasContenedor");
             cont.innerHTML = "";
             if (!lista || !lista.length) { cont.innerHTML = "<p style='color:var(--padel-gray); font-size:0.85rem;'>No hay ligas registradas en este modo.</p>"; return; }
@@ -1081,68 +801,67 @@
             document.getElementById("modalCrearLiga").classList.add("active");
         }
 
-        async function guardarNuevaLigaCloud() {
+        function guardarNuevaLiga() {
             const nom = document.getElementById("ligaNombreInput").value.trim();
             if (!nom) return showToast("Escribe un nombre", "error");
             const nueva = { id: "liga_" + Date.now(), nombre: nom, modo: modoSeleccionado, finalizada: false, jornadas: [] };
             if (modoSeleccionado === 'americano') {
-                userData.ligasAmericano = userData.ligasAmericano || [];
-                userData.ligasAmericano.push(nueva);
+                localData.ligasAmericano = localData.ligasAmericano || [];
+                localData.ligasAmericano.push(nueva);
             } else {
-                userData.ligasPozo = userData.ligasPozo || [];
-                userData.ligasPozo.push(nueva);
+                localData.ligasPozo = localData.ligasPozo || [];
+                localData.ligasPozo.push(nueva);
             }
-            await syncCloud();
+            saveLocalData();
             closeModal("modalCrearLiga");
             renderLigasDelModo();
-            showToast("Liga guardada en Firebase");
+            showToast("Liga creada");
         }
 
-        async function eliminarLiga(id) {
+        function eliminarLiga(id) {
             if (confirm("¿Eliminar esta liga y sus jornadas?")) {
-                if (modoSeleccionado === 'americano') userData.ligasAmericano = userData.ligasAmericano.filter(x => x.id !== id);
-                else userData.ligasPozo = userData.ligasPozo.filter(x => x.id !== id);
-                await syncCloud();
+                if (modoSeleccionado === 'americano') localData.ligasAmericano = localData.ligasAmericano.filter(x => x.id !== id);
+                else localData.ligasPozo = localData.ligasPozo.filter(x => x.id !== id);
+                saveLocalData();
                 renderLigasDelModo();
             }
         }
 
-        async function agregarJugadorCloud() {
+        function agregarJugadorLocal() {
             const inp = document.getElementById("inputNuevoJugador");
             const nom = inp.value.trim();
             if (!nom) return;
-            userData.jugadores = userData.jugadores || [];
-            if (userData.jugadores.includes(nom)) return showToast("Ya registrado", "error");
-            userData.jugadores.push(nom);
-            await syncCloud();
+            localData.jugadores = localData.jugadores || [];
+            if (localData.jugadores.includes(nom)) return showToast("Ya registrado", "error");
+            localData.jugadores.push(nom);
+            saveLocalData();
             inp.value = "";
             renderPadron();
-            showToast("Jugador guardado en la nube");
+            showToast("Jugador añadido");
         }
 
         function renderPadron() {
             const cont = document.getElementById("listaJugadoresPadron");
             cont.innerHTML = "";
-            userData.jugadores = userData.jugadores || [];
-            userData.jugadores.forEach((j) => {
+            (localData.jugadores || []).forEach((j) => {
                 cont.innerHTML += `
                     <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #cbd5e1;">
                         <span style="font-weight:600;">${j}</span>
-                        <i class="fas fa-trash" style="color:#e74c3c; cursor:pointer;" onclick="eliminarJugadorCloud('${j}')"></i>
+                        <i class="fas fa-trash" style="color:#e74c3c; cursor:pointer;" onclick="eliminarJugadorLocal('${j}')"></i>
                     </div>`;
             });
         }
 
-        async function eliminarJugadorCloud(nom) {
-            userData.jugadores = userData.jugadores.filter(x => x !== nom);
-            await syncCloud();
+        function eliminarJugadorLocal(nom) {
+            localData.jugadores = localData.jugadores.filter(x => x !== nom);
+            saveLocalData();
             renderPadron();
         }
 
         let ligaActiva = null;
 
         function abrirLigaDetalle(id) {
-            const lista = modoSeleccionado === 'americano' ? userData.ligasAmericano : userData.ligasPozo;
+            const lista = modoSeleccionado === 'americano' ? localData.ligasAmericano : localData.ligasPozo;
             ligaActiva = lista.find(x => x.id === id);
             ligaActiva.jornadas = ligaActiva.jornadas || [];
 
@@ -1171,10 +890,10 @@
             document.getElementById("tabLigaJornadas").classList.toggle("active", tab === 'jornadas');
         }
 
-        async function terminarLigaOficial() {
-            if (confirm("¿Cerrar oficialmente esta liga? La tabla final quedará consolidada.")) {
+        function terminarLigaOficial() {
+            if (confirm("¿Cerrar oficialmente esta liga?")) {
                 ligaActiva.finalizada = true;
-                await syncCloud();
+                saveLocalData();
                 abrirLigaDetalle(ligaActiva.id);
                 showToast("Liga cerrada");
             }
@@ -1202,9 +921,7 @@
                     Object.keys(jugadorStats).forEach(p => {
                         let ptsJornada = 0;
                         if (j.rondas) {
-                            j.rondas.forEach(r => {
-                                ptsJornada += (r[p] || 0);
-                            });
+                            j.rondas.forEach(r => ptsJornada += (r[p] || 0));
                         }
                         jugadorStats[p].jornadas.push(ptsJornada);
                         jugadorStats[p].total += ptsJornada;
@@ -1232,8 +949,8 @@
                     if (j.rounds) {
                         j.rounds.forEach(r => {
                             (r.matches || []).forEach(m => {
-                                m.p1.forEach(p => { stats[p] = stats[p] || initStats(p); stats[p].pj++; stats[p].pf += m.score1; stats[p].pc += m.score2; jPart.add(p); if(m.score1 > m.score2) stats[p].w++; else if(m.score1 < m.score2) stats[p].l++; else stats[p].d++; });
-                                m.p2.forEach(p => { stats[p] = stats[p] || initStats(p); stats[p].pj++; stats[p].pf += m.score2; stats[p].pc += m.score1; jPart.add(p); if(m.score2 > m.score1) stats[p].w++; else if(m.score2 < m.score1) stats[p].l++; else stats[p].d++; });
+                                m.p1.forEach(p => { stats[p] = stats[p] || initStats(p); stats[p].pj++; stats[p].pf += m.score1; stats[p].pc += m.score2; jPart.add(p); if(m.score1 > m.score2) stats[p].w++; else if(m.score1 < m.score2) stats[p].d++; else stats[p].l++; });
+                                m.p2.forEach(p => { stats[p] = stats[p] || initStats(p); stats[p].pj++; stats[p].pf += m.score2; stats[p].pc += m.score1; jPart.add(p); if(m.score2 > m.score1) stats[p].w++; else if(m.score2 < m.score1) stats[p].d++; else stats[p].l++; });
                             });
                         });
                     }
@@ -1278,24 +995,24 @@
             });
         }
 
-        // Convocatorias
+        // CONVOCATORIAS
         let convocadosSeleccionados = [];
 
         function abrirModalNuevaJornada() {
             document.getElementById("jornadaNombreInput").value = `Jornada ${ligaActiva.jornadas.length + 1}`;
-            convocadosSeleccionados = [...userData.jugadores];
+            convocadosSeleccionados = [...localData.jugadores];
             renderPillsConvocados();
             document.getElementById("modalNuevaJornada").classList.add("active");
         }
 
-        async function registrarJugadorExpress() {
+        function registrarJugadorExpress() {
             const inp = document.getElementById("inputRegistroExpress");
             const nom = inp.value.trim();
             if (!nom) return;
-            userData.jugadores = userData.jugadores || [];
-            if (!userData.jugadores.includes(nom)) {
-                userData.jugadores.push(nom);
-                await syncCloud();
+            localData.jugadores = localData.jugadores || [];
+            if (!localData.jugadores.includes(nom)) {
+                localData.jugadores.push(nom);
+                saveLocalData();
             }
             if (!convocadosSeleccionados.includes(nom)) convocadosSeleccionados.push(nom);
             inp.value = "";
@@ -1306,7 +1023,7 @@
         function renderPillsConvocados() {
             const cont = document.getElementById("pillsConvocadosContainer");
             cont.innerHTML = "";
-            (userData.jugadores || []).forEach(j => {
+            (localData.jugadores || []).forEach(j => {
                 const isSel = convocadosSeleccionados.includes(j);
                 cont.innerHTML += `<div class="chip-pill ${isSel?'active':''}" onclick="toggleConvocado('${j}')">${isSel?'✓ ':''}${j}</div>`;
             });
@@ -1319,7 +1036,7 @@
             renderPillsConvocados();
         }
 
-        async function iniciarJornadaConfirmada() {
+        function iniciarJornadaConfirmada() {
             const nom = document.getElementById("jornadaNombreInput").value.trim() || "Jornada";
             if (convocadosSeleccionados.length < 2) return showToast("Mínimo 2 jugadores", "error");
 
@@ -1354,7 +1071,7 @@
 
             ligaActiva.jornadas = ligaActiva.jornadas || [];
             ligaActiva.jornadas.push(nuevaJornada);
-            await syncCloud();
+            saveLocalData();
             closeModal("modalNuevaJornada");
             cargarJornadaEnVivo(nuevaJornada.id);
         }
@@ -1382,7 +1099,7 @@
         }
 
         function backToLigaDetalle() {
-            syncCloud();
+            saveLocalData();
             document.getElementById("viewJornadaPozoVivo").classList.add("hidden");
             document.getElementById("viewJornada8LocoVivo").classList.add("hidden");
             document.getElementById("viewLigaDetalle").classList.remove("hidden");
@@ -1429,7 +1146,7 @@
             rData[jugador] = Math.max(0, (rData[jugador] || 0) + delta);
             showPozoRound(jornadaActiva.rondaActual);
             updatePozoLiveLeaderboard();
-            syncCloud();
+            saveLocalData();
         }
 
         function setPuntoPozo(jugador, val) {
@@ -1437,7 +1154,7 @@
             rData[jugador] = Math.max(0, parseInt(val) || 0);
             showPozoRound(jornadaActiva.rondaActual);
             updatePozoLiveLeaderboard();
-            syncCloud();
+            saveLocalData();
         }
 
         function sumarCaguamaPozo(jugador) {
@@ -1445,15 +1162,15 @@
             jornadaActiva.caguamas[jugador] = (jornadaActiva.caguamas[jugador] || 0) + 1;
             showPozoRound(jornadaActiva.rondaActual);
             updatePozoLiveLeaderboard();
-            syncCloud();
+            saveLocalData();
             showToast(`🍺 +1 para ${jugador}`);
         }
 
-        async function agregarRondaPozo() {
+        function agregarRondaPozo() {
             const nuevaRonda = {};
             jornadaActiva.convocados.forEach(p => nuevaRonda[p] = 0);
             jornadaActiva.rondas.push(nuevaRonda);
-            await syncCloud();
+            saveLocalData();
             showPozoRound(jornadaActiva.rondas.length);
             showToast(`¡Ronda ${jornadaActiva.rondas.length} agregada!`);
         }
@@ -1463,9 +1180,7 @@
             jornadaActiva.convocados.forEach(p => totales[p] = 0);
 
             jornadaActiva.rondas.forEach(r => {
-                Object.entries(r).forEach(([p, pts]) => {
-                    totales[p] = (totales[p] || 0) + pts;
-                });
+                Object.entries(r).forEach(([p, pts]) => totales[p] = (totales[p] || 0) + pts);
             });
 
             const sorted = Object.entries(totales).sort((a,b) => b[1] - a[1]);
@@ -1481,12 +1196,12 @@
             });
         }
 
-        async function finalizarJornadaPozoOficial() {
-            if (confirm("¿Finalizar jornada de Pozo y guardar en la nube?")) {
+        function finalizarJornadaPozoOficial() {
+            if (confirm("¿Finalizar jornada de Pozo?")) {
                 jornadaActiva.finalizada = true;
-                await syncCloud();
+                saveLocalData();
                 backToLigaDetalle();
-                showToast("Jornada finalizada y sincronizada");
+                showToast("Jornada finalizada");
             }
         }
 
@@ -1610,7 +1325,7 @@
 
             const restCont = document.getElementById("amRestingPlayer");
             if (current.resting && current.resting.length) {
-                restCont.innerHTML = current.resting.map(p => `<span class="badge-chip" style="background:white; color:var(--padel-dark); border:1px solid #cbd5e1;">${p}</span>`).join(' ');
+                restCont.innerHTML = current.resting.map(p => `<span class="badge-chip" style="background:white; color:var(--padel-dark); border:1px solid #cbd5e1; padding:4px 8px; border-radius:12px; font-size:0.75rem;">${p}</span>`).join(' ');
             } else restCont.innerHTML = "<span style='color:var(--padel-gray); font-size:0.8rem;'>Todos en pista</span>";
         }
 
@@ -1624,7 +1339,7 @@
                     m[type] = parsed;
                     show8LocoRound(jornadaActiva.currentRound);
                     update8LocoLiveLeaderboard();
-                    syncCloud();
+                    saveLocalData();
                     break;
                 }
             }
@@ -1634,7 +1349,7 @@
             jornadaActiva.caguamas = jornadaActiva.caguamas || {};
             jornadaActiva.caguamas[p] = (jornadaActiva.caguamas[p] || 0) + 1;
             show8LocoRound(jornadaActiva.currentRound);
-            syncCloud();
+            saveLocalData();
             showToast(`🍺 +1 para ${p}`);
         }
 
@@ -1676,8 +1391,8 @@
             if (!item) return;
             item.pf += pf; item.pc += pc; item.diff = item.pf - item.pc;
             if (pf > pc) { item.w++; item.pts += 3; }
-            else if (pf < pc) { item.l++; }
-            else { item.d++; item.pts += 1; }
+            else if (pf < pc) { item.d++; item.pts += 1; }
+            else { item.l++; }
         }
 
         function nextRound8Loco() {
@@ -1686,18 +1401,18 @@
             } else showToast("Última ronda completada");
         }
 
-        async function agregarRondaExtra8Loco() {
+        function agregarRondaExtra8Loco() {
             const extra = generarCalendario8Loco(jornadaActiva.convocados);
             jornadaActiva.rounds.push(extra[0]);
-            await syncCloud();
+            saveLocalData();
             show8LocoRound(jornadaActiva.rounds.length);
             showToast("Ronda extra agregada");
         }
 
-        async function finalizarJornada8LocoOficial() {
-            if (confirm("¿Finalizar jornada de 8 Loco y guardar en la nube?")) {
+        function finalizarJornada8LocoOficial() {
+            if (confirm("¿Finalizar jornada de 8 Loco?")) {
                 jornadaActiva.finalizada = true;
-                await syncCloud();
+                saveLocalData();
                 backToLigaDetalle();
             }
         }
@@ -1717,6 +1432,16 @@
             txt += `*Patrocinado por:* ${sponsorConfig.names}\n`;
 
             window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+
+        function showToast(msg, type="info") {
+            const t = document.getElementById("toast");
+            t.textContent = msg;
+            t.style.background = type === "error" ? "#e74c3c" : "var(--padel-dark)";
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 2200);
         }
     </script>
 </body>

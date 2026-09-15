@@ -160,7 +160,6 @@
                     <img src="img/patrocinador_principal.png" alt="SB TOTAL PADEL" class="sponsor-main-logo" onerror="this.style.display='none'">
                 </a>
             </div>
-            <!-- Engranaje con candado de acceso protegido -->
             <button class="btn-gear-admin" onclick="solicitarAccesoAdmin()" title="Acceso Administrador">
                 <i class="fas fa-lock"></i>
             </button>
@@ -204,7 +203,7 @@
             </div>
         </div>
 
-        <!-- MODAL DE AUTENTICACIÓN ADMIN (BLINDADO) -->
+        <!-- MODAL DE AUTENTICACIÓN ADMIN -->
         <div id="modalAuthAdmin" class="modal">
             <div class="modal-content" style="max-width:340px; text-align:center;">
                 <div style="font-size:2rem; color:var(--padel-blue); margin-bottom:8px;"><i class="fas fa-shield-alt"></i></div>
@@ -218,7 +217,7 @@
             </div>
         </div>
 
-        <!-- PANEL DE ADMINISTRACIÓN / ENLACES (SOLO ACCESIBLE CON PIN) -->
+        <!-- PANEL DE ADMINISTRACIÓN / ENLACES -->
         <div id="viewAdmin" class="card hidden">
             <div class="card-header">
                 <span><i class="fas fa-lock-open"></i> Panel de Patrocinadores (Global)</span>
@@ -250,7 +249,7 @@
                 <div class="mode-icon-circle"><i class="fas fa-dice"></i></div>
                 <div>
                     <div class="mode-info-title">Modo 8 Loco / Americano</div>
-                    <div class="mode-info-sub">Partidos por parejas rotativas o fijas.</div>
+                    <div class="mode-info-sub">Partidos por parejas rotativas sin repetir compañero.</div>
                 </div>
             </div>
 
@@ -390,7 +389,6 @@
     <div id="toast" class="toast">Notificación</div>
 
     <script>
-        // CONFIGURACIÓN DE SEGURIDAD Y FIREBASE
         const CLOUD_DB_URL = "https://padel-pro-4c4d7-default-rtdb.firebaseio.com/sponsors.json";
         const MASTER_ADMIN_PIN = "lopl1984";
 
@@ -404,16 +402,17 @@
             banner6Url: "https://instagram.com"
         };
 
+        // PADRÓN LIMPIO POR DEFECTO
         function getUserData() { 
-            return JSON.parse(localStorage.getItem("11padel_app_data")) || { 
-                jugadores: ["Pepe moreno", "GERARDO ÁLVAREZ", "Miguel", "Andre", "Luciano", "Chuleta", "Javier", "Joselin"], 
-                ligasAmericano: [], 
-                ligasPozo: [] 
-            }; 
+            let d = JSON.parse(localStorage.getItem("11padel_app_data"));
+            if (!d) {
+                d = { jugadores: [], ligasAmericano: [], ligasPozo: [] };
+                localStorage.setItem("11padel_app_data", JSON.stringify(d));
+            }
+            return d;
         }
         function saveUserData(d) { localStorage.setItem("11padel_app_data", JSON.stringify(d)); }
 
-        // NORMALIZACIÓN DE ENLACES
         function normalizarUrl(url) {
             if (!url || url.trim() === "" || url === "#") return "https://instagram.com";
             let clean = url.trim();
@@ -423,7 +422,6 @@
             return clean;
         }
 
-        // ASIGNACIÓN NATIVA DE ENLACES (FUNCIONA SIEMPRE EN CUALQUIER NAVEGADOR)
         function aplicarEnlaces() {
             const main = document.getElementById("sponsorMainLink");
             if (main) main.href = normalizarUrl(sponsorConfig.mainUrl);
@@ -434,7 +432,6 @@
             }
         }
 
-        // DESCARGA DESDE FIREBASE AL ABRIR LA APP
         async function sincronizarEnlacesDesdeLaNube() {
             try {
                 const res = await fetch(CLOUD_DB_URL);
@@ -451,7 +448,7 @@
             }
         }
 
-        // CONTROL DE ACCESO ADMIN PROTEGIDO
+        // CONTROL ADMIN CON PIN
         function solicitarAccesoAdmin() {
             document.getElementById("inputMasterPinPrompt").value = "";
             document.getElementById("modalAuthAdmin").classList.add("active");
@@ -486,7 +483,6 @@
             document.getElementById("viewAdmin").classList.add("hidden");
         }
 
-        // GUARDAR CAMBIOS Y TRANSMITIR A LA NUBE
         async function guardarEnlacesEnFirebase() {
             sponsorConfig.mainUrl = document.getElementById("adminMainSponsorUrl").value.trim() || "https://instagram.com/sbtotalpadel";
             sponsorConfig.banner1Url = document.getElementById("adminBanner1Url").value.trim() || "https://instagram.com";
@@ -495,7 +491,7 @@
             sponsorConfig.banner4Url = document.getElementById("adminBanner4Url").value.trim() || "https://instagram.com";
             sponsorConfig.banner5Url = document.getElementById("adminBanner5Url").value.trim() || "https://instagram.com";
             sponsorConfig.banner6Url = document.getElementById("adminBanner6Url").value.trim() || "https://instagram.com";
-            sponsorConfig.adminPass = MASTER_ADMIN_PIN; // Firma que autoriza en Firebase Rules
+            sponsorConfig.adminPass = MASTER_ADMIN_PIN;
 
             localStorage.setItem("11padel_sponsor_config", JSON.stringify(sponsorConfig));
             aplicarEnlaces();
@@ -516,7 +512,7 @@
             cerrarPanelAdmin();
         }
 
-        // CONTROL DE JUEGOS Y MODOS
+        // CONTROL DE MODOS
         let modoSeleccionado = null;
         function entrarModo(m) {
             modoSeleccionado = m;
@@ -573,22 +569,48 @@
             }
         }
 
+        // PADRÓN: AGREGAR Y BORRAR
         function agregarJugadorPadron() {
-            const inp = document.getElementById("inputNuevoJugador"); const nom = inp.value.trim();
-            if (!nom) return; const d = getUserData();
-            if (d.jugadores.includes(nom)) return showToast("Ya registrado", "error");
-            d.jugadores.push(nom); saveUserData(d); inp.value = ""; renderPadron();
+            const inp = document.getElementById("inputNuevoJugador"); 
+            const nom = inp.value.trim();
+            if (!nom) return; 
+            const d = getUserData();
+            if (d.jugadores.includes(nom)) return showToast("Jugador ya registrado", "error");
+            d.jugadores.push(nom); 
+            saveUserData(d); 
+            inp.value = ""; 
+            renderPadron();
+            showToast("Jugador agregado");
         }
+
+        function borrarJugadorPadron(idx) {
+            const d = getUserData();
+            const eliminado = d.jugadores[idx];
+            if (confirm(`¿Eliminar a "${eliminado}" del padrón?`)) {
+                d.jugadores.splice(idx, 1);
+                saveUserData(d);
+                renderPadron();
+                showToast("Jugador eliminado");
+            }
+        }
+
         function renderPadron() {
-            const d = getUserData(); const cont = document.getElementById("listaJugadoresPadron");
+            const d = getUserData(); 
+            const cont = document.getElementById("listaJugadoresPadron");
             cont.innerHTML = "";
-            d.jugadores.forEach(j => {
-                cont.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #cbd5e1;">
-                    <span style="font-weight:600;">${j}</span><button class="btn btn-sm btn-danger" onclick="d.jugadores=d.jugadores.filter(x=>x!=='${j}'); saveUserData(d); renderPadron();">🗑</button>
+            if (d.jugadores.length === 0) {
+                cont.innerHTML = "<p style='color:gray; font-size:0.85rem; padding:12px; text-align:center;'>No hay jugadores registrados. Agrega uno nuevo arriba.</p>";
+                return;
+            }
+            d.jugadores.forEach((j, index) => {
+                cont.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #cbd5e1;">
+                    <span style="font-weight:600;">${j}</span>
+                    <button class="btn btn-sm btn-danger" onclick="borrarJugadorPadron(${index})"><i class="fas fa-trash"></i></button>
                 </div>`;
             });
         }
 
+        // DETALLE DE LIGA
         let ligaActiva = null;
         function abrirLigaDetalle(id) {
             const d = getUserData();
@@ -681,6 +703,7 @@
             saveUserData(d);
         }
 
+        // CONVOCATORIA
         let convocadosSeleccionados = [];
         function abrirModalNuevaJornada() {
             document.getElementById("jornadaNombreInput").value = `Jornada ${ligaActiva.jornadas.length + 1}`;
@@ -708,9 +731,69 @@
             else convocadosSeleccionados.push(nom);
             renderPills();
         }
+
+        // ALGORITMO ROUND-ROBIN AFINADO: N-1 RONDAS Y COMPAÑEROS ÚNICOS
+        function generarRondas8Loco(players) {
+            let pool = [...players];
+            const n = pool.length;
+            
+            // Si la cantidad es impar, se agrega un descanso rotativo ("BYE")
+            const isOdd = (n % 2 !== 0);
+            if (isOdd) pool.push("BYE");
+
+            // Rondas exactas: siempre N-1 compañeros únicos por jugador
+            const totalRondas = isOdd ? (n - 1) : (n - 1);
+            const numPistas = Math.floor(n / 4);
+            const r = [];
+
+            let rotation = [...pool];
+
+            for (let round = 0; round < totalRondas; round++) {
+                const parejasRonda = [];
+                const descansan = [];
+
+                // Generación de parejas usando el sistema rotativo de Berger
+                for (let i = 0; i < rotation.length / 2; i++) {
+                    const pA = rotation[i];
+                    const pB = rotation[rotation.length - 1 - i];
+
+                    if (pA === "BYE") {
+                        descansan.push(pB);
+                    } else if (pB === "BYE") {
+                        descansan.push(pA);
+                    } else {
+                        parejasRonda.push([pA, pB]);
+                    }
+                }
+
+                // Asignación a pistas
+                const matches = [];
+                let courtCount = 0;
+                for (let p = 0; p + 1 < parejasRonda.length && courtCount < numPistas; p += 2) {
+                    matches.push({
+                        p1: parejasRonda[p],
+                        p2: parejasRonda[p + 1],
+                        score1: 0,
+                        score2: 0
+                    });
+                    courtCount++;
+                }
+
+                r.push({ matches });
+
+                // Rotación circular fija en el índice 0
+                const fixed = rotation[0];
+                const rest = rotation.slice(1);
+                rest.unshift(rest.pop());
+                rotation = [fixed, ...rest];
+            }
+
+            return r;
+        }
+
         function iniciarJornadaConfirmada() {
             const nom = document.getElementById("jornadaNombreInput").value.trim() || "Jornada";
-            if (convocadosSeleccionados.length < 2) return showToast("Mínimo 2 jugadores", "error");
+            if (convocadosSeleccionados.length < 4) return showToast("Mínimo 4 jugadores para el modo", "error");
             let j = null;
             if (modoSeleccionado === 'pozo') {
                 const r1 = {}; convocadosSeleccionados.forEach(p => r1[p] = 0);
@@ -744,6 +827,7 @@
             abrirLigaDetalle(ligaActiva.id);
         }
 
+        // POZO LIVE
         function renderPozoNav() {
             const cont = document.getElementById("pozoRoundsNav"); cont.innerHTML = "";
             for (let i=1; i<=jornadaActiva.rondas.length; i++) {
@@ -783,20 +867,7 @@
             window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
         }
 
-        function generarRondas8Loco(players) {
-            const courts = Math.floor(players.length / 4);
-            const r = [];
-            for (let round=0; round<players.length-1; round++) {
-                const matches = [];
-                for (let c=0; c<courts; c++) {
-                    const p1 = [players[(round + c*4)%players.length], players[(round + c*4 + 1)%players.length]];
-                    const p2 = [players[(round + c*4 + 2)%players.length], players[(round + c*4 + 3)%players.length]];
-                    matches.push({ p1, p2, score1: 0, score2: 0 });
-                }
-                r.push({ matches });
-            }
-            return r;
-        }
+        // 8 LOCO LIVE
         function render8LocoNav() {
             const cont = document.getElementById("amRoundsNav"); cont.innerHTML = "";
             for (let i=1; i<=jornadaActiva.rounds.length; i++) {
@@ -849,7 +920,6 @@
         }
         function closeModal(id) { document.getElementById(id).classList.remove("active"); }
 
-        // INICIALIZACIÓN
         document.addEventListener("DOMContentLoaded", () => {
             aplicarEnlaces();
             sincronizarEnlacesDesdeLaNube();

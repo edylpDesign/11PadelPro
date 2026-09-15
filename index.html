@@ -141,6 +141,7 @@
             overflow: hidden;
             position: relative;
             box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+            cursor: pointer;
         }
         .sponsor-box-btn:active { transform: scale(0.96); }
         .sponsor-btn-img {
@@ -245,7 +246,7 @@
         <header>
             <div class="brand-logos-zone">
                 <img src="img/logo_11padel.png" alt="11Padel Point Pro" class="logo-app-img" onerror="this.style.display='none'">
-                <a href="#" target="_blank" class="sponsor-main-badge-link" id="sponsorMainLink" title="SB TOTAL PADEL">
+                <a href="javascript:void(0)" class="sponsor-main-badge-link" id="sponsorMainLink" title="SB TOTAL PADEL">
                     <img src="img/patrocinador_principal.png" alt="SB TOTAL PADEL" class="sponsor-main-logo" onerror="this.style.display='none'">
                 </a>
             </div>
@@ -261,27 +262,27 @@
             </div>
             
             <div class="sponsors-grid-layout">
-                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBanner1">
+                <a href="javascript:void(0)" class="sponsor-box-btn" id="linkBanner1">
                     <img src="img/banner_patrocinador1.png" alt="Sponsor 1" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 1</div>
                 </a>
-                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBanner2">
+                <a href="javascript:void(0)" class="sponsor-box-btn" id="linkBanner2">
                     <img src="img/banner_patrocinador2.png" alt="Sponsor 2" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 2</div>
                 </a>
-                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBanner3">
+                <a href="javascript:void(0)" class="sponsor-box-btn" id="linkBanner3">
                     <img src="img/banner_patrocinador3.png" alt="Sponsor 3" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 3</div>
                 </a>
-                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBanner4">
+                <a href="javascript:void(0)" class="sponsor-box-btn" id="linkBanner4">
                     <img src="img/banner_patrocinador4.png" alt="Sponsor 4" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 4</div>
                 </a>
-                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBanner5">
+                <a href="javascript:void(0)" class="sponsor-box-btn" id="linkBanner5">
                     <img src="img/banner_patrocinador5.png" alt="Sponsor 5" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 5</div>
                 </a>
-                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBanner6">
+                <a href="javascript:void(0)" class="sponsor-box-btn" id="linkBanner6">
                     <img src="img/banner_patrocinador6.png" alt="Sponsor 6" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 6</div>
                 </a>
@@ -308,12 +309,12 @@
             <input type="url" id="adminMainSponsorUrl" placeholder="https://instagram.com/sbtotalpadel">
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:6px;">
-                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 1:</label><input type="url" id="adminBanner1Url" placeholder="URL 1"></div>
-                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 2:</label><input type="url" id="adminBanner2Url" placeholder="URL 2"></div>
-                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 3:</label><input type="url" id="adminBanner3Url" placeholder="URL 3"></div>
-                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 4:</label><input type="url" id="adminBanner4Url" placeholder="URL 4"></div>
-                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 5:</label><input type="url" id="adminBanner5Url" placeholder="URL 5"></div>
-                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 6:</label><input type="url" id="adminBanner6Url" placeholder="URL 6"></div>
+                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 1:</label><input type="url" id="adminBanner1Url" placeholder="https://..."></div>
+                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 2:</label><input type="url" id="adminBanner2Url" placeholder="https://..."></div>
+                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 3:</label><input type="url" id="adminBanner3Url" placeholder="https://..."></div>
+                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 4:</label><input type="url" id="adminBanner4Url" placeholder="https://..."></div>
+                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 5:</label><input type="url" id="adminBanner5Url" placeholder="https://..."></div>
+                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 6:</label><input type="url" id="adminBanner6Url" placeholder="https://..."></div>
             </div>
 
             <button class="btn btn-sm btn-green" style="width:100%; margin-top:14px;" onclick="guardarEnlacesProtegidos()">Guardar y Sincronizar Globalmente</button>
@@ -467,11 +468,11 @@
     <div id="toast" class="toast">Notificación</div>
 
     <script>
-        // ENDPOINT CENTRAL EN LA NUBE
-        const CLOUD_DB_URL = "https://padel-point-default-rtdb.firebaseio.com/sponsors.json";
-
-        // CONTRASEÑA MAESTRA POR DEFECTO (Cámbiala por la tuya)
-        const MASTER_ADMIN_PIN = "TuClaveMaestra2026";
+        // URL DE TU PROYECTO REALTIME DATABASE
+        const CLOUD_DB_URL = "https://padel-pro-4c4d7-default-rtdb.firebaseio.com/sponsors.json";
+        
+        // TU CLAVE MAESTRA ACTUALIZADA
+        const MASTER_ADMIN_PIN = "lopl1984";
 
         let sponsorConfig = JSON.parse(localStorage.getItem("11padel_sponsor_config")) || {
             mainUrl: "https://instagram.com/sbtotalpadel",
@@ -492,7 +493,24 @@
         }
         function saveUserData(d) { localStorage.setItem("11padel_app_data", JSON.stringify(d)); }
 
-        // DESCARGA LIBRE (Cualquiera puede leer para que carguen los patrocinadores)
+        function normalizarUrl(url) {
+            if (!url || url === "#" || url === "javascript:void(0)" || url.trim() === "") return "";
+            let clean = url.trim();
+            if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
+                clean = "https://" + clean;
+            }
+            return clean;
+        }
+
+        function abrirEnlaceExterno(url) {
+            const destino = normalizarUrl(url);
+            if (destino) {
+                window.open(destino, '_blank', 'noopener,noreferrer');
+            } else {
+                showToast("Enlace aún no configurado", "error");
+            }
+        }
+
         async function sincronizarEnlacesDesdeLaNube() {
             try {
                 const res = await fetch(CLOUD_DB_URL);
@@ -510,31 +528,41 @@
         }
 
         function aplicarEnlaces() {
-            document.getElementById("sponsorMainLink").href = sponsorConfig.mainUrl;
-            document.getElementById("linkBanner1").href = sponsorConfig.banner1Url;
-            document.getElementById("linkBanner2").href = sponsorConfig.banner2Url;
-            document.getElementById("linkBanner3").href = sponsorConfig.banner3Url;
-            document.getElementById("linkBanner4").href = sponsorConfig.banner4Url;
-            document.getElementById("linkBanner5").href = sponsorConfig.banner5Url;
-            document.getElementById("linkBanner6").href = sponsorConfig.banner6Url;
+            const mainLnk = document.getElementById("sponsorMainLink");
+            if (mainLnk) {
+                mainLnk.onclick = (e) => { 
+                    e.preventDefault(); 
+                    abrirEnlaceExterno(sponsorConfig.mainUrl); 
+                };
+            }
+
+            for (let i = 1; i <= 6; i++) {
+                const btn = document.getElementById(`linkBanner${i}`);
+                if (btn) {
+                    const urlTarget = sponsorConfig[`banner${i}Url`];
+                    btn.onclick = (e) => { 
+                        e.preventDefault(); 
+                        abrirEnlaceExterno(urlTarget); 
+                    };
+                }
+            }
         }
 
         function toggleAdminPanel() {
             const adminCard = document.getElementById("viewAdmin");
             adminCard.classList.toggle("hidden");
             if (!adminCard.classList.contains("hidden")) {
-                document.getElementById("adminMainSponsorUrl").value = sponsorConfig.mainUrl;
-                document.getElementById("adminBanner1Url").value = sponsorConfig.banner1Url;
-                document.getElementById("adminBanner2Url").value = sponsorConfig.banner2Url;
-                document.getElementById("adminBanner3Url").value = sponsorConfig.banner3Url;
-                document.getElementById("adminBanner4Url").value = sponsorConfig.banner4Url;
-                document.getElementById("adminBanner5Url").value = sponsorConfig.banner5Url;
-                document.getElementById("adminBanner6Url").value = sponsorConfig.banner6Url;
+                document.getElementById("adminMainSponsorUrl").value = sponsorConfig.mainUrl || "";
+                document.getElementById("adminBanner1Url").value = sponsorConfig.banner1Url || "";
+                document.getElementById("adminBanner2Url").value = sponsorConfig.banner2Url || "";
+                document.getElementById("adminBanner3Url").value = sponsorConfig.banner3Url || "";
+                document.getElementById("adminBanner4Url").value = sponsorConfig.banner4Url || "";
+                document.getElementById("adminBanner5Url").value = sponsorConfig.banner5Url || "";
+                document.getElementById("adminBanner6Url").value = sponsorConfig.banner6Url || "";
                 document.getElementById("adminSecurityKey").value = "";
             }
         }
 
-        // ESCRITURA PROTEGIDA CON VALIDACIÓN DE SEGURIDAD
         async function guardarEnlacesProtegidos() {
             const inputPin = document.getElementById("adminSecurityKey").value.trim();
 
@@ -543,7 +571,7 @@
             }
 
             if (inputPin !== MASTER_ADMIN_PIN) {
-                return showToast("Clave de administrador incorrecta. Acceso denegado.", "error");
+                return showToast("Clave de administrador incorrecta", "error");
             }
 
             sponsorConfig.mainUrl = document.getElementById("adminMainSponsorUrl").value.trim() || "https://instagram.com";
@@ -553,30 +581,28 @@
             sponsorConfig.banner4Url = document.getElementById("adminBanner4Url").value.trim() || "https://instagram.com";
             sponsorConfig.banner5Url = document.getElementById("adminBanner5Url").value.trim() || "https://instagram.com";
             sponsorConfig.banner6Url = document.getElementById("adminBanner6Url").value.trim() || "https://instagram.com";
-            sponsorConfig.adminPass = inputPin; // Firma que valida la regla de seguridad
+            sponsorConfig.adminPass = inputPin;
 
             localStorage.setItem("11padel_sponsor_config", JSON.stringify(sponsorConfig));
             aplicarEnlaces();
 
             try {
-                showToast("Sincronizando en la nube con seguridad...");
+                showToast("Sincronizando en la nube...");
                 const response = await fetch(CLOUD_DB_URL, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(sponsorConfig)
                 });
 
-                if (!response.ok) {
-                    throw new Error("Rechazado por el servidor");
-                }
-                showToast("¡Enlaces actualizados y protegidos globalmente!");
+                if (!response.ok) throw new Error("Rechazo de base de datos");
+                showToast("¡Enlaces actualizados para todos!");
             } catch (e) {
-                showToast("Error al sincronizar: rechazo de permisos en el servidor.");
+                showToast("Guardado localmente.");
             }
             toggleAdminPanel();
         }
 
-        // LÓGICA DE JUEGOS Y LIGAS
+        // CONTROL DE JUEGOS Y MODOS
         let modoSeleccionado = null;
         function entrarModo(m) {
             modoSeleccionado = m;

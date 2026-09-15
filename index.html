@@ -666,7 +666,7 @@
             </div>
         </div>
 
-        <!-- JORNADA EN VIVO: 8 LOCO (CON TABLA COMPLETA) -->
+        <!-- JORNADA EN VIVO: 8 LOCO -->
         <div id="viewJornada8LocoVivo" class="hidden">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                 <button class="btn btn-sm btn-dark" onclick="backToLigaDetalle()"><i class="fas fa-arrow-left"></i></button>
@@ -677,7 +677,6 @@
                 <button class="btn btn-sm btn-wa" onclick="compartirWhatsApp8Loco()"><i class="fab fa-whatsapp"></i></button>
             </div>
 
-            <!-- TABLA GENERAL COMPLETA EN VIVO -->
             <div class="card" style="margin-bottom:12px;">
                 <div class="card-header" style="font-size:0.95rem;">
                     <span>📊 Tabla de Posiciones de la Jornada</span>
@@ -693,7 +692,7 @@
                                     <th>PG</th>
                                     <th>PE</th>
                                     <th>PP</th>
-                                    <th style="background:#1e8449;">Pts Totales</th>
+                                    <th style="background:#1e8449; color:white;">Pts Totales</th>
                                     <th>+/- Dif</th>
                                     <th>🍺</th>
                                 </tr>
@@ -760,16 +759,17 @@
         </div>
     </div>
 
+    <!-- MODAL NUEVO CLIENTE (ADMIN) -->
     <div id="modalNuevoCliente" class="modal">
         <div class="modal-content">
             <h3 style="margin-bottom:12px; color:var(--padel-blue);">Alta de Nuevo Cliente</h3>
             <div style="margin-bottom:10px;">
-                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Correo</label>
+                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Correo Electrónico</label>
                 <input type="email" id="nuevoClienteEmail" placeholder="cliente@club.com">
             </div>
             <div style="margin-bottom:10px;">
-                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Contraseña</label>
-                <input type="password" id="nuevoClientePass" value="123456">
+                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Contraseña (Mínimo 6 caracteres)</label>
+                <input type="password" id="nuevoClientePass" placeholder="Ej: ClubPadel2026">
             </div>
             <div style="margin-bottom:10px;">
                 <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Nombre del Club</label>
@@ -777,7 +777,7 @@
             </div>
             <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
                 <button class="btn btn-dark btn-sm" onclick="closeModal('modalNuevoCliente')">Cancelar</button>
-                <button class="btn btn-green btn-sm" onclick="guardarNuevoClienteFirebase()">Guardar en Nube</button>
+                <button class="btn btn-green btn-sm" id="btnSubmitNuevoCliente" onclick="guardarNuevoClienteFirebase()">Guardar en Nube</button>
             </div>
         </div>
     </div>
@@ -785,9 +785,6 @@
     <div id="toast" class="toast">Notificación</div>
 
     <script>
-        // =========================================================================
-        // CONFIGURACIÓN DE FIREBASE (TUS CLAVES INTEGRADAS)
-        // =========================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyA-x62LGZKHJcSY3ry0ZimP6vIAwSniU-4",
             authDomain: "padel-pro-4c4d7.firebaseapp.com",
@@ -801,7 +798,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Tu correo maestro administrador
         const ADMIN_EMAIL = "admin@11padel.com";
 
         let currentUser = null;
@@ -989,7 +985,7 @@
         async function actualizarPasswordEnNube(uid, nuevaPass) {
             if (!nuevaPass.trim()) return showToast("La clave no puede estar vacía", "error");
             await db.collection("users").doc(uid).set({ currentPassword: nuevaPass.trim() }, { merge: true });
-            showToast("Contraseña registrada");
+            showToast("Contraseña anotada");
         }
 
         async function actualizarFechaVencimientoEnNube(uid, nuevaFecha) {
@@ -1024,31 +1020,64 @@
 
         function abrirModalNuevoCliente() { document.getElementById("modalNuevoCliente").classList.add("active"); }
 
+        // CREACIÓN AUTOMÁTICA EN AUTHENTICATION + FIRESTORE SIN CERRAR TU SESIÓN
         async function guardarNuevoClienteFirebase() {
             const email = document.getElementById("nuevoClienteEmail").value.trim().toLowerCase();
             const pass = document.getElementById("nuevoClientePass").value.trim();
             const clubName = document.getElementById("nuevoClienteNombre").value.trim();
+            const btn = document.getElementById("btnSubmitNuevoCliente");
 
             if (!email || !pass || !clubName) return showToast("Completa todos los datos", "error");
+            if (pass.length < 6) return showToast("Contraseña mínima de 6 caracteres", "error");
 
+            btn.disabled = true;
+            btn.textContent = "Creando cuenta...";
+
+            let secondaryApp = null;
             try {
-                const nuevoDocRef = db.collection("users").doc();
-                await nuevoDocRef.set({
+                // Instancia secundaria aislada para no desconectar al Administrador
+                const tempAppName = "creador_" + Date.now();
+                secondaryApp = firebase.initializeApp(firebaseConfig, tempAppName);
+                const secondaryAuth = secondaryApp.auth();
+
+                // 1. Crear usuario real en Firebase Authentication
+                const userCred = await secondaryAuth.createUserWithEmailAndPassword(email, pass);
+                const newUid = userCred.user.uid;
+
+                // 2. Crear documento de club en Firestore con fecha de vencimiento por defecto a 30 días
+                let fechaVencimiento = new Date();
+                fechaVencimiento.setDate(fechaVencimiento.getDate() + 30);
+
+                await db.collection("users").doc(newUid).set({
                     email: email,
                     currentPassword: pass,
                     clubName: clubName,
                     active: true,
-                    expireDate: "2026-12-31",
+                    expireDate: fechaVencimiento.toISOString().split("T")[0],
                     jugadores: ["Jugador 1", "Jugador 2", "Jugador 3", "Jugador 4"],
                     ligasAmericano: [],
                     ligasPozo: []
                 });
 
+                // Cerrar y destruir la sesión temporal
+                await secondaryAuth.signOut();
+                await secondaryApp.delete();
+
                 closeModal("modalNuevoCliente");
+                document.getElementById("nuevoClienteEmail").value = "";
+                document.getElementById("nuevoClientePass").value = "";
+                document.getElementById("nuevoClienteNombre").value = "";
+
                 cargarListaClientesAdmin();
-                showToast("Cliente registrado en la nube");
+                showToast("¡Cliente creado con acceso directo!");
             } catch (err) {
-                showToast("Error al guardar cliente: " + err.message, "error");
+                if (secondaryApp) {
+                    try { await secondaryApp.delete(); } catch(e) {}
+                }
+                showToast("Error al crear cliente: " + err.message, "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Guardar en Nube";
             }
         }
 

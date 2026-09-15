@@ -93,7 +93,7 @@
             cursor: pointer; font-size: 1.1rem;
         }
 
-        /* BANNER PATROCINADORES (200x80 px) */
+        /* BANNER PATROCINADORES: 3 FILAS DE 2 */
         .sponsors-card-container {
             background: white; border-radius: 16px; padding: 12px;
             margin-bottom: 12px; box-shadow: var(--padel-shadow); border: 1px solid rgba(0,0,0,0.06); text-align: center;
@@ -104,35 +104,38 @@
             display: flex; align-items: center; justify-content: center; gap: 4px;
         }
         .sponsors-grid-layout {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
         }
 
         .sponsor-box-btn {
             background: #111827;
             border: 1px solid #cbd5e1;
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 0 !important;
-            width: 200px !important;
-            height: 80px !important;
-            min-width: 200px;
+            height: 52px !important;
+            width: 100% !important;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
             cursor: pointer;
         }
         .sponsor-box-btn:active { transform: scale(0.96); }
-        .sponsor-btn-img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block; }
+        .sponsor-btn-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            display: block;
+        }
         .sponsor-btn-fallback { font-size: 0.72rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 4px; }
         .sponsors-footer-text { font-size: 0.82rem; font-weight: 800; color: var(--padel-orange); margin-top: 10px; }
 
-        /* CARRUSEL DE TORNEOS (MEDIDAS 200 x 355 px) */
+        /* CARRUSEL DE TORNEOS (200 x 355 px) */
         .tournaments-container {
             background: white; border-radius: 16px; padding: 12px;
             margin-bottom: 14px; box-shadow: var(--padel-shadow); border: 1px solid rgba(0,0,0,0.06);
@@ -368,7 +371,7 @@
             </button>
         </header>
 
-        <!-- BANNER DE PATROCINADORES (200x80 px) -->
+        <!-- BANNER DE PATROCINADORES (3 FILAS DE 2) -->
         <div class="sponsors-card-container">
             <div class="sponsors-label-top">
                 <i class="fas fa-ad"></i> PATROCINADORES OFICIALES • TOCA CADA UNO PARA VISITAR
@@ -413,7 +416,7 @@
                 <small style="color:var(--padel-gray); font-size:0.68rem; font-weight:bold;">Desliza ➔</small>
             </div>
             <div class="tournaments-carousel" id="tournamentsGridContainer">
-                <!-- 4 flyers dinámicos -->
+                <!-- Se inyectan 4 flyers dinámicamente -->
             </div>
         </div>
 
@@ -723,7 +726,6 @@
             renderTorneosPublicos();
         }
 
-        // RENDER DE CARRUSEL DE 4 TORNEOS
         function renderTorneosPublicos() {
             const grid = document.getElementById("tournamentsGridContainer");
             if (!grid) return;

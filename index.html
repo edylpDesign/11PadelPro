@@ -10,13 +10,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { 
-            getAuth, 
-            signInWithEmailAndPassword, 
-            signOut, 
-            onAuthStateChanged,
-            createUserWithEmailAndPassword 
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { 
             getFirestore, 
             doc, 
             setDoc, 
@@ -24,7 +17,9 @@
             getDocs, 
             collection, 
             updateDoc, 
-            deleteDoc 
+            deleteDoc,
+            query,
+            where
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -37,31 +32,22 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Instancia para registrar usuarios clientes sin tumbar la sesión del admin
-        const secondaryApp = initializeApp(firebaseConfig, "SecondaryAuthBridge");
-        const secondaryAuth = getAuth(secondaryApp);
-
         window.fb = {
-            auth,
             db,
-            secondaryAuth,
-            signInWithEmailAndPassword,
-            signOut,
-            onAuthStateChanged,
-            createUserWithEmailAndPassword,
             doc,
             setDoc,
             getDoc,
             getDocs,
             collection,
             updateDoc,
-            deleteDoc
+            deleteDoc,
+            query,
+            where
         };
 
-        window.initFirebaseBridge();
+        window.initCloudSystem();
     </script>
 
     <style>
@@ -224,7 +210,6 @@
             box-shadow: 0 3px 6px rgba(0,0,0,0.1);
         }
         .btn:active { transform: scale(0.98); }
-        .btn-primary { background: linear-gradient(135deg, var(--padel-blue) 0%, var(--padel-purple) 100%); color: white; }
         .btn-green { background: linear-gradient(135deg, var(--padel-green) 0%, #1e8449 100%); color: white; }
         .btn-danger { background: #e74c3c; color: white; }
         .btn-wa { background: #25d366; color: white; }
@@ -295,7 +280,6 @@
             width: 50px; height: 34px; background: white; border: 2px solid var(--padel-light-gray);
             color: var(--padel-blue); font-weight: 800; font-size: 1.1rem; text-align: center; border-radius: 8px;
         }
-
         .caguama-tag {
             background: #fef3c7; color: #b45309; border: 1px solid #f59e0b; border-radius: 14px;
             padding: 3px 8px; font-size: 0.78rem; font-weight: bold; cursor: pointer; margin-top: 4px; display: inline-flex; align-items: center; gap: 3px;
@@ -306,8 +290,6 @@
         th { background: linear-gradient(135deg, var(--padel-blue) 0%, var(--padel-green) 100%); color: white; padding: 10px 8px; font-weight: 700; text-align: center; }
         td { padding: 9px 8px; border-bottom: 1px solid var(--padel-light-gray); text-align: center; white-space: nowrap; font-weight: 600; }
         .pos-1 { background: rgba(255, 215, 0, 0.2) !important; font-weight: bold; }
-        .pos-2 { background: rgba(192, 192, 192, 0.15) !important; }
-        .pos-3 { background: rgba(205, 127, 50, 0.15) !important; }
 
         input, select { width: 100%; padding: 10px 14px; border: 2px solid var(--padel-light-gray); border-radius: 10px; font-size: 0.9rem; outline: none; }
         input:focus { border-color: var(--padel-green); }
@@ -355,34 +337,30 @@
         <!-- BANNER DE 3 PATROCINADORES -->
         <div class="sponsors-banner-wrapper hidden" id="sponsorsBannerBlock">
             <div class="sponsors-label"><i class="fas fa-ad"></i> Patrocinadores Oficiales • Toca cada uno para visitar</div>
-            
             <div class="sponsors-grid-3">
                 <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor1" title="Visitar Patrocinador 1">
                     <img src="img/banner_patrocinador1.png" alt="Sponsor 1" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-shield-alt"></i> Sponsor 1</div>
                 </a>
-
                 <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor2" title="Visitar Patrocinador 2">
                     <img src="img/banner_patrocinador2.png" alt="Sponsor 2" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-award"></i> Sponsor 2</div>
                 </a>
-
                 <a href="#" target="_blank" class="sponsor-box-btn" id="linkBannerSponsor3" title="Visitar Patrocinador 3">
                     <img src="img/banner_patrocinador3.png" alt="Sponsor 3" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-star"></i> Sponsor 3</div>
                 </a>
             </div>
-
             <div class="sponsors-text" id="sponsorsTextDisplay">Patrocinado por: 11Padel Oficial</div>
         </div>
 
-        <!-- LOGIN FIREBASE -->
+        <!-- LOGIN -->
         <div id="viewLogin" class="card">
             <div class="card-header"><i class="fas fa-lock"></i> Acceso Protegido de Club</div>
             <div class="card-body" style="max-width: 380px; margin: 0 auto;">
                 <div style="margin-bottom: 12px;">
                     <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Correo Electrónico</label>
-                    <input type="email" id="loginEmail" placeholder="correo@club.com">
+                    <input type="email" id="loginEmail" placeholder="cliente@club.com">
                 </div>
                 <div style="margin-bottom: 16px;">
                     <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Contraseña</label>
@@ -392,10 +370,10 @@
             </div>
         </div>
 
-        <!-- PANEL ADMIN: CLIENTES, CONTRASEÑA, FECHA MANUAL, +30D, BORRADO Y ENLACES (EN FIRESTORE) -->
+        <!-- PANEL ADMIN: CLIENTES, CONTRASEÑA, FECHA, +30D, BORRADO Y ENLACES (CLOUD) -->
         <div id="viewAdmin" class="card hidden">
             <div class="card-header">
-                <span><i class="fas fa-shield-alt"></i> Panel de Administración y Enlaces (Firebase)</span>
+                <span><i class="fas fa-shield-alt"></i> Panel de Administración y Enlaces (Cloud)</span>
                 <button class="btn btn-sm btn-dark" onclick="toggleAdminPanel()">Cerrar</button>
             </div>
             <div class="card-body">
@@ -432,7 +410,7 @@
 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <span style="font-size:0.85rem; font-weight:bold;">Clientes en Firebase</span>
-                    <button class="btn btn-sm btn-green" onclick="abrirModalNuevoCliente()">+ Cliente en Firebase</button>
+                    <button class="btn btn-sm btn-green" onclick="abrirModalNuevoCliente()">+ Cliente</button>
                 </div>
 
                 <div class="table-responsive">
@@ -678,7 +656,7 @@
                 <input type="email" id="nuevoClienteEmail" placeholder="cliente@club.com">
             </div>
             <div style="margin-bottom:10px;">
-                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Contraseña (mínimo 6 caracteres)</label>
+                <label style="font-size:0.8rem; font-weight:bold; color:var(--padel-gray);">Contraseña de Acceso</label>
                 <input type="text" id="nuevoClientePass" value="123456">
             </div>
             <div style="margin-bottom:10px;">
@@ -699,7 +677,7 @@
     <div id="toast" class="toast">Notificación</div>
 
     <script>
-        let currentAppUser = null;
+        let currentAppUser = JSON.parse(sessionStorage.getItem("11padel_active_user")) || null;
         let userData = { jugadores: [], ligasAmericano: [], ligasPozo: [] };
 
         let sponsorConfig = JSON.parse(localStorage.getItem("11padel_sponsor_config")) || {
@@ -710,102 +688,114 @@
             banner3Url: "https://instagram.com"
         };
 
-        // Puente con Firebase SDK
-        window.initFirebaseBridge = function() {
-            window.fb.onAuthStateChanged(window.fb.auth, async (user) => {
-                if (user) {
-                    try {
-                        const userDoc = await window.fb.getDoc(window.fb.doc(window.fb.db, "users", user.uid));
-                        if (userDoc.exists()) {
-                            currentAppUser = { uid: user.uid, email: user.email, ...userDoc.data() };
-                        } else {
-                            const esAdmin = user.email === "admin@11padel.com" || user.email.includes("admin");
-                            currentAppUser = {
-                                uid: user.uid,
-                                email: user.email,
-                                name: esAdmin ? "Admin Central" : "Club",
-                                isAdmin: esAdmin,
-                                active: true,
-                                expireDate: "2099-12-31"
-                            };
-                            await window.fb.setDoc(window.fb.doc(window.fb.db, "users", user.uid), currentAppUser);
-                        }
-
-                        // Verificar suscripción activa
-                        if (!currentAppUser.active && !currentAppUser.isAdmin) {
-                            showToast("Cuenta suspendida por falta de pago", "error");
-                            await window.fb.signOut(window.fb.auth);
-                            return;
-                        }
-
-                        // Verificar corte
-                        const hoy = new Date().toISOString().split("T")[0];
-                        if (!currentAppUser.isAdmin && currentAppUser.expireDate && currentAppUser.expireDate < hoy) {
-                            showToast("Suscripción vencida (" + currentAppUser.expireDate + ")", "error");
-                            await window.fb.signOut(window.fb.auth);
-                            return;
-                        }
-
-                        await cargarDatosClubCloud(user.uid);
-                        await cargarConfigPatrociniosCloud();
-                        loadAppUI();
-                    } catch (e) {
-                        console.error("Error en sesión:", e);
-                        showToast("Error de conexión a Firestore", "error");
-                    }
-                } else {
-                    currentAppUser = null;
-                    document.getElementById("userNavActions").classList.add("hidden");
-                    document.getElementById("btnAdminPanel").classList.add("hidden");
-                    document.getElementById("viewAdmin").classList.add("hidden");
-                    document.getElementById("viewHubModos").classList.add("hidden");
-                    document.getElementById("viewLigasModo").classList.add("hidden");
-                    document.getElementById("viewPadron").classList.add("hidden");
-                    document.getElementById("viewLigaDetalle").classList.add("hidden");
-                    document.getElementById("viewJornadaPozoVivo").classList.add("hidden");
-                    document.getElementById("viewJornada8LocoVivo").classList.add("hidden");
-                    document.getElementById("sponsorsBannerBlock").classList.add("hidden");
-                    document.getElementById("viewLogin").classList.remove("hidden");
-                }
-            });
+        window.initCloudSystem = async function() {
+            if (currentAppUser) {
+                await cargarDatosClubCloud(currentAppUser.email);
+                await cargarConfigPatrociniosCloud();
+                loadAppUI();
+            } else {
+                cerrarSesion();
+            }
         };
 
+        // INICIO DE SESIÓN CON FIRESTORE (INMEDIATO Y SIN BLOQUEOS DE AUTH)
         async function iniciarSesion() {
-            const emailInput = document.getElementById("loginEmail");
-            const passInput = document.getElementById("loginPass");
+            const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+            const pass = document.getElementById("loginPass").value.trim();
             const btn = document.getElementById("btnLoginAction");
-
-            const email = emailInput.value.trim().toLowerCase();
-            const pass = passInput.value.trim();
 
             if (!email || !pass) return showToast("Introduce correo y contraseña", "error");
 
             btn.disabled = true;
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Entrando...";
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Verificando...";
 
             try {
-                await window.fb.signInWithEmailAndPassword(window.fb.auth, email, pass);
-            } catch (err) {
-                console.error(err);
-                if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
-                    showToast("Credenciales incorrectas en Firebase Auth", "error");
-                } else {
-                    showToast("Error Firebase: " + err.message, "error");
+                // Si es el primer acceso de admin@11padel.com y aún no existe en Firestore, lo inicializa
+                if (email === "admin@11padel.com" && pass === "admin123") {
+                    const adminCheck = await window.fb.getDoc(window.fb.doc(window.fb.db, "users", "admin@11padel.com"));
+                    if (!adminCheck.exists()) {
+                        const adminMaster = {
+                            email: "admin@11padel.com",
+                            name: "Administrador Central",
+                            passwordRef: "admin123",
+                            isAdmin: true,
+                            active: true,
+                            expireDate: "2099-12-31"
+                        };
+                        await window.fb.setDoc(window.fb.doc(window.fb.db, "users", "admin@11padel.com"), adminMaster);
+                    }
                 }
-            } finally {
+
+                // Buscar documento del usuario en Firestore
+                const docSnap = await window.fb.getDoc(window.fb.doc(window.fb.db, "users", email));
+
+                if (!docSnap.exists()) {
+                    btn.disabled = false;
+                    btn.textContent = "Entrar a mi Club";
+                    return showToast("Club no registrado en Firebase", "error");
+                }
+
+                const userRecord = docSnap.data();
+
+                // Validar contraseña
+                if (userRecord.passwordRef !== pass) {
+                    btn.disabled = false;
+                    btn.textContent = "Entrar a mi Club";
+                    return showToast("Contraseña incorrecta", "error");
+                }
+
+                // Validar suspensión
+                if (!userRecord.isAdmin && !userRecord.active) {
+                    btn.disabled = false;
+                    btn.textContent = "Entrar a mi Club";
+                    return showToast("Cuenta suspendida por falta de pago", "error");
+                }
+
+                // Validar fecha de corte
+                const hoy = new Date().toISOString().split("T")[0];
+                if (!userRecord.isAdmin && userRecord.expireDate && userRecord.expireDate < hoy) {
+                    btn.disabled = false;
+                    btn.textContent = "Entrar a mi Club";
+                    return showToast("Suscripción vencida (" + userRecord.expireDate + ")", "error");
+                }
+
+                currentAppUser = userRecord;
+                sessionStorage.setItem("11padel_active_user", JSON.stringify(userRecord));
+
+                await cargarDatosClubCloud(userRecord.email);
+                await cargarConfigPatrociniosCloud();
+
                 btn.disabled = false;
                 btn.textContent = "Entrar a mi Club";
+                loadAppUI();
+
+            } catch (err) {
+                console.error(err);
+                btn.disabled = false;
+                btn.textContent = "Entrar a mi Club";
+                showToast("Error Firebase: " + err.message, "error");
             }
         }
 
-        async function cerrarSesion() {
-            await window.fb.signOut(window.fb.auth);
+        function cerrarSesion() {
+            sessionStorage.clear();
+            currentAppUser = null;
+            document.getElementById("userNavActions").classList.add("hidden");
+            document.getElementById("btnAdminPanel").classList.add("hidden");
+            document.getElementById("viewAdmin").classList.add("hidden");
+            document.getElementById("viewHubModos").classList.add("hidden");
+            document.getElementById("viewLigasModo").classList.add("hidden");
+            document.getElementById("viewPadron").classList.add("hidden");
+            document.getElementById("viewLigaDetalle").classList.add("hidden");
+            document.getElementById("viewJornadaPozoVivo").classList.add("hidden");
+            document.getElementById("viewJornada8LocoVivo").classList.add("hidden");
+            document.getElementById("sponsorsBannerBlock").classList.add("hidden");
+            document.getElementById("viewLogin").classList.remove("hidden");
         }
 
-        // Carga y sincronización de datos privados del club en Firestore
-        async function cargarDatosClubCloud(uid) {
+        async function cargarDatosClubCloud(email) {
             try {
-                const snap = await window.fb.getDoc(window.fb.doc(window.fb.db, "club_data", uid));
+                const snap = await window.fb.getDoc(window.fb.doc(window.fb.db, "club_data", email));
                 if (snap.exists()) {
                     userData = snap.data();
                 } else {
@@ -814,7 +804,7 @@
                         ligasAmericano: [],
                         ligasPozo: []
                     };
-                    await window.fb.setDoc(window.fb.doc(window.fb.db, "club_data", uid), userData);
+                    await window.fb.setDoc(window.fb.doc(window.fb.db, "club_data", email), userData);
                 }
             } catch (e) {
                 console.error("Error al cargar club_data:", e);
@@ -824,7 +814,7 @@
         async function syncCloud() {
             if (!currentAppUser) return;
             try {
-                await window.fb.setDoc(window.fb.doc(window.fb.db, "club_data", currentAppUser.uid), userData);
+                await window.fb.setDoc(window.fb.doc(window.fb.db, "club_data", currentAppUser.email), userData);
             } catch (e) {
                 console.error("Error al sincronizar:", e);
                 showToast("Error al guardar en la nube", "error");
@@ -891,7 +881,7 @@
             }
 
             aplicarConfiguracionPatrocinios();
-            showToast("Patrocinios sincronizados");
+            showToast("Patrocinios sincronizados en Cloud");
         }
 
         function aplicarConfiguracionPatrocinios() {
@@ -902,7 +892,6 @@
             document.getElementById("linkBannerSponsor3").href = sponsorConfig.banner3Url;
         }
 
-        // Panel Admin: Clientes en Firestore con contraseña guardada, fecha editable y +30d
         async function cargarClientesDesdeFirestore() {
             const tbody = document.getElementById("adminUsersTableBody");
             tbody.innerHTML = "<tr><td colspan='6'>Cargando clientes de Firebase...</td></tr>";
@@ -911,22 +900,22 @@
                 const querySnapshot = await window.fb.getDocs(window.fb.collection(window.fb.db, "users"));
                 tbody.innerHTML = "";
                 querySnapshot.forEach((docSnap) => {
-                    const u = { uid: docSnap.id, ...docSnap.data() };
+                    const u = docSnap.data();
                     tbody.innerHTML += `<tr>
                         <td>${u.email}</td>
                         <td>${u.name || 'Club'}</td>
                         <td>
-                            <input type="text" style="width:85px; text-align:center; padding:3px;" value="${u.passwordRef || '******'}" onchange="actualizarPasswordRef('${u.uid}', this.value)">
+                            <input type="text" style="width:85px; text-align:center; padding:3px;" value="${u.passwordRef || '******'}" onchange="actualizarPasswordRef('${u.email}', this.value)">
                         </td>
                         <td>
-                            <input type="date" style="width:auto; padding:3px;" value="${u.expireDate || '2026-12-31'}" onchange="actualizarVencimientoCliente('${u.uid}', this.value)">
+                            <input type="date" style="width:auto; padding:3px;" value="${u.expireDate || '2026-12-31'}" onchange="actualizarVencimientoCliente('${u.email}', this.value)">
                         </td>
                         <td>${u.active ? '🟢 Activo' : '🔴 Inactivo'}</td>
                         <td>
+                            <button class="btn btn-sm btn-dark" style="padding:4px 8px; font-size:0.75rem;" onclick="renovar30Dias('${u.email}', '${u.expireDate}')">+30d</button>
                             ${!u.isAdmin ? `
-                                <button class="btn btn-sm btn-dark" style="padding:4px 8px; font-size:0.75rem;" onclick="renovar30Dias('${u.uid}', '${u.expireDate}')">+30d</button>
-                                <button class="btn btn-sm ${u.active ? 'btn-danger':'btn-green'}" style="padding:4px 8px; font-size:0.75rem;" onclick="toggleStatusCliente('${u.uid}', ${!u.active})">${u.active?'Bloquear':'Activar'}</button>
-                                <button class="btn-xs-delete" onclick="borrarClienteFirestore('${u.uid}')"><i class="fas fa-trash"></i></button>
+                                <button class="btn btn-sm ${u.active ? 'btn-danger':'btn-green'}" style="padding:4px 8px; font-size:0.75rem;" onclick="toggleStatusCliente('${u.email}', ${!u.active})">${u.active?'Bloquear':'Activar'}</button>
+                                <button class="btn-xs-delete" onclick="borrarClienteFirestore('${u.email}')"><i class="fas fa-trash"></i></button>
                             ` : 'Master'}
                         </td>
                     </tr>`;
@@ -945,19 +934,12 @@
             const btn = document.getElementById("btnCrearClienteFirebase");
 
             if (!email || !pass || !name) return showToast("Completa todos los campos", "error");
-            if (pass.length < 6) return showToast("La clave debe tener mínimo 6 caracteres", "error");
 
             try {
                 btn.disabled = true;
-                btn.textContent = "Registrando en Firebase...";
+                btn.textContent = "Registrando en Cloud...";
 
-                // Registra en Authentication usando la instancia secundaria sin cerrar la sesión del admin
-                const cred = await window.fb.createUserWithEmailAndPassword(window.fb.secondaryAuth, email, pass);
-                const nuevoUid = cred.user.uid;
-                await window.fb.signOut(window.fb.secondaryAuth);
-
-                // Registra en Firestore
-                await window.fb.setDoc(window.fb.doc(window.fb.db, "users", nuevoUid), {
+                await window.fb.setDoc(window.fb.doc(window.fb.db, "users", email), {
                     email: email,
                     name: name,
                     passwordRef: pass,
@@ -968,46 +950,42 @@
                 });
 
                 closeModal("modalNuevoCliente");
-                showToast(`¡Club ${name} registrado en Firebase!`);
+                showToast(`¡Club ${name} registrado y sincronizado!`);
                 cargarClientesDesdeFirestore();
             } catch (err) {
                 console.error(err);
-                if (err.code === "auth/email-already-in-use") {
-                    showToast("Ese correo ya existe en Firebase Auth", "error");
-                } else {
-                    showToast("Error Firebase: " + err.message, "error");
-                }
+                showToast("Error al guardar: " + err.message, "error");
             } finally {
                 btn.disabled = false;
                 btn.textContent = "Registrar";
             }
         }
 
-        async function actualizarPasswordRef(uid, pass) {
+        async function actualizarPasswordRef(email, pass) {
             try {
-                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", uid), { passwordRef: pass });
-                showToast("Clave de referencia guardada");
+                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", email), { passwordRef: pass });
+                showToast("Contraseña actualizada");
             } catch (e) {
-                showToast("Error al guardar", "error");
+                showToast("Error al guardar clave", "error");
             }
         }
 
-        async function actualizarVencimientoCliente(uid, nuevaFecha) {
+        async function actualizarVencimientoCliente(email, nuevaFecha) {
             try {
-                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", uid), { expireDate: nuevaFecha });
-                showToast("Fecha guardada");
+                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", email), { expireDate: nuevaFecha });
+                showToast("Fecha actualizada");
             } catch (e) {
-                showToast("Error al guardar", "error");
+                showToast("Error al guardar fecha", "error");
             }
         }
 
-        async function renovar30Dias(uid, fechaActual) {
+        async function renovar30Dias(email, fechaActual) {
             let base = new Date();
             if (fechaActual && new Date(fechaActual) > base) base = new Date(fechaActual);
             base.setDate(base.getDate() + 30);
             const nueva = base.toISOString().split("T")[0];
             try {
-                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", uid), { expireDate: nueva, active: true });
+                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", email), { expireDate: nueva, active: true });
                 cargarClientesDesdeFirestore();
                 showToast("+30 días otorgados");
             } catch (e) {
@@ -1015,9 +993,9 @@
             }
         }
 
-        async function toggleStatusCliente(uid, nuevoEstado) {
+        async function toggleStatusCliente(email, nuevoEstado) {
             try {
-                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", uid), { active: nuevoEstado });
+                await window.fb.updateDoc(window.fb.doc(window.fb.db, "users", email), { active: nuevoEstado });
                 cargarClientesDesdeFirestore();
                 showToast(nuevoEstado ? "Club Activado" : "Club Suspendido");
             } catch (e) {
@@ -1025,13 +1003,13 @@
             }
         }
 
-        async function borrarClienteFirestore(uid) {
-            if (confirm("¿Eliminar este club de Firestore y todos sus datos?")) {
+        async function borrarClienteFirestore(email) {
+            if (confirm(`¿Eliminar al club ${email} y todos sus torneos de Firebase?`)) {
                 try {
-                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, "users", uid));
-                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, "club_data", uid));
+                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, "users", email));
+                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, "club_data", email));
                     cargarClientesDesdeFirestore();
-                    showToast("Club eliminado");
+                    showToast("Club eliminado permanentemente");
                 } catch (e) {
                     showToast("Error al eliminar", "error");
                 }
@@ -1081,7 +1059,7 @@
             const lista = modoSeleccionado === 'americano' ? userData.ligasAmericano : userData.ligasPozo;
             const cont = document.getElementById("listaLigasContenedor");
             cont.innerHTML = "";
-            if (!lista || !lista.length) { cont.innerHTML = "<p style='color:var(--padel-gray); font-size:0.85rem;'>No hay ligas registradas en este modo.</pp>"; return; }
+            if (!lista || !lista.length) { cont.innerHTML = "<p style='color:var(--padel-gray); font-size:0.85rem;'>No hay ligas registradas en este modo.</p>"; return; }
 
             lista.forEach(l => {
                 cont.innerHTML += `

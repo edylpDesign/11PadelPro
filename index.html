@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>11Padel Point Pro - Suite</title>
+    <title>11Padel Point Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         :root {
-            --padel-court: #1e8449;
             --padel-blue: #2980b9;
-            --padel-pink: #e84393;
             --padel-green: #27ae60;
             --padel-orange: #e67e22;
             --padel-purple: #8e44ad;
@@ -26,11 +24,6 @@
             min-height: 100vh;
             padding: 12px;
             color: var(--padel-dark);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(39, 174, 96, 0.12) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(41, 128, 185, 0.12) 0%, transparent 20%);
-            background-attachment: fixed;
-            -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: contain;
             -webkit-overflow-scrolling: touch;
         }
@@ -50,120 +43,40 @@
             align-items: center;
             gap: 10px;
         }
-        .brand-logos-zone {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex: 1;
-        }
-
-        .logo-app-img {
-            height: 52px;
-            width: auto;
-            max-width: 140px;
-            object-fit: contain;
-            background: transparent !important;
-        }
-
-        .sponsor-main-badge-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent !important;
-            border: none !important;
-            padding: 0 !important;
-            text-decoration: none;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .sponsor-main-badge-link:active { transform: scale(0.95); }
-        .sponsor-main-logo {
-            height: 48px;
-            width: auto;
-            max-width: 150px;
-            object-fit: contain;
-            background: transparent !important;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-        }
+        .brand-logos-zone { display: flex; align-items: center; gap: 16px; flex: 1; }
+        .logo-app-img { height: 52px; width: auto; max-width: 140px; object-fit: contain; background: transparent !important; }
+        .sponsor-main-link { display: flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; }
+        .sponsor-main-logo { height: 48px; width: auto; max-width: 150px; object-fit: contain; background: transparent !important; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
 
         .btn-gear-admin {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.25);
-            border: 1.5px solid rgba(255,255,255,0.6);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1rem;
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(255,255,255,0.25); border: 1.5px solid rgba(255,255,255,0.6);
+            color: white; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 1.1rem;
         }
 
-        /* BANNER 6 PATROCINADORES */
+        /* BANNER DE 6 PATROCINADORES */
         .sponsors-card-container {
-            background: white;
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 14px;
-            box-shadow: var(--padel-shadow);
-            border: 1px solid rgba(0,0,0,0.06);
-            text-align: center;
+            background: white; border-radius: 16px; padding: 12px;
+            margin-bottom: 14px; box-shadow: var(--padel-shadow); border: 1px solid rgba(0,0,0,0.06); text-align: center;
         }
         .sponsors-label-top {
-            font-size: 0.68rem;
-            font-weight: 800;
-            color: var(--padel-gray);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
+            font-size: 0.68rem; font-weight: 800; color: var(--padel-gray);
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
         }
-        .sponsors-grid-layout {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
+        .sponsors-grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
         .sponsor-box-btn {
-            background: #111827;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            padding: 0 !important;
-            height: 54px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-            cursor: pointer;
+            background: #111827; border: 1px solid #cbd5e1; border-radius: 10px;
+            padding: 0 !important; height: 54px; display: flex; align-items: center;
+            justify-content: center; text-decoration: none; overflow: hidden; position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06); cursor: pointer;
         }
         .sponsor-box-btn:active { transform: scale(0.96); }
-        .sponsor-btn-img {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-            display: block;
-        }
-        .sponsor-btn-fallback {
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .sponsors-footer-text {
-            font-size: 0.82rem;
-            font-weight: 800;
-            color: var(--padel-orange);
-            margin-top: 8px;
-        }
+        .sponsor-btn-img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block; }
+        .sponsor-btn-fallback { font-size: 0.72rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 4px; }
+        .sponsors-footer-text { font-size: 0.82rem; font-weight: 800; color: var(--padel-orange); margin-top: 8px; }
 
         /* MODOS */
         .section-title { font-size: 0.88rem; font-weight: 700; color: var(--padel-dark); margin: 10px 0 8px 4px; }
@@ -184,7 +97,7 @@
         .mode-info-title { font-size: 0.98rem; font-weight: 800; color: var(--padel-dark); }
         .mode-info-sub { font-size: 0.76rem; color: var(--padel-gray); font-weight: 500; }
 
-        /* VISTAS */
+        /* COMPONENTES GENERALES */
         .card { background: white; border-radius: 16px; box-shadow: var(--padel-shadow); padding: 16px; margin-bottom: 14px; }
         .card-header {
             background: linear-gradient(90deg, var(--padel-blue) 0%, var(--padel-green) 100%);
@@ -204,19 +117,16 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .scroll-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px; scrollbar-width: none; }
-        .scroll-chips::-webkit-scrollbar { display: none; }
+        .scroll-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px; }
         .chip-pill { background: white; padding: 6px 14px; border-radius: 18px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e1; white-space: nowrap; }
         .chip-pill.active { background: var(--padel-blue); color: white; border-color: var(--padel-blue); }
 
-        /* POZO */
         .pozo-row { background: var(--padel-light); border: 1px solid #cbd5e1; border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .caguama-badge { background: #fef3c7; color: #b45309; border: 1px solid #f59e0b; border-radius: 12px; padding: 2px 8px; font-size: 0.78rem; font-weight: bold; cursor: pointer; }
         .score-ctrl { display: flex; align-items: center; gap: 6px; }
         .score-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #cbd5e1; background: white; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
         .score-in { width: 46px; height: 32px; text-align: center; font-weight: 800; border-radius: 6px; border: 1.5px solid #cbd5e1; color: var(--padel-blue); font-size: 1.1rem; }
 
-        /* 8 LOCO */
         .match-card-clean { background: white; border-radius: 12px; padding: 12px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-left: 5px solid var(--padel-green); }
         .team-row-live { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
         .score-display-btn { width: 50px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 900; border: none; cursor: pointer; color: white; }
@@ -245,66 +155,76 @@
         <!-- HEADER -->
         <header>
             <div class="brand-logos-zone">
-                <img src="img/logo_11padel.png" alt="11Padel Point Pro" class="logo-app-img" onerror="this.style.display='none'">
-                <a href="javascript:void(0)" class="sponsor-main-badge-link" id="sponsorMainLink" title="SB TOTAL PADEL">
+                <img src="img/logo_11padel.png" alt="11Padel" class="logo-app-img" onerror="this.style.display='none'">
+                <a href="https://instagram.com/sbtotalpadel" target="_blank" rel="noopener noreferrer" class="sponsor-main-link" id="sponsorMainLink">
                     <img src="img/patrocinador_principal.png" alt="SB TOTAL PADEL" class="sponsor-main-logo" onerror="this.style.display='none'">
                 </a>
             </div>
-            <button class="btn-gear-admin" onclick="toggleAdminPanel()" title="Configuración de Enlaces">
-                <i class="fas fa-cog"></i>
+            <!-- Engranaje con candado de acceso protegido -->
+            <button class="btn-gear-admin" onclick="solicitarAccesoAdmin()" title="Acceso Administrador">
+                <i class="fas fa-lock"></i>
             </button>
         </header>
 
         <!-- BANNER DE 6 PATROCINADORES -->
-        <div class="sponsors-card-container" id="sponsorsBannerBlock">
+        <div class="sponsors-card-container">
             <div class="sponsors-label-top">
                 <i class="fas fa-ad"></i> PATROCINADORES OFICIALES • TOCA CADA UNO PARA VISITAR
             </div>
             
             <div class="sponsors-grid-layout">
-                <a href="javascript:void(0)" class="sponsor-box-btn" id="linkBanner1">
-                    <img src="img/banner_patrocinador1.png" alt="Sponsor 1" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <a href="https://instagram.com/chuletasnkrs" target="_blank" rel="noopener noreferrer" class="sponsor-box-btn" id="linkBanner1">
+                    <img src="img/banner_patrocinador1.png" alt="1" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 1</div>
                 </a>
-                <a href="javascript:void(0)" class="sponsor-box-btn" id="linkBanner2">
-                    <img src="img/banner_patrocinador2.png" alt="Sponsor 2" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <a href="https://instagram.com/motio" target="_blank" rel="noopener noreferrer" class="sponsor-box-btn" id="linkBanner2">
+                    <img src="img/banner_patrocinador2.png" alt="2" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 2</div>
                 </a>
-                <a href="javascript:void(0)" class="sponsor-box-btn" id="linkBanner3">
-                    <img src="img/banner_patrocinador3.png" alt="Sponsor 3" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <a href="https://instagram.com/room" target="_blank" rel="noopener noreferrer" class="sponsor-box-btn" id="linkBanner3">
+                    <img src="img/banner_patrocinador3.png" alt="3" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 3</div>
                 </a>
-                <a href="javascript:void(0)" class="sponsor-box-btn" id="linkBanner4">
-                    <img src="img/banner_patrocinador4.png" alt="Sponsor 4" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="sponsor-box-btn" id="linkBanner4">
+                    <img src="img/banner_patrocinador4.png" alt="4" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 4</div>
                 </a>
-                <a href="javascript:void(0)" class="sponsor-box-btn" id="linkBanner5">
-                    <img src="img/banner_patrocinador5.png" alt="Sponsor 5" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="sponsor-box-btn" id="linkBanner5">
+                    <img src="img/banner_patrocinador5.png" alt="5" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 5</div>
                 </a>
-                <a href="javascript:void(0)" class="sponsor-box-btn" id="linkBanner6">
-                    <img src="img/banner_patrocinador6.png" alt="Sponsor 6" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="sponsor-box-btn" id="linkBanner6">
+                    <img src="img/banner_patrocinador6.png" alt="6" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 6</div>
                 </a>
             </div>
 
-            <div class="sponsors-footer-text" id="sponsorsTextDisplay">
+            <div class="sponsors-footer-text">
                 Patrocinado por: SB TOTAL PADEL
             </div>
         </div>
 
-        <!-- PANEL DE ADMINISTRACIÓN / ENLACES PROTEGIDO -->
+        <!-- MODAL DE AUTENTICACIÓN ADMIN (BLINDADO) -->
+        <div id="modalAuthAdmin" class="modal">
+            <div class="modal-content" style="max-width:340px; text-align:center;">
+                <div style="font-size:2rem; color:var(--padel-blue); margin-bottom:8px;"><i class="fas fa-shield-alt"></i></div>
+                <h3 style="margin-bottom:6px;">Acceso Administrador</h3>
+                <p style="font-size:0.75rem; color:var(--padel-gray); margin-bottom:12px;">Introduce tu clave maestra para desbloquear los controles:</p>
+                <input type="password" id="inputMasterPinPrompt" placeholder="PIN Maestro" style="text-align:center; font-size:1.1rem; letter-spacing:2px;">
+                <div style="display:flex; justify-content:center; gap:8px; margin-top:14px;">
+                    <button class="btn btn-dark btn-sm" onclick="closeModal('modalAuthAdmin')">Cancelar</button>
+                    <button class="btn btn-green btn-sm" onclick="verificarPinAdmin()">Acceder</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DE ADMINISTRACIÓN / ENLACES (SOLO ACCESIBLE CON PIN) -->
         <div id="viewAdmin" class="card hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h4 style="color:var(--padel-blue);"><i class="fas fa-lock"></i> Gestión Global Protegida</h4>
-                <button class="btn btn-sm btn-dark" onclick="toggleAdminPanel()">Cerrar</button>
+            <div class="card-header">
+                <span><i class="fas fa-lock-open"></i> Panel de Patrocinadores (Global)</span>
+                <button class="btn btn-sm btn-dark" onclick="cerrarPanelAdmin()">Cerrar</button>
             </div>
             
-            <div style="background:#fef2f2; border:1px solid #f87171; border-radius:8px; padding:10px; margin-bottom:12px;">
-                <label style="font-size:0.75rem; font-weight:bold; color:#991b1b;"><i class="fas fa-key"></i> Clave Maestra de Administrador (Obligatoria):</label>
-                <input type="password" id="adminSecurityKey" placeholder="Introduce tu clave para autorizar cambios" style="border-color:#f87171;">
-            </div>
-
             <label style="font-size:0.75rem; font-weight:bold;">Patrocinador Principal (Header):</label>
             <input type="url" id="adminMainSponsorUrl" placeholder="https://instagram.com/sbtotalpadel">
 
@@ -317,7 +237,9 @@
                 <div><label style="font-size:0.75rem; font-weight:bold;">Banner 6:</label><input type="url" id="adminBanner6Url" placeholder="https://..."></div>
             </div>
 
-            <button class="btn btn-sm btn-green" style="width:100%; margin-top:14px;" onclick="guardarEnlacesProtegidos()">Guardar y Sincronizar Globalmente</button>
+            <button class="btn btn-green" style="width:100%; margin-top:14px;" onclick="guardarEnlacesEnFirebase()">
+                <i class="fas fa-cloud-upload-alt"></i> Guardar y Sincronizar en Todos los Dispositivos
+            </button>
         </div>
 
         <!-- HUB PRINCIPAL DE MODOS -->
@@ -436,7 +358,7 @@
         </footer>
     </div>
 
-    <!-- MODALES -->
+    <!-- MODALES DE LIGAS Y JORNADAS -->
     <div id="modalCrearLiga" class="modal">
         <div class="modal-content">
             <h3 style="color:var(--padel-blue); margin-bottom:8px;">Nueva Liga</h3>
@@ -468,10 +390,8 @@
     <div id="toast" class="toast">Notificación</div>
 
     <script>
-        // URL DE TU PROYECTO REALTIME DATABASE
+        // CONFIGURACIÓN DE SEGURIDAD Y FIREBASE
         const CLOUD_DB_URL = "https://padel-pro-4c4d7-default-rtdb.firebaseio.com/sponsors.json";
-        
-        // TU CLAVE MAESTRA ACTUALIZADA
         const MASTER_ADMIN_PIN = "lopl1984";
 
         let sponsorConfig = JSON.parse(localStorage.getItem("11padel_sponsor_config")) || {
@@ -493,8 +413,9 @@
         }
         function saveUserData(d) { localStorage.setItem("11padel_app_data", JSON.stringify(d)); }
 
+        // NORMALIZACIÓN DE ENLACES
         function normalizarUrl(url) {
-            if (!url || url === "#" || url === "javascript:void(0)" || url.trim() === "") return "";
+            if (!url || url.trim() === "" || url === "#") return "https://instagram.com";
             let clean = url.trim();
             if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
                 clean = "https://" + clean;
@@ -502,22 +423,25 @@
             return clean;
         }
 
-        function abrirEnlaceExterno(url) {
-            const destino = normalizarUrl(url);
-            if (destino) {
-                window.open(destino, '_blank', 'noopener,noreferrer');
-            } else {
-                showToast("Enlace aún no configurado", "error");
+        // ASIGNACIÓN NATIVA DE ENLACES (FUNCIONA SIEMPRE EN CUALQUIER NAVEGADOR)
+        function aplicarEnlaces() {
+            const main = document.getElementById("sponsorMainLink");
+            if (main) main.href = normalizarUrl(sponsorConfig.mainUrl);
+
+            for (let i = 1; i <= 6; i++) {
+                const btn = document.getElementById(`linkBanner${i}`);
+                if (btn) btn.href = normalizarUrl(sponsorConfig[`banner${i}Url`]);
             }
         }
 
+        // DESCARGA DESDE FIREBASE AL ABRIR LA APP
         async function sincronizarEnlacesDesdeLaNube() {
             try {
                 const res = await fetch(CLOUD_DB_URL);
                 if (res.ok) {
                     const data = await res.json();
                     if (data && data.mainUrl) {
-                        sponsorConfig = data;
+                        sponsorConfig = Object.assign({}, sponsorConfig, data);
                         localStorage.setItem("11padel_sponsor_config", JSON.stringify(sponsorConfig));
                         aplicarEnlaces();
                     }
@@ -527,61 +451,51 @@
             }
         }
 
-        function aplicarEnlaces() {
-            const mainLnk = document.getElementById("sponsorMainLink");
-            if (mainLnk) {
-                mainLnk.onclick = (e) => { 
-                    e.preventDefault(); 
-                    abrirEnlaceExterno(sponsorConfig.mainUrl); 
-                };
-            }
-
-            for (let i = 1; i <= 6; i++) {
-                const btn = document.getElementById(`linkBanner${i}`);
-                if (btn) {
-                    const urlTarget = sponsorConfig[`banner${i}Url`];
-                    btn.onclick = (e) => { 
-                        e.preventDefault(); 
-                        abrirEnlaceExterno(urlTarget); 
-                    };
-                }
-            }
+        // CONTROL DE ACCESO ADMIN PROTEGIDO
+        function solicitarAccesoAdmin() {
+            document.getElementById("inputMasterPinPrompt").value = "";
+            document.getElementById("modalAuthAdmin").classList.add("active");
+            setTimeout(() => document.getElementById("inputMasterPinPrompt").focus(), 150);
         }
 
-        function toggleAdminPanel() {
+        function verificarPinAdmin() {
+            const pin = document.getElementById("inputMasterPinPrompt").value.trim();
+            if (pin !== MASTER_ADMIN_PIN) {
+                showToast("PIN incorrecto. Acceso denegado.", "error");
+                return;
+            }
+            closeModal("modalAuthAdmin");
+            abrirPanelAdmin();
+        }
+
+        function abrirPanelAdmin() {
             const adminCard = document.getElementById("viewAdmin");
-            adminCard.classList.toggle("hidden");
-            if (!adminCard.classList.contains("hidden")) {
-                document.getElementById("adminMainSponsorUrl").value = sponsorConfig.mainUrl || "";
-                document.getElementById("adminBanner1Url").value = sponsorConfig.banner1Url || "";
-                document.getElementById("adminBanner2Url").value = sponsorConfig.banner2Url || "";
-                document.getElementById("adminBanner3Url").value = sponsorConfig.banner3Url || "";
-                document.getElementById("adminBanner4Url").value = sponsorConfig.banner4Url || "";
-                document.getElementById("adminBanner5Url").value = sponsorConfig.banner5Url || "";
-                document.getElementById("adminBanner6Url").value = sponsorConfig.banner6Url || "";
-                document.getElementById("adminSecurityKey").value = "";
-            }
+            adminCard.classList.remove("hidden");
+            document.getElementById("adminMainSponsorUrl").value = sponsorConfig.mainUrl || "";
+            document.getElementById("adminBanner1Url").value = sponsorConfig.banner1Url || "";
+            document.getElementById("adminBanner2Url").value = sponsorConfig.banner2Url || "";
+            document.getElementById("adminBanner3Url").value = sponsorConfig.banner3Url || "";
+            document.getElementById("adminBanner4Url").value = sponsorConfig.banner4Url || "";
+            document.getElementById("adminBanner5Url").value = sponsorConfig.banner5Url || "";
+            document.getElementById("adminBanner6Url").value = sponsorConfig.banner6Url || "";
+            adminCard.scrollIntoView({ behavior: 'smooth' });
+            showToast("Acceso Autorizado");
         }
 
-        async function guardarEnlacesProtegidos() {
-            const inputPin = document.getElementById("adminSecurityKey").value.trim();
+        function cerrarPanelAdmin() {
+            document.getElementById("viewAdmin").classList.add("hidden");
+        }
 
-            if (!inputPin) {
-                return showToast("Introduce la clave de administrador para guardar", "error");
-            }
-
-            if (inputPin !== MASTER_ADMIN_PIN) {
-                return showToast("Clave de administrador incorrecta", "error");
-            }
-
-            sponsorConfig.mainUrl = document.getElementById("adminMainSponsorUrl").value.trim() || "https://instagram.com";
+        // GUARDAR CAMBIOS Y TRANSMITIR A LA NUBE
+        async function guardarEnlacesEnFirebase() {
+            sponsorConfig.mainUrl = document.getElementById("adminMainSponsorUrl").value.trim() || "https://instagram.com/sbtotalpadel";
             sponsorConfig.banner1Url = document.getElementById("adminBanner1Url").value.trim() || "https://instagram.com";
             sponsorConfig.banner2Url = document.getElementById("adminBanner2Url").value.trim() || "https://instagram.com";
             sponsorConfig.banner3Url = document.getElementById("adminBanner3Url").value.trim() || "https://instagram.com";
             sponsorConfig.banner4Url = document.getElementById("adminBanner4Url").value.trim() || "https://instagram.com";
             sponsorConfig.banner5Url = document.getElementById("adminBanner5Url").value.trim() || "https://instagram.com";
             sponsorConfig.banner6Url = document.getElementById("adminBanner6Url").value.trim() || "https://instagram.com";
-            sponsorConfig.adminPass = inputPin;
+            sponsorConfig.adminPass = MASTER_ADMIN_PIN; // Firma que autoriza en Firebase Rules
 
             localStorage.setItem("11padel_sponsor_config", JSON.stringify(sponsorConfig));
             aplicarEnlaces();
@@ -594,12 +508,12 @@
                     body: JSON.stringify(sponsorConfig)
                 });
 
-                if (!response.ok) throw new Error("Rechazo de base de datos");
+                if (!response.ok) throw new Error("Error en servidor");
                 showToast("¡Enlaces actualizados para todos!");
             } catch (e) {
                 showToast("Guardado localmente.");
             }
-            toggleAdminPanel();
+            cerrarPanelAdmin();
         }
 
         // CONTROL DE JUEGOS Y MODOS
@@ -935,7 +849,9 @@
         }
         function closeModal(id) { document.getElementById(id).classList.remove("active"); }
 
+        // INICIALIZACIÓN
         document.addEventListener("DOMContentLoaded", () => {
+            aplicarEnlaces();
             sincronizarEnlacesDesdeLaNube();
         });
     </script>

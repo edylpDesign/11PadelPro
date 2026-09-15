@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>11Padel Point Pro</title>
+    <title>11Padel Point Pro - Suite</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -41,82 +41,66 @@
         header {
             background: linear-gradient(90deg, var(--padel-blue) 0%, var(--padel-green) 100%);
             border-radius: 18px;
-            padding: 10px 14px;
-            color: white;
+            padding: 8px 16px;
             box-shadow: var(--padel-shadow);
             border: 2px solid white;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         .brand-logos-zone {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
             flex: 1;
         }
 
-        /* LOGO PRINCIPAL SIN FONDO BLANCO */
         .logo-app-img {
             height: 52px;
             width: auto;
             max-width: 140px;
             object-fit: contain;
             background: transparent !important;
-            padding: 0 !important;
-            box-shadow: none !important;
-            border-radius: 0 !important;
         }
 
-        /* PATROCINADOR PRINCIPAL CON CONTENEDOR VIDRIO ELEGANTE SIN CUADRO BLANCO INTERNO */
         .sponsor-main-badge-link {
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.22);
-            padding: 6px 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.45);
-            cursor: pointer;
+            justify-content: center;
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
             text-decoration: none;
-            color: white;
-            backdrop-filter: blur(4px);
+            cursor: pointer;
+            transition: transform 0.2s;
         }
+        .sponsor-main-badge-link:active { transform: scale(0.95); }
         .sponsor-main-logo {
-            height: 38px;
+            height: 48px;
             width: auto;
-            max-width: 85px;
+            max-width: 150px;
             object-fit: contain;
             background: transparent !important;
-            padding: 0 !important;
-            box-shadow: none !important;
-            border-radius: 0 !important;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
         }
-        .sponsor-main-text-block {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.1;
-        }
-        .sponsor-main-label { font-size: 0.82rem; font-weight: 800; white-space: nowrap; }
-        .sponsor-main-sub { font-size: 0.65rem; opacity: 0.9; }
 
         .btn-gear-admin {
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background: rgba(255,255,255,0.25);
-            border: 1px solid rgba(255,255,255,0.5);
+            border: 1.5px solid rgba(255,255,255,0.6);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
-        /* BANNER DE PATROCINADORES CON LLENADO AL 100% */
+        /* BANNER 6 PATROCINADORES */
         .sponsors-card-container {
             background: white;
             border-radius: 16px;
@@ -144,18 +128,17 @@
             gap: 8px;
         }
 
-        /* BOTONES DE PATROCINADOR RELLENOS COMPLETOS */
         .sponsor-box-btn {
-            background: #1e293b; /* Base oscura estética si la imagen tiene fondos negros */
+            background: #111827;
             border: 1px solid #cbd5e1;
             border-radius: 10px;
-            padding: 0 !important; /* Elimina espacio blanco */
-            height: 56px;
+            padding: 0 !important;
+            height: 54px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            overflow: hidden;     /* Recorta a los bordes del botón */
+            overflow: hidden;
             position: relative;
             box-shadow: 0 2px 4px rgba(0,0,0,0.06);
         }
@@ -163,7 +146,7 @@
         .sponsor-btn-img {
             width: 100% !important;
             height: 100% !important;
-            object-fit: cover !important; /* Rellena el 100% del cuadro */
+            object-fit: cover !important;
             display: block;
         }
         .sponsor-btn-fallback {
@@ -181,115 +164,126 @@
             margin-top: 8px;
         }
 
-        /* TARJETAS DE MODO */
-        .section-title {
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: var(--padel-dark);
-            margin: 10px 0 8px 4px;
-        }
+        /* MODOS */
+        .section-title { font-size: 0.88rem; font-weight: 700; color: var(--padel-dark); margin: 10px 0 8px 4px; }
         .mode-box-card {
-            background: white;
-            border-radius: 14px;
-            padding: 14px 16px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            box-shadow: var(--padel-shadow);
-            border-left: 5px solid var(--padel-green);
-            transition: transform 0.15s;
+            background: white; border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
+            cursor: pointer; display: flex; align-items: center; gap: 14px; box-shadow: var(--padel-shadow);
+            border-left: 5px solid var(--padel-green); transition: transform 0.15s;
         }
         .mode-box-card:active { transform: scale(0.98); }
         .mode-box-card.pozo { border-left-color: var(--padel-blue); }
         .mode-box-card.padron { border-left-color: var(--padel-purple); }
         .mode-icon-circle {
-            width: 44px;
-            height: 44px;
-            min-width: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            color: white;
-            background: var(--padel-green);
+            width: 44px; height: 44px; min-width: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: white; background: var(--padel-green);
         }
         .mode-box-card.pozo .mode-icon-circle { background: var(--padel-blue); }
         .mode-box-card.padron .mode-icon-circle { background: var(--padel-purple); }
         .mode-info-title { font-size: 0.98rem; font-weight: 800; color: var(--padel-dark); }
         .mode-info-sub { font-size: 0.76rem; color: var(--padel-gray); font-weight: 500; }
 
-        /* FOOTER DE CRÉDITOS */
-        footer {
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--padel-gray);
-            margin-top: 20px;
-            font-weight: 600;
-        }
-        footer strong { color: var(--padel-green); }
-
-        /* ESTILOS COMUNES PARA MODALES Y ACCIONES */
+        /* VISTAS */
         .card { background: white; border-radius: 16px; box-shadow: var(--padel-shadow); padding: 16px; margin-bottom: 14px; }
-        .btn { padding: 10px 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        .card-header {
+            background: linear-gradient(90deg, var(--padel-blue) 0%, var(--padel-green) 100%);
+            color: white; padding: 12px 16px; border-radius: 12px; margin: -16px -16px 14px -16px;
+            font-size: 1rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center;
+        }
+        .btn { padding: 9px 14px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.85rem; }
         .btn-green { background: var(--padel-green); color: white; }
         .btn-dark { background: var(--padel-light-gray); color: var(--padel-dark); border: 1px solid #cbd5e1; }
-        .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-wa { background: #25d366; color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 0.8rem; border-radius: 6px; }
+
+        .tabs { display: flex; background: var(--padel-light-gray); border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+        .tab { flex: 1; padding: 8px; text-align: center; cursor: pointer; font-weight: 700; font-size: 0.8rem; }
+        .tab.active { background: linear-gradient(135deg, var(--padel-blue) 0%, var(--padel-green) 100%); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .scroll-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px; scrollbar-width: none; }
+        .scroll-chips::-webkit-scrollbar { display: none; }
+        .chip-pill { background: white; padding: 6px 14px; border-radius: 18px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e1; white-space: nowrap; }
+        .chip-pill.active { background: var(--padel-blue); color: white; border-color: var(--padel-blue); }
+
+        /* POZO */
+        .pozo-row { background: var(--padel-light); border: 1px solid #cbd5e1; border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .caguama-badge { background: #fef3c7; color: #b45309; border: 1px solid #f59e0b; border-radius: 12px; padding: 2px 8px; font-size: 0.78rem; font-weight: bold; cursor: pointer; }
+        .score-ctrl { display: flex; align-items: center; gap: 6px; }
+        .score-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #cbd5e1; background: white; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        .score-in { width: 46px; height: 32px; text-align: center; font-weight: 800; border-radius: 6px; border: 1.5px solid #cbd5e1; color: var(--padel-blue); font-size: 1.1rem; }
+
+        /* 8 LOCO */
+        .match-card-clean { background: white; border-radius: 12px; padding: 12px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-left: 5px solid var(--padel-green); }
+        .team-row-live { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+        .score-display-btn { width: 50px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 900; border: none; cursor: pointer; color: white; }
+        .score-yellow { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .score-green { background: linear-gradient(135deg, var(--padel-green) 0%, #1e8449 100%); }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th { background: linear-gradient(135deg, var(--padel-blue) 0%, var(--padel-green) 100%); color: white; padding: 8px 6px; font-weight: 700; text-align: center; }
+        td { padding: 8px 6px; border-bottom: 1px solid var(--padel-light-gray); text-align: center; white-space: nowrap; font-weight: 600; }
+
+        input { width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; margin-top: 4px; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; pointer-events: none; padding: 12px; }
+        .modal.active { opacity: 1; pointer-events: all; }
+        .modal-content { background: white; border-radius: 16px; width: 100%; max-width: 480px; padding: 18px; max-height: 85vh; overflow-y: auto; }
         .hidden { display: none !important; }
-        input { width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; margin-top: 4px; }
+
+        footer { text-align: center; font-size: 0.75rem; color: var(--padel-gray); margin-top: 20px; font-weight: 600; }
+        footer strong { color: var(--padel-green); }
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--padel-dark); color: white; padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; opacity: 0; z-index: 3000; transition: 0.3s; }
         .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- HEADER TRANSPARENTE SIN FONDOS BLANCOS -->
+        <!-- HEADER -->
         <header>
             <div class="brand-logos-zone">
-                <!-- Logo Principal transparente -->
                 <img src="img/logo_11padel.png" alt="11Padel Point Pro" class="logo-app-img" onerror="this.style.display='none'">
-
-                <!-- Botón Logo Patrocinador Principal -->
-                <a href="#" target="_blank" class="sponsor-main-badge-link" id="sponsorMainLink" title="Patrocinador Oficial">
-                    <img src="img/patrocinador_principal.png" alt="Sponsor" class="sponsor-main-logo" onerror="this.style.display='none'">
-                    <div class="sponsor-main-text-block">
-                        <span class="sponsor-main-label">★ Patrocinador</span>
-                        <span class="sponsor-main-sub">Oficial del Torneo <i class="fas fa-external-link-alt" style="font-size:0.55rem;"></i></span>
-                    </div>
+                <a href="#" target="_blank" class="sponsor-main-badge-link" id="sponsorMainLink" title="SB TOTAL PADEL">
+                    <img src="img/patrocinador_principal.png" alt="SB TOTAL PADEL" class="sponsor-main-logo" onerror="this.style.display='none'">
                 </a>
             </div>
-
-            <!-- Botón de Ajustes / Admin -->
-            <button class="btn-gear-admin" onclick="toggleAdminPanel()" title="Ajustes de Patrocinador">
+            <button class="btn-gear-admin" onclick="toggleAdminPanel()" title="Configuración de Enlaces">
                 <i class="fas fa-cog"></i>
             </button>
         </header>
 
-        <!-- BANNER DE PATROCINADORES QUE LLENA 100% EL BOTÓN -->
+        <!-- BANNER DE 6 PATROCINADORES -->
         <div class="sponsors-card-container" id="sponsorsBannerBlock">
             <div class="sponsors-label-top">
                 <i class="fas fa-ad"></i> PATROCINADORES OFICIALES • TOCA CADA UNO PARA VISITAR
             </div>
             
             <div class="sponsors-grid-layout">
-                <!-- Botón 1 -->
                 <a href="#" target="_blank" class="sponsor-box-btn" id="linkBanner1">
                     <img src="img/banner_patrocinador1.png" alt="Sponsor 1" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                    <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> Sponsor 1</div>
+                    <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 1</div>
                 </a>
-
-                <!-- Botón 2 -->
                 <a href="#" target="_blank" class="sponsor-box-btn" id="linkBanner2">
                     <img src="img/banner_patrocinador2.png" alt="Sponsor 2" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                    <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> Sponsor 2</div>
+                    <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 2</div>
                 </a>
-
-                <!-- Botón 3 -->
                 <a href="#" target="_blank" class="sponsor-box-btn" id="linkBanner3">
                     <img src="img/banner_patrocinador3.png" alt="Sponsor 3" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                    <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> Sponsor 3</div>
+                    <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 3</div>
+                </a>
+                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBanner4">
+                    <img src="img/banner_patrocinador4.png" alt="Sponsor 4" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 4</div>
+                </a>
+                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBanner5">
+                    <img src="img/banner_patrocinador5.png" alt="Sponsor 5" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 5</div>
+                </a>
+                <a href="#" target="_blank" class="sponsor-box-btn" id="linkBanner6">
+                    <img src="img/banner_patrocinador6.png" alt="Sponsor 6" class="sponsor-btn-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> 6</div>
                 </a>
             </div>
 
@@ -298,53 +292,141 @@
             </div>
         </div>
 
-        <!-- PANEL DE ENLACES (OCULTO / DESPLEGABLE) -->
+        <!-- PANEL DE ADMINISTRACIÓN / ENLACES PROTEGIDO -->
         <div id="viewAdmin" class="card hidden">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h4 style="color:var(--padel-blue);"><i class="fas fa-link"></i> Enlaces de Patrocinio</h4>
+                <h4 style="color:var(--padel-blue);"><i class="fas fa-lock"></i> Gestión Global Protegida</h4>
                 <button class="btn btn-sm btn-dark" onclick="toggleAdminPanel()">Cerrar</button>
             </div>
-            <div style="font-size:0.75rem; color:var(--padel-gray); margin-bottom:8px;">Escribe las URLs directas para que los botones redirijan a tus patrocinadores:</div>
             
+            <div style="background:#fef2f2; border:1px solid #f87171; border-radius:8px; padding:10px; margin-bottom:12px;">
+                <label style="font-size:0.75rem; font-weight:bold; color:#991b1b;"><i class="fas fa-key"></i> Clave Maestra de Administrador (Obligatoria):</label>
+                <input type="password" id="adminSecurityKey" placeholder="Introduce tu clave para autorizar cambios" style="border-color:#f87171;">
+            </div>
+
             <label style="font-size:0.75rem; font-weight:bold;">Patrocinador Principal (Header):</label>
-            <input type="url" id="adminMainSponsorUrl" placeholder="https://instagram.com/totalpadel">
+            <input type="url" id="adminMainSponsorUrl" placeholder="https://instagram.com/sbtotalpadel">
 
-            <label style="font-size:0.75rem; font-weight:bold; margin-top:6px; display:block;">Banner 1 (Izquierdo):</label>
-            <input type="url" id="adminBanner1Url" placeholder="https://instagram.com/chuletasnkrs">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:6px;">
+                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 1:</label><input type="url" id="adminBanner1Url" placeholder="URL 1"></div>
+                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 2:</label><input type="url" id="adminBanner2Url" placeholder="URL 2"></div>
+                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 3:</label><input type="url" id="adminBanner3Url" placeholder="URL 3"></div>
+                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 4:</label><input type="url" id="adminBanner4Url" placeholder="URL 4"></div>
+                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 5:</label><input type="url" id="adminBanner5Url" placeholder="URL 5"></div>
+                <div><label style="font-size:0.75rem; font-weight:bold;">Banner 6:</label><input type="url" id="adminBanner6Url" placeholder="URL 6"></div>
+            </div>
 
-            <label style="font-size:0.75rem; font-weight:bold; margin-top:6px; display:block;">Banner 2 (Centro):</label>
-            <input type="url" id="adminBanner2Url" placeholder="https://instagram.com/motio">
-
-            <label style="font-size:0.75rem; font-weight:bold; margin-top:6px; display:block;">Banner 3 (Derecho):</label>
-            <input type="url" id="adminBanner3Url" placeholder="https://instagram.com/room">
-
-            <button class="btn btn-sm btn-green" style="width:100%; margin-top:12px;" onclick="guardarEnlaces()">Guardar Enlaces</button>
+            <button class="btn btn-sm btn-green" style="width:100%; margin-top:14px;" onclick="guardarEnlacesProtegidos()">Guardar y Sincronizar Globalmente</button>
         </div>
 
-        <!-- LISTA PRINCIPAL DE MODOS -->
-        <div class="section-title">Selecciona el modo de juego:</div>
+        <!-- HUB PRINCIPAL DE MODOS -->
+        <div id="viewHubModos">
+            <div class="section-title">Selecciona el modo de juego:</div>
 
-        <div class="mode-box-card" onclick="showToast('Modo 8 Loco seleccionado')">
-            <div class="mode-icon-circle"><i class="fas fa-dice"></i></div>
-            <div>
-                <div class="mode-info-title">Modo 8 Loco / Americano</div>
-                <div class="mode-info-sub">Partidos por parejas rotativas o fijas.</div>
+            <div class="mode-box-card" onclick="entrarModo('americano')">
+                <div class="mode-icon-circle"><i class="fas fa-dice"></i></div>
+                <div>
+                    <div class="mode-info-title">Modo 8 Loco / Americano</div>
+                    <div class="mode-info-sub">Partidos por parejas rotativas o fijas.</div>
+                </div>
+            </div>
+
+            <div class="mode-box-card pozo" onclick="entrarModo('pozo')">
+                <div class="mode-icon-circle"><i class="fas fa-trophy"></i></div>
+                <div>
+                    <div class="mode-info-title">Modo Pozo / Rey de la Pista</div>
+                    <div class="mode-info-sub">Puntos individuales directos por ronda.</div>
+                </div>
+            </div>
+
+            <div class="mode-box-card padron" onclick="abrirPadronJugadores()">
+                <div class="mode-icon-circle"><i class="fas fa-users"></i></div>
+                <div>
+                    <div class="mode-info-title">Padrón de Jugadores</div>
+                    <div class="mode-info-sub">Administra tu lista de jugadores habituales.</div>
+                </div>
             </div>
         </div>
 
-        <div class="mode-box-card pozo" onclick="showToast('Modo Pozo seleccionado')">
-            <div class="mode-icon-circle"><i class="fas fa-trophy"></i></div>
-            <div>
-                <div class="mode-info-title">Modo Pozo / Rey de la Pista</div>
-                <div class="mode-info-sub">Puntos individuales directos por ronda.</div>
+        <!-- VISTA: LIGAS DEL MODO SELECCIONADO -->
+        <div id="viewLigasModo" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <button class="btn btn-sm btn-dark" onclick="backToHubModos()"><i class="fas fa-arrow-left"></i> Modos</button>
+                <button class="btn btn-sm btn-green" onclick="abrirModalCrearLiga()">+ Crear Liga</button>
+            </div>
+            <div class="card">
+                <div class="card-header"><span id="tituloModoLigas">Ligas</span></div>
+                <div id="listaLigasContenedor"></div>
             </div>
         </div>
 
-        <div class="mode-box-card padron" onclick="showToast('Padrón de Jugadores seleccionado')">
-            <div class="mode-icon-circle"><i class="fas fa-users"></i></div>
-            <div>
-                <div class="mode-info-title">Padrón de Jugadores</div>
-                <div class="mode-info-sub">Administra tu lista de jugadores habituales.</div>
+        <!-- VISTA: PADRÓN DE JUGADORES -->
+        <div id="viewPadron" class="card hidden">
+            <div class="card-header">
+                <span>Padrón de Jugadores</span>
+                <button class="btn btn-sm btn-dark" onclick="backToHubModos()"><i class="fas fa-arrow-left"></i> Volver</button>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <input type="text" id="inputNuevoJugador" placeholder="Nombre completo" style="margin:0;">
+                <button class="btn btn-sm btn-green" onclick="agregarJugadorPadron()">Añadir</button>
+            </div>
+            <div id="listaJugadoresPadron"></div>
+        </div>
+
+        <!-- VISTA: DETALLE DE LIGA -->
+        <div id="viewLigaDetalle" class="hidden">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <button class="btn btn-sm btn-dark" onclick="backToLigasModo()"><i class="fas fa-arrow-left"></i> Ligas</button>
+                <button class="btn btn-sm btn-green" id="btnNuevaJornadaLiga" onclick="abrirModalNuevaJornada()">+ Nueva Jornada</button>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span id="ligaDetalleNombre">Liga</span>
+                    <button class="btn btn-sm btn-danger" onclick="terminarLigaOficial()">🏁 Cerrar Liga</button>
+                </div>
+                <div class="tabs">
+                    <div class="tab active" onclick="switchLigaTab('tabla')">📊 TABLA GENERAL</div>
+                    <div class="tab" onclick="switchLigaTab('jornadas')">📅 JORNADAS</div>
+                </div>
+                <div id="tabLigaTabla" class="tab-content active">
+                    <div class="table-responsive"><table id="tablaLigaGeneral"><thead id="tablaLigaHead"></thead><tbody id="tablaLigaBody"></tbody></table></div>
+                </div>
+                <div id="tabLigaJornadas" class="tab-content">
+                    <div id="listaJornadasContenedor"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: JORNADA EN VIVO POZO -->
+        <div id="viewJornadaPozoVivo" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <button class="btn btn-sm btn-dark" onclick="backToLigaDetalle()"><i class="fas fa-arrow-left"></i></button>
+                <div style="text-align:center;"><h3 id="pozoLiveTitulo" style="font-size:1rem; color:var(--padel-blue);">Jornada Pozo</h3></div>
+                <button class="btn btn-sm btn-wa" onclick="compartirWhatsAppPozo()"><i class="fab fa-whatsapp"></i></button>
+            </div>
+            <div class="scroll-chips" id="pozoRoundsNav"></div>
+            <div class="card">
+                <div class="card-header"><span id="pozoRondaActualLabel">Ronda 1</span></div>
+                <div id="pozoPlayersRondaContainer"></div>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="btn btn-dark btn-sm" style="flex:1;" onclick="agregarRondaPozo()">➕ Ronda Extra</button>
+                <button class="btn btn-green btn-sm" style="flex:1;" onclick="finalizarJornadaPozoOficial()">🏁 Finalizar Jornada</button>
+            </div>
+        </div>
+
+        <!-- VISTA: JORNADA EN VIVO 8 LOCO -->
+        <div id="viewJornada8LocoVivo" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <button class="btn btn-sm btn-dark" onclick="backToLigaDetalle()"><i class="fas fa-arrow-left"></i></button>
+                <div style="text-align:center;"><h3 id="amLiveTitulo" style="font-size:1rem; color:var(--padel-blue);">Jornada 8 Loco</h3></div>
+                <button class="btn btn-sm btn-wa" onclick="compartirWhatsApp8Loco()"><i class="fab fa-whatsapp"></i></button>
+            </div>
+            <div class="scroll-chips" id="amRoundsNav"></div>
+            <div id="amMatchesContainer"></div>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+                <button class="btn btn-dark btn-sm" style="flex:1;" onclick="agregarRondaExtra8Loco()">➕ Ronda Extra</button>
+                <button class="btn btn-green btn-sm" style="flex:1;" onclick="finalizarJornada8LocoOficial()">🏁 Finalizar Jornada</button>
             </div>
         </div>
 
@@ -353,21 +435,88 @@
         </footer>
     </div>
 
+    <!-- MODALES -->
+    <div id="modalCrearLiga" class="modal">
+        <div class="modal-content">
+            <h3 style="color:var(--padel-blue); margin-bottom:8px;">Nueva Liga</h3>
+            <input type="text" id="ligaNombreInput" placeholder="Nombre de la Liga">
+            <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:12px;">
+                <button class="btn btn-dark btn-sm" onclick="closeModal('modalCrearLiga')">Cancelar</button>
+                <button class="btn btn-green btn-sm" onclick="guardarNuevaLiga()">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalNuevaJornada" class="modal">
+        <div class="modal-content">
+            <h3 style="color:var(--padel-blue); margin-bottom:8px;">Nueva Jornada</h3>
+            <input type="text" id="jornadaNombreInput" placeholder="Nombre de la Jornada">
+            <div style="background:var(--padel-light); padding:8px; border-radius:8px; margin:10px 0; border:1px solid #cbd5e1;">
+                <span style="font-size:0.75rem; font-weight:bold;">Registro rápido al vuelo:</span>
+                <div style="display:flex; gap:4px; margin-top:4px;">
+                    <input type="text" id="inputRegistroExpress" placeholder="Nombre completo" style="margin:0;">
+                    <button class="btn btn-sm btn-green" onclick="registrarJugadorExpress()">+</button>
+                </div>
+            </div>
+            <p style="font-size:0.75rem; font-weight:bold;">Convocados (<span id="countConvocados">0</span>):</p>
+            <div id="pillsConvocadosContainer" style="display:flex; flex-wrap:wrap; gap:4px; max-height:140px; overflow-y:auto; margin-bottom:10px;"></div>
+            <button class="btn btn-green" style="width:100%;" onclick="iniciarJornadaConfirmada()">Iniciar Jornada ➔</button>
+        </div>
+    </div>
+
     <div id="toast" class="toast">Notificación</div>
 
     <script>
+        // ENDPOINT CENTRAL EN LA NUBE
+        const CLOUD_DB_URL = "https://padel-point-default-rtdb.firebaseio.com/sponsors.json";
+
+        // CONTRASEÑA MAESTRA POR DEFECTO (Cámbiala por la tuya)
+        const MASTER_ADMIN_PIN = "TuClaveMaestra2026";
+
         let sponsorConfig = JSON.parse(localStorage.getItem("11padel_sponsor_config")) || {
-            mainUrl: "https://instagram.com",
-            banner1Url: "https://instagram.com",
-            banner2Url: "https://instagram.com",
-            banner3Url: "https://instagram.com"
+            mainUrl: "https://instagram.com/sbtotalpadel",
+            banner1Url: "https://instagram.com/chuletasnkrs",
+            banner2Url: "https://instagram.com/motio",
+            banner3Url: "https://instagram.com/room",
+            banner4Url: "https://instagram.com",
+            banner5Url: "https://instagram.com",
+            banner6Url: "https://instagram.com"
         };
+
+        function getUserData() { 
+            return JSON.parse(localStorage.getItem("11padel_app_data")) || { 
+                jugadores: ["Pepe moreno", "GERARDO ÁLVAREZ", "Miguel", "Andre", "Luciano", "Chuleta", "Javier", "Joselin"], 
+                ligasAmericano: [], 
+                ligasPozo: [] 
+            }; 
+        }
+        function saveUserData(d) { localStorage.setItem("11padel_app_data", JSON.stringify(d)); }
+
+        // DESCARGA LIBRE (Cualquiera puede leer para que carguen los patrocinadores)
+        async function sincronizarEnlacesDesdeLaNube() {
+            try {
+                const res = await fetch(CLOUD_DB_URL);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.mainUrl) {
+                        sponsorConfig = data;
+                        localStorage.setItem("11padel_sponsor_config", JSON.stringify(sponsorConfig));
+                        aplicarEnlaces();
+                    }
+                }
+            } catch (e) {
+                aplicarEnlaces();
+            }
+        }
 
         function aplicarEnlaces() {
             document.getElementById("sponsorMainLink").href = sponsorConfig.mainUrl;
             document.getElementById("linkBanner1").href = sponsorConfig.banner1Url;
             document.getElementById("linkBanner2").href = sponsorConfig.banner2Url;
             document.getElementById("linkBanner3").href = sponsorConfig.banner3Url;
+            document.getElementById("linkBanner4").href = sponsorConfig.banner4Url;
+            document.getElementById("linkBanner5").href = sponsorConfig.banner5Url;
+            document.getElementById("linkBanner6").href = sponsorConfig.banner6Url;
         }
 
         function toggleAdminPanel() {
@@ -378,28 +527,391 @@
                 document.getElementById("adminBanner1Url").value = sponsorConfig.banner1Url;
                 document.getElementById("adminBanner2Url").value = sponsorConfig.banner2Url;
                 document.getElementById("adminBanner3Url").value = sponsorConfig.banner3Url;
+                document.getElementById("adminBanner4Url").value = sponsorConfig.banner4Url;
+                document.getElementById("adminBanner5Url").value = sponsorConfig.banner5Url;
+                document.getElementById("adminBanner6Url").value = sponsorConfig.banner6Url;
+                document.getElementById("adminSecurityKey").value = "";
             }
         }
 
-        function guardarEnlaces() {
+        // ESCRITURA PROTEGIDA CON VALIDACIÓN DE SEGURIDAD
+        async function guardarEnlacesProtegidos() {
+            const inputPin = document.getElementById("adminSecurityKey").value.trim();
+
+            if (!inputPin) {
+                return showToast("Introduce la clave de administrador para guardar", "error");
+            }
+
+            if (inputPin !== MASTER_ADMIN_PIN) {
+                return showToast("Clave de administrador incorrecta. Acceso denegado.", "error");
+            }
+
             sponsorConfig.mainUrl = document.getElementById("adminMainSponsorUrl").value.trim() || "https://instagram.com";
             sponsorConfig.banner1Url = document.getElementById("adminBanner1Url").value.trim() || "https://instagram.com";
             sponsorConfig.banner2Url = document.getElementById("adminBanner2Url").value.trim() || "https://instagram.com";
             sponsorConfig.banner3Url = document.getElementById("adminBanner3Url").value.trim() || "https://instagram.com";
+            sponsorConfig.banner4Url = document.getElementById("adminBanner4Url").value.trim() || "https://instagram.com";
+            sponsorConfig.banner5Url = document.getElementById("adminBanner5Url").value.trim() || "https://instagram.com";
+            sponsorConfig.banner6Url = document.getElementById("adminBanner6Url").value.trim() || "https://instagram.com";
+            sponsorConfig.adminPass = inputPin; // Firma que valida la regla de seguridad
+
             localStorage.setItem("11padel_sponsor_config", JSON.stringify(sponsorConfig));
             aplicarEnlaces();
+
+            try {
+                showToast("Sincronizando en la nube con seguridad...");
+                const response = await fetch(CLOUD_DB_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(sponsorConfig)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Rechazado por el servidor");
+                }
+                showToast("¡Enlaces actualizados y protegidos globalmente!");
+            } catch (e) {
+                showToast("Error al sincronizar: rechazo de permisos en el servidor.");
+            }
             toggleAdminPanel();
-            showToast("Enlaces actualizados correctamente");
         }
 
-        function showToast(msg) {
-            const t = document.getElementById("toast");
-            t.textContent = msg;
-            t.classList.add("show");
-            setTimeout(() => t.classList.remove("show"), 2000);
+        // LÓGICA DE JUEGOS Y LIGAS
+        let modoSeleccionado = null;
+        function entrarModo(m) {
+            modoSeleccionado = m;
+            document.getElementById("viewHubModos").classList.add("hidden");
+            document.getElementById("viewLigasModo").classList.remove("hidden");
+            document.getElementById("tituloModoLigas").textContent = m === 'americano' ? "Ligas: 8 Loco / Americano" : "Ligas: Pozo / Rey de la Pista";
+            renderLigasDelModo();
         }
 
-        document.addEventListener("DOMContentLoaded", aplicarEnlaces);
+        function backToHubModos() {
+            document.getElementById("viewLigasModo").classList.add("hidden");
+            document.getElementById("viewPadron").classList.add("hidden");
+            document.getElementById("viewHubModos").classList.remove("hidden");
+        }
+
+        function abrirPadronJugadores() {
+            document.getElementById("viewHubModos").classList.add("hidden");
+            document.getElementById("viewPadron").classList.remove("hidden");
+            renderPadron();
+        }
+
+        function renderLigasDelModo() {
+            const d = getUserData();
+            const lista = modoSeleccionado === 'americano' ? d.ligasAmericano : d.ligasPozo;
+            const cont = document.getElementById("listaLigasContenedor");
+            cont.innerHTML = "";
+            if (!lista.length) { cont.innerHTML = "<p style='color:gray; font-size:0.85rem; padding:10px;'>No hay ligas registradas en este modo.</p>"; return; }
+            lista.forEach(l => {
+                cont.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:var(--padel-light); border:1px solid #cbd5e1; border-radius:10px; margin-bottom:8px;">
+                    <div><strong style="color:var(--padel-blue);">${l.nombre}</strong><br><small style="color:gray;">Jornadas: ${l.jornadas.length}</small></div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-sm btn-green" onclick="abrirLigaDetalle('${l.id}')">Entrar</button>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarLiga('${l.id}')">🗑</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function abrirModalCrearLiga() { document.getElementById("ligaNombreInput").value = ""; document.getElementById("modalCrearLiga").classList.add("active"); }
+        function guardarNuevaLiga() {
+            const nom = document.getElementById("ligaNombreInput").value.trim();
+            if (!nom) return;
+            const d = getUserData();
+            const n = { id: "l_" + Date.now(), nombre: nom, finalizada: false, jornadas: [] };
+            if (modoSeleccionado === 'americano') d.ligasAmericano.push(n); else d.ligasPozo.push(n);
+            saveUserData(d); closeModal("modalCrearLiga"); renderLigasDelModo();
+        }
+        function eliminarLiga(id) {
+            if (confirm("¿Eliminar esta liga?")) {
+                const d = getUserData();
+                if (modoSeleccionado === 'americano') d.ligasAmericano = d.ligasAmericano.filter(x => x.id !== id);
+                else d.ligasPozo = d.ligasPozo.filter(x => x.id !== id);
+                saveUserData(d); renderLigasDelModo();
+            }
+        }
+
+        function agregarJugadorPadron() {
+            const inp = document.getElementById("inputNuevoJugador"); const nom = inp.value.trim();
+            if (!nom) return; const d = getUserData();
+            if (d.jugadores.includes(nom)) return showToast("Ya registrado", "error");
+            d.jugadores.push(nom); saveUserData(d); inp.value = ""; renderPadron();
+        }
+        function renderPadron() {
+            const d = getUserData(); const cont = document.getElementById("listaJugadoresPadron");
+            cont.innerHTML = "";
+            d.jugadores.forEach(j => {
+                cont.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #cbd5e1;">
+                    <span style="font-weight:600;">${j}</span><button class="btn btn-sm btn-danger" onclick="d.jugadores=d.jugadores.filter(x=>x!=='${j}'); saveUserData(d); renderPadron();">🗑</button>
+                </div>`;
+            });
+        }
+
+        let ligaActiva = null;
+        function abrirLigaDetalle(id) {
+            const d = getUserData();
+            const l = modoSeleccionado === 'americano' ? d.ligasAmericano : d.ligasPozo;
+            ligaActiva = l.find(x => x.id === id);
+            document.getElementById("viewLigasModo").classList.add("hidden");
+            document.getElementById("viewLigaDetalle").classList.remove("hidden");
+            document.getElementById("ligaDetalleNombre").textContent = ligaActiva.nombre;
+            renderTablaGeneralLiga(); renderListaJornadasLiga();
+        }
+        function backToLigasModo() {
+            document.getElementById("viewLigaDetalle").classList.add("hidden");
+            document.getElementById("viewLigasModo").classList.remove("hidden");
+            renderLigasDelModo();
+        }
+        function switchLigaTab(t) {
+            document.querySelectorAll("#viewLigaDetalle .tab").forEach((el, i) => el.classList.toggle("active", (t==='tabla'?i===0:i===1)));
+            document.getElementById("tabLigaTabla").classList.toggle("active", t==='tabla');
+            document.getElementById("tabLigaJornadas").classList.toggle("active", t==='jornadas');
+        }
+        function terminarLigaOficial() {
+            if (confirm("¿Cerrar oficialmente la liga?")) {
+                ligaActiva.finalizada = true; saveLigaActiva(); showToast("Liga finalizada");
+            }
+        }
+        function renderTablaGeneralLiga() {
+            const th = document.getElementById("tablaLigaHead"); const tb = document.getElementById("tablaLigaBody");
+            tb.innerHTML = "";
+            if (modoSeleccionado === 'pozo') {
+                let h = "<tr><th>Pos</th><th>Jugador</th><th>Total</th>";
+                ligaActiva.jornadas.forEach((j, idx) => h += `<th>J${idx+1}</th>`);
+                h += "<th>🍺</th></tr>"; th.innerHTML = h;
+                const stats = {};
+                ligaActiva.jornadas.forEach(j => {
+                    j.convocados.forEach(p => { if (!stats[p]) stats[p] = { total: 0, list: [], cags: 0 }; });
+                });
+                ligaActiva.jornadas.forEach(j => {
+                    Object.keys(stats).forEach(p => {
+                        let pts = 0; if (j.rondas) j.rondas.forEach(r => pts += (r[p]||0));
+                        stats[p].list.push(pts); stats[p].total += pts;
+                        stats[p].cags += (j.caguamas && j.caguamas[p] ? j.caguamas[p] : 0);
+                    });
+                });
+                const sorted = Object.entries(stats).sort((a,b) => b[1].total - a[1].total);
+                sorted.forEach(([p, dat], idx) => {
+                    let r = `<tr><td>${idx+1}</td><td><strong>${p}</strong></td><td style="color:var(--padel-green); font-weight:bold;">${dat.total}</td>`;
+                    dat.list.forEach(val => r += `<td>${val}</td>`);
+                    r += `<td style="color:var(--padel-orange); font-weight:bold;">🍺 ${dat.cags}</td></tr>`;
+                    tb.innerHTML += r;
+                });
+                if (!sorted.length) tb.innerHTML = "<tr><td colspan='4'>Sin jornadas registradas</td></tr>";
+            } else {
+                th.innerHTML = "<tr><th>Pos</th><th>Jugador</th><th>PJ</th><th>W</th><th>Pts</th><th>+/-</th><th>🍺</th></tr>";
+                const stats = {};
+                ligaActiva.jornadas.forEach(j => {
+                    if (j.rounds) {
+                        j.rounds.forEach(r => {
+                            r.matches.forEach(m => {
+                                m.p1.forEach(p => { stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 }; stats[p].pj++; stats[p].diff += (m.score1 - m.score2); if (m.score1 > m.score2) { stats[p].w++; stats[p].pts += 3; } });
+                                m.p2.forEach(p => { stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 }; stats[p].pj++; stats[p].diff += (m.score2 - m.score1); if (m.score2 > m.score1) { stats[p].w++; stats[p].pts += 3; } });
+                            });
+                        });
+                    }
+                    if (j.caguamas) Object.entries(j.caguamas).forEach(([p, c]) => { stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 }; stats[p].cags += c; });
+                });
+                const sorted = Object.entries(stats).sort((a,b) => b[1].pts - a[1].pts);
+                sorted.forEach(([p, dat], idx) => {
+                    tb.innerHTML += `<tr><td>${idx+1}</td><td><strong>${p}</strong></td><td>${dat.pj}</td><td>${dat.w}</td><td style="color:var(--padel-green); font-weight:bold;">${dat.pts}</td><td>${dat.diff}</td><td>🍺 ${dat.cags}</td></tr>`;
+                });
+                if (!sorted.length) tb.innerHTML = "<tr><td colspan='7'>Sin partidos jugados</td></tr>";
+            }
+        }
+        function renderListaJornadasLiga() {
+            const cont = document.getElementById("listaJornadasContenedor"); cont.innerHTML = "";
+            if (!ligaActiva.jornadas.length) { cont.innerHTML = "<p style='color:gray; padding:10px;'>No hay jornadas creadas.</p>"; return; }
+            ligaActiva.jornadas.forEach(j => {
+                cont.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:var(--padel-light); border:1px solid #cbd5e1; border-radius:8px; margin-bottom:6px;">
+                    <div><strong style="color:var(--padel-blue);">${j.nombre}</strong><br><small style="color:gray;">${j.convocados.length} jugadores</small></div>
+                    <button class="btn btn-sm btn-green" onclick="cargarJornadaEnVivo('${j.id}')">Entrar</button>
+                </div>`;
+            });
+        }
+        function saveLigaActiva() {
+            const d = getUserData();
+            if (modoSeleccionado === 'americano') {
+                const idx = d.ligasAmericano.findIndex(x => x.id === ligaActiva.id); d.ligasAmericano[idx] = ligaActiva;
+            } else {
+                const idx = d.ligasPozo.findIndex(x => x.id === ligaActiva.id); d.ligasPozo[idx] = ligaActiva;
+            }
+            saveUserData(d);
+        }
+
+        let convocadosSeleccionados = [];
+        function abrirModalNuevaJornada() {
+            document.getElementById("jornadaNombreInput").value = `Jornada ${ligaActiva.jornadas.length + 1}`;
+            convocadosSeleccionados = [...getUserData().jugadores];
+            renderPills();
+            document.getElementById("modalNuevaJornada").classList.add("active");
+        }
+        function registrarJugadorExpress() {
+            const inp = document.getElementById("inputRegistroExpress"); const nom = inp.value.trim();
+            if (!nom) return; const d = getUserData();
+            if (!d.jugadores.includes(nom)) { d.jugadores.push(nom); saveUserData(d); }
+            if (!convocadosSeleccionados.includes(nom)) convocadosSeleccionados.push(nom);
+            inp.value = ""; renderPills();
+        }
+        function renderPills() {
+            const d = getUserData(); const cont = document.getElementById("pillsConvocadosContainer"); cont.innerHTML = "";
+            d.jugadores.forEach(j => {
+                const sel = convocadosSeleccionados.includes(j);
+                cont.innerHTML += `<div class="chip-pill ${sel?'active':''}" onclick="togglePill('${j}')">${sel?'✓ ':''}${j}</div>`;
+            });
+            document.getElementById("countConvocados").textContent = convocadosSeleccionados.length;
+        }
+        function togglePill(nom) {
+            if (convocadosSeleccionados.includes(nom)) convocadosSeleccionados = convocadosSeleccionados.filter(x => x !== nom);
+            else convocadosSeleccionados.push(nom);
+            renderPills();
+        }
+        function iniciarJornadaConfirmada() {
+            const nom = document.getElementById("jornadaNombreInput").value.trim() || "Jornada";
+            if (convocadosSeleccionados.length < 2) return showToast("Mínimo 2 jugadores", "error");
+            let j = null;
+            if (modoSeleccionado === 'pozo') {
+                const r1 = {}; convocadosSeleccionados.forEach(p => r1[p] = 0);
+                j = { id: "j_" + Date.now(), nombre: nom, convocados: [...convocadosSeleccionados], rondas: [r1], rondaActual: 1, caguamas: {}, finalizada: false };
+            } else {
+                j = { id: "j_" + Date.now(), nombre: nom, convocados: [...convocadosSeleccionados], rounds: generarRondas8Loco(convocadosSeleccionados), currentRound: 1, caguamas: {}, finalizada: false };
+            }
+            convocadosSeleccionados.forEach(p => j.caguamas[p] = 0);
+            ligaActiva.jornadas.push(j); saveLigaActiva(); closeModal("modalNuevaJornada"); cargarJornadaEnVivo(j.id);
+        }
+
+        let jornadaActiva = null;
+        function cargarJornadaEnVivo(id) {
+            jornadaActiva = ligaActiva.jornadas.find(x => x.id === id);
+            document.getElementById("viewLigaDetalle").classList.add("hidden");
+            if (modoSeleccionado === 'pozo') {
+                document.getElementById("viewJornadaPozoVivo").classList.remove("hidden");
+                document.getElementById("pozoLiveTitulo").textContent = jornadaActiva.nombre;
+                renderPozoNav(); showPozoRound(jornadaActiva.rondaActual || 1);
+            } else {
+                document.getElementById("viewJornada8LocoVivo").classList.remove("hidden");
+                document.getElementById("amLiveTitulo").textContent = jornadaActiva.nombre;
+                render8LocoNav(); show8LocoRound(jornadaActiva.currentRound || 1);
+            }
+        }
+        function backToLigaDetalle() {
+            saveLigaActiva();
+            document.getElementById("viewJornadaPozoVivo").classList.add("hidden");
+            document.getElementById("viewJornada8LocoVivo").classList.add("hidden");
+            document.getElementById("viewLigaDetalle").classList.remove("hidden");
+            abrirLigaDetalle(ligaActiva.id);
+        }
+
+        function renderPozoNav() {
+            const cont = document.getElementById("pozoRoundsNav"); cont.innerHTML = "";
+            for (let i=1; i<=jornadaActiva.rondas.length; i++) {
+                cont.innerHTML += `<div class="chip-pill ${i===jornadaActiva.rondaActual?'active':''}" onclick="showPozoRound(${i})">Ronda ${i}</div>`;
+            }
+        }
+        function showPozoRound(n) {
+            jornadaActiva.rondaActual = n; renderPozoNav();
+            document.getElementById("pozoRondaActualLabel").textContent = `Ronda ${n}`;
+            const rData = jornadaActiva.rondas[n-1]; const cont = document.getElementById("pozoPlayersRondaContainer"); cont.innerHTML = "";
+            jornadaActiva.convocados.forEach(p => {
+                const pts = rData[p] || 0; const cags = jornadaActiva.caguamas[p] || 0;
+                cont.innerHTML += `<div class="pozo-row">
+                    <div><strong style="color:var(--padel-dark);">${p}</strong><br><button class="caguama-badge" onclick="jornadaActiva.caguamas['${p}']=(jornadaActiva.caguamas['${p}']||0)+1; showPozoRound(${n}); saveLigaActiva();">🍺 ${cags}</button></div>
+                    <div class="score-ctrl">
+                        <button class="score-btn" onclick="rData['${p}']=Math.max(0,(rData['${p}']||0)-1); showPozoRound(${n}); saveLigaActiva();">−</button>
+                        <input type="number" class="score-in" value="${pts}" onchange="rData['${p}']=Math.max(0,parseInt(this.value)||0); saveLigaActiva();">
+                        <button class="score-btn" onclick="rData['${p}']=(rData['${p}']||0)+1; showPozoRound(${n}); saveLigaActiva();">+</button>
+                    </div>
+                </div>`;
+            });
+        }
+        function agregarRondaPozo() {
+            const r = {}; jornadaActiva.convocados.forEach(p => r[p] = 0);
+            jornadaActiva.rondas.push(r); saveLigaActiva(); showPozoRound(jornadaActiva.rondas.length);
+        }
+        function finalizarJornadaPozoOficial() {
+            if (confirm("¿Finalizar jornada?")) { jornadaActiva.finalizada = true; saveLigaActiva(); backToLigaDetalle(); }
+        }
+        function compartirWhatsAppPozo() {
+            let txt = `*🎾 11PADEL POINT PRO - POZO*\n🏆 *Liga:* ${ligaActiva.nombre}\n\n*PUNTOS TOTALES:*\n`;
+            const tot = {}; jornadaActiva.convocados.forEach(p => tot[p] = 0);
+            jornadaActiva.rondas.forEach(r => Object.entries(r).forEach(([p, v]) => tot[p] += v));
+            Object.entries(tot).sort((a,b)=>b[1]-a[1]).forEach(([p, v], idx) => {
+                txt += `${idx+1}. ${p} - *${v} Pts* | 🍺 ${jornadaActiva.caguamas[p]||0}\n`;
+            });
+            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
+        }
+
+        function generarRondas8Loco(players) {
+            const courts = Math.floor(players.length / 4);
+            const r = [];
+            for (let round=0; round<players.length-1; round++) {
+                const matches = [];
+                for (let c=0; c<courts; c++) {
+                    const p1 = [players[(round + c*4)%players.length], players[(round + c*4 + 1)%players.length]];
+                    const p2 = [players[(round + c*4 + 2)%players.length], players[(round + c*4 + 3)%players.length]];
+                    matches.push({ p1, p2, score1: 0, score2: 0 });
+                }
+                r.push({ matches });
+            }
+            return r;
+        }
+        function render8LocoNav() {
+            const cont = document.getElementById("amRoundsNav"); cont.innerHTML = "";
+            for (let i=1; i<=jornadaActiva.rounds.length; i++) {
+                cont.innerHTML += `<div class="chip-pill ${i===jornadaActiva.currentRound?'active':''}" onclick="show8LocoRound(${i})">Ronda ${i}</div>`;
+            }
+        }
+        function show8LocoRound(n) {
+            jornadaActiva.currentRound = n; render8LocoNav();
+            const curr = jornadaActiva.rounds[n-1]; const cont = document.getElementById("amMatchesContainer"); cont.innerHTML = "";
+            curr.matches.forEach((m, idx) => {
+                cont.innerHTML += `<div class="match-card-clean">
+                    <div style="font-size:0.75rem; font-weight:bold; color:var(--padel-orange); margin-bottom:4px;">Pista ${idx+1}</div>
+                    <div class="team-row-live">
+                        <div>
+                            <div style="font-weight:700; color:var(--padel-blue); font-size:0.9rem;">${m.p1.join(' & ')}</div>
+                            <button class="caguama-badge" onclick="jornadaActiva.caguamas['${m.p1[0]}']=(jornadaActiva.caguamas['${m.p1[0]}']||0)+1; show8LocoRound(${n}); saveLigaActiva();">🍺 ${jornadaActiva.caguamas[m.p1[0]]||0}</button>
+                        </div>
+                        <button class="score-display-btn score-yellow" onclick="let s=prompt('Puntaje:', m.score1); if(s!==null){ m.score1=parseInt(s)||0; show8LocoRound(${n}); saveLigaActiva(); }">${m.score1}</button>
+                    </div>
+                    <div class="team-row-live" style="margin-top:6px;">
+                        <div>
+                            <div style="font-weight:700; color:var(--padel-blue); font-size:0.9rem;">${m.p2.join(' & ')}</div>
+                            <button class="caguama-badge" onclick="jornadaActiva.caguamas['${m.p2[0]}']=(jornadaActiva.caguamas['${m.p2[0]}']||0)+1; show8LocoRound(${n}); saveLigaActiva();">🍺 ${jornadaActiva.caguamas[m.p2[0]]||0}</button>
+                        </div>
+                        <button class="score-display-btn score-green" onclick="let s=prompt('Puntaje:', m.score2); if(s!==null){ m.score2=parseInt(s)||0; show8LocoRound(${n}); saveLigaActiva(); }">${m.score2}</button>
+                    </div>
+                </div>`;
+            });
+        }
+        function agregarRondaExtra8Loco() {
+            const extra = generarRondas8Loco(jornadaActiva.convocados);
+            jornadaActiva.rounds.push(extra[0]); saveLigaActiva(); show8LocoRound(jornadaActiva.rounds.length);
+        }
+        function finalizarJornada8LocoOficial() {
+            if (confirm("¿Finalizar jornada?")) { jornadaActiva.finalizada = true; saveLigaActiva(); backToLigaDetalle(); }
+        }
+        function compartirWhatsApp8Loco() {
+            let txt = `*🎾 11PADEL POINT PRO - 8 LOCO*\n🏆 *Liga:* ${ligaActiva.nombre}\n\n`;
+            jornadaActiva.rounds.forEach((r, idx) => {
+                txt += `*Ronda ${idx+1}:*\n`;
+                r.matches.forEach(m => txt += `${m.p1.join('&')} (${m.score1}) vs (${m.score2}) ${m.p2.join('&')}\n`);
+            });
+            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
+        }
+
+        function showToast(msg, type="info") {
+            const t = document.getElementById("toast"); t.textContent = msg;
+            t.style.background = type === "error" ? "#e74c3c" : "#2c3e50";
+            t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2500);
+        }
+        function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            sincronizarEnlacesDesdeLaNube();
+        });
     </script>
 </body>
 </html>

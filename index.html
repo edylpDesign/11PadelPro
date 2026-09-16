@@ -271,6 +271,28 @@
         .chip-pill { background: white; padding: 6px 14px; border-radius: 18px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: 1px solid #cbd5e1; white-space: nowrap; }
         .chip-pill.active { background: var(--padel-blue); color: white; border-color: var(--padel-blue); }
 
+        /* FILA POZO */
+        .pozo-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 6px;
+        }
+        .caguama-badge {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
         /* CANCHA DE PÁDEL REALISTA PARA PARTIDOS */
         .padel-court-card {
             background: linear-gradient(180deg, #1b4d79 0%, #153b5d 100%);
@@ -515,7 +537,7 @@
                 <div class="mode-icon-circle"><i class="fas fa-trophy"></i></div>
                 <div>
                     <div class="mode-info-title">Modo Pozo / Rey de la Pista</div>
-                    <div class="mode-info-sub">Puntos individuales directos por ronda.</div>
+                    <div class="mode-info-sub">Puntos individuales directos acumulativos por ronda.</div>
                 </div>
             </div>
 
@@ -1000,7 +1022,7 @@
             return pos;
         }
 
-        // TABLA GENERAL DE LIGA
+        // TABLA GENERAL DE LIGA (SUMATORIA POZO Y 8 LOCO)
         function renderTablaGeneralLiga() {
             const th = document.getElementById("tablaLigaHead"); const tb = document.getElementById("tablaLigaBody");
             tb.innerHTML = "";
@@ -1014,8 +1036,14 @@
                 });
                 ligaActiva.jornadas.forEach(j => {
                     Object.keys(stats).forEach(p => {
-                        let pts = 0; if (j.rondas) j.rondas.forEach(r => pts += (parseInt(r[p]) || 0));
-                        stats[p].list.push(pts); stats[p].total += pts;
+                        let pts = 0; 
+                        if (j.rondas) {
+                            j.rondas.forEach(r => {
+                                pts += (parseInt(r[p]) || 0);
+                            });
+                        }
+                        stats[p].list.push(pts); 
+                        stats[p].total += pts;
                         stats[p].cags += (j.caguamas && j.caguamas[p] ? j.caguamas[p] : 0);
                     });
                 });
@@ -1120,9 +1148,7 @@
             renderPills();
         }
 
-        // ROUND-ROBIN REGLA EQUITATIVA:
-        // Si N es par -> N-1 rondas (nadie descansa)
-        // Si N es impar -> N rondas (todos descansan exactamente 1 vez)
+        // ROUND-ROBIN AMERICANO (N par -> N-1 rondas, N impar -> N rondas)
         function generarRondas8Loco(players) {
             let pool = [...players];
             const n = pool.length;
@@ -1186,13 +1212,33 @@
             if (convocadosSeleccionados.length < 4) return showToast("Mínimo 4 jugadores para el modo", "error");
             let j = null;
             if (modoSeleccionado === 'pozo') {
-                const r1 = {}; convocadosSeleccionados.forEach(p => r1[p] = 0);
-                j = { id: "j_" + Date.now(), nombre: nom, convocados: [...convocadosSeleccionados], rondas: [r1], rondaActual: 1, caguamas: {}, finalizada: false };
+                const r1 = {}; 
+                convocadosSeleccionados.forEach(p => { r1[p] = 0; });
+                j = { 
+                    id: "j_" + Date.now(), 
+                    nombre: nom, 
+                    convocados: [...convocadosSeleccionados], 
+                    rondas: [r1], 
+                    rondaActual: 1, 
+                    caguamas: {}, 
+                    finalizada: false 
+                };
             } else {
-                j = { id: "j_" + Date.now(), nombre: nom, convocados: [...convocadosSeleccionados], rounds: generarRondas8Loco(convocadosSeleccionados), currentRound: 1, caguamas: {}, finalizada: false };
+                j = { 
+                    id: "j_" + Date.now(), 
+                    nombre: nom, 
+                    convocados: [...convocadosSeleccionados], 
+                    rounds: generarRondas8Loco(convocadosSeleccionados), 
+                    currentRound: 1, 
+                    caguamas: {}, 
+                    finalizada: false 
+                };
             }
             convocadosSeleccionados.forEach(p => j.caguamas[p] = 0);
-            ligaActiva.jornadas.push(j); saveLigaActiva(); closeModal("modalNuevaJornada"); cargarJornadaEnVivo(j.id);
+            ligaActiva.jornadas.push(j); 
+            saveLigaActiva(); 
+            closeModal("modalNuevaJornada"); 
+            cargarJornadaEnVivo(j.id);
         }
 
         let jornadaActiva = null;
@@ -1205,12 +1251,14 @@
                 document.getElementById("viewJornadaPozoVivo").classList.remove("hidden");
                 document.getElementById("pozoLiveTitulo").textContent = jornadaActiva.nombre;
                 switchLiveTab('pozo', 'pistas');
-                renderPozoNav(); showPozoRound(jornadaActiva.rondaActual || 1);
+                renderPozoNav(); 
+                showPozoRound(jornadaActiva.rondaActual || 1);
             } else {
                 document.getElementById("viewJornada8LocoVivo").classList.remove("hidden");
                 document.getElementById("amLiveTitulo").textContent = jornadaActiva.nombre;
                 switchLiveTab('8loco', 'pistas');
-                render8LocoNav(); show8LocoRound(jornadaActiva.currentRound || 1);
+                render8LocoNav(); 
+                show8LocoRound(jornadaActiva.currentRound || 1);
             }
         }
 
@@ -1250,13 +1298,19 @@
             }
         }
 
-        // TABLA EN VIVO: POZO
+        // TABLA EN VIVO: POZO (SUMATORIA EXACTA DE TODAS LAS RONDAS)
         function renderTablaPozoLive() {
             const tb = document.getElementById("tablaPozoLiveBody");
             tb.innerHTML = "";
             const tot = {};
-            jornadaActiva.convocados.forEach(p => tot[p] = 0);
-            jornadaActiva.rondas.forEach(r => Object.entries(r).forEach(([p, v]) => tot[p] += (parseInt(v) || 0)));
+            jornadaActiva.convocados.forEach(p => { tot[p] = 0; });
+            
+            // Suma ronda por ronda
+            jornadaActiva.rondas.forEach(r => {
+                jornadaActiva.convocados.forEach(p => {
+                    tot[p] += (parseInt(r[p]) || 0);
+                });
+            });
 
             const sorted = Object.entries(tot).sort((a,b) => b[1] - a[1]);
             sorted.forEach(([p, v], idx) => {
@@ -1322,36 +1376,79 @@
             });
         }
 
-        // POZO LIVE
+        // GESTIÓN Y PERSISTENCIA DE PUNTOS EN POZO
         function renderPozoNav() {
-            const cont = document.getElementById("pozoRoundsNav"); cont.innerHTML = "";
-            for (let i=1; i<=jornadaActiva.rondas.length; i++) {
-                cont.innerHTML += `<div class="chip-pill ${i===jornadaActiva.rondaActual?'active':''}" onclick="showPozoRound(${i})">Ronda ${i}</div>`;
+            const cont = document.getElementById("pozoRoundsNav"); 
+            cont.innerHTML = "";
+            for (let i = 1; i <= jornadaActiva.rondas.length; i++) {
+                cont.innerHTML += `<div class="chip-pill ${i === jornadaActiva.rondaActual ? 'active' : ''}" onclick="showPozoRound(${i})">Ronda ${i}</div>`;
             }
         }
+
+        function modificarPuntosPozo(roundNum, player, cambio) {
+            const rData = jornadaActiva.rondas[roundNum - 1];
+            const actual = parseInt(rData[player]) || 0;
+            rData[player] = Math.max(0, actual + cambio);
+            saveLigaActiva();
+            showPozoRound(roundNum);
+        }
+
+        function escribirPuntosPozo(roundNum, player, val) {
+            const rData = jornadaActiva.rondas[roundNum - 1];
+            rData[player] = Math.max(0, parseInt(val) || 0);
+            saveLigaActiva();
+        }
+
         function showPozoRound(n) {
-            jornadaActiva.rondaActual = n; renderPozoNav();
+            jornadaActiva.rondaActual = n; 
+            renderPozoNav();
             document.getElementById("pozoRondaActualLabel").textContent = `Ronda ${n}`;
-            const rData = jornadaActiva.rondas[n-1]; const cont = document.getElementById("pozoPlayersRondaContainer"); cont.innerHTML = "";
+            const rData = jornadaActiva.rondas[n - 1]; 
+            const cont = document.getElementById("pozoPlayersRondaContainer"); 
+            cont.innerHTML = "";
+
             jornadaActiva.convocados.forEach(p => {
-                const pts = rData[p] !== undefined ? rData[p] : 0;
+                if (rData[p] === undefined) rData[p] = 0;
+                const pts = rData[p];
                 const cags = jornadaActiva.caguamas[p] || 0;
-                cont.innerHTML += `<div class="pozo-row">
-                    <div><strong style="color:var(--padel-dark);">${p}</strong><br><button class="caguama-badge" onclick="jornadaActiva.caguamas['${p}']=(jornadaActiva.caguamas['${p}']||0)+1; showPozoRound(${n}); saveLigaActiva();">🍺 ${cags}</button></div>
+
+                // Suma acumulada total hasta el momento para referencia visual del jugador
+                let totalAcumulado = 0;
+                jornadaActiva.rondas.forEach(r => { totalAcumulado += (parseInt(r[p]) || 0); });
+
+                cont.innerHTML += `
+                <div class="pozo-row">
+                    <div>
+                        <strong style="color:var(--padel-dark);">${p}</strong>
+                        <div style="font-size:0.7rem; color:gray;">Acumulado: <strong style="color:var(--padel-green);">${totalAcumulado} pts</strong></div>
+                        <button class="caguama-badge" style="margin-top:3px;" onclick="jornadaActiva.caguamas['${p}']=(jornadaActiva.caguamas['${p}']||0)+1; saveLigaActiva(); showPozoRound(${n});">🍺 ${cags}</button>
+                    </div>
                     <div class="score-ctrl">
-                        <button class="score-btn" onclick="rData['${p}']=Math.max(0,(parseInt(rData['${p}'])||0)-1); showPozoRound(${n}); saveLigaActiva();">−</button>
-                        <input type="number" class="score-in" value="${pts}" oninput="rData['${p}']=Math.max(0,parseInt(this.value)||0); saveLigaActiva();">
-                        <button class="score-btn" onclick="rData['${p}']=(parseInt(rData['${p}'])||0)+1; showPozoRound(${n}); saveLigaActiva();">+</button>
+                        <button type="button" class="score-btn" onclick="modificarPuntosPozo(${n}, '${p}', -1)">−</button>
+                        <input type="number" class="score-in" value="${pts}" oninput="escribirPuntosPozo(${n}, '${p}', this.value)">
+                        <button type="button" class="score-btn" onclick="modificarPuntosPozo(${n}, '${p}', 1)">+</button>
                     </div>
                 </div>`;
             });
         }
+
         function agregarRondaPozo() {
-            const r = {}; jornadaActiva.convocados.forEach(p => r[p] = 0);
-            jornadaActiva.rondas.push(r); saveLigaActiva(); showPozoRound(jornadaActiva.rondas.length);
+            // Crea una nueva ronda limpia iniciando a todos en 0 sin modificar las anteriores
+            const nuevaRonda = {}; 
+            jornadaActiva.convocados.forEach(p => { nuevaRonda[p] = 0; });
+            jornadaActiva.rondas.push(nuevaRonda); 
+            jornadaActiva.rondaActual = jornadaActiva.rondas.length;
+            saveLigaActiva(); 
+            showPozoRound(jornadaActiva.rondaActual);
+            showToast(`¡Ronda ${jornadaActiva.rondaActual} agregada!`);
         }
+
         function finalizarJornadaPozoOficial() {
-            if (confirm("¿Finalizar jornada?")) { jornadaActiva.finalizada = true; saveLigaActiva(); backToLigaDetalle(); }
+            if (confirm("¿Finalizar oficialmente esta jornada?")) { 
+                jornadaActiva.finalizada = true; 
+                saveLigaActiva(); 
+                backToLigaDetalle(); 
+            }
         }
 
         // 8 LOCO LIVE (CANCHAS REALISTAS Y MARCADOR TÁCTIL BLINDADO)
@@ -1436,9 +1533,14 @@
 
         // COMPARTIR WHATSAPP
         function compartirWhatsAppPozo() {
-            let txt = `*🎾 11PADEL POINT PRO - POZO*\n🏆 *Liga:* ${ligaActiva.nombre}\n📅 *Jornada:* ${jornadaActiva.nombre}\n\n*TABLA DE PUNTOS EN VIVO:*\n`;
-            const tot = {}; jornadaActiva.convocados.forEach(p => tot[p] = 0);
-            jornadaActiva.rondas.forEach(r => Object.entries(r).forEach(([p, v]) => tot[p] += (parseInt(v) || 0)));
+            let txt = `*🎾 11PADEL POINT PRO - POZO*\n🏆 *Liga:* ${ligaActiva.nombre}\n📅 *Jornada:* ${jornadaActiva.nombre}\n\n*TABLA DE PUNTOS ACUMULADOS:*\n`;
+            const tot = {}; 
+            jornadaActiva.convocados.forEach(p => { tot[p] = 0; });
+            jornadaActiva.rondas.forEach(r => {
+                jornadaActiva.convocados.forEach(p => {
+                    tot[p] += (parseInt(r[p]) || 0);
+                });
+            });
             Object.entries(tot).sort((a,b)=>b[1]-a[1]).forEach(([p, v], idx) => {
                 const med = idx === 0 ? '🥇 ' : (idx === 1 ? '🥈 ' : (idx === 2 ? '🥉 ' : ''));
                 txt += `${idx+1}. ${med}${p} - *${v} Pts* | 🍺 ${jornadaActiva.caguamas[p]||0}\n`;

@@ -369,7 +369,8 @@
         th { background: linear-gradient(135deg, var(--padel-blue) 0%, var(--padel-green) 100%); color: white; padding: 8px 6px; font-weight: 700; text-align: center; }
         td { padding: 8px 6px; border-bottom: 1px solid var(--padel-light-gray); text-align: center; white-space: nowrap; font-weight: 600; }
 
-        input { width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; margin-top: 4px; }
+        input, textarea { width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; margin-top: 4px; }
+        textarea { resize: vertical; min-height: 60px; font-family: inherit; font-size: 0.85rem; }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; pointer-events: none; padding: 12px; }
         .modal.active { opacity: 1; pointer-events: all; }
         .modal-content { background: white; border-radius: 16px; width: 100%; max-width: 480px; padding: 18px; max-height: 85vh; overflow-y: auto; }
@@ -472,6 +473,11 @@
             <h4 style="color:var(--padel-green); font-size:0.85rem; margin-top:4px;"><i class="fas fa-share-alt"></i> Redes Sociales de la App</h4>
             <label style="font-size:0.75rem; font-weight:bold;">Enlace Redes 11Padel (Logo Principal):</label>
             <input type="url" id="adminAppLogoUrl" placeholder="https://instagram.com/11padelpro">
+
+            <!-- MENSAJE GENERAL PARA WHATSAPP -->
+            <h4 style="color:#25d366; font-size:0.85rem; margin-top:14px; border-top:1px solid #cbd5e1; padding-top:10px;"><i class="fab fa-whatsapp"></i> Mensaje de Pie para WhatsApp</h4>
+            <label style="font-size:0.75rem; font-weight:bold;">Este texto aparecerá al final de todos los reportes de WhatsApp:</label>
+            <textarea id="adminWaCustomMsg" placeholder="Ej: Síguenos en @11padelpro • Torneo patrocinado por SB TOTAL PADEL"></textarea>
 
             <h4 style="color:var(--padel-orange); font-size:0.85rem; margin-top:14px; border-top:1px solid #cbd5e1; padding-top:10px;"><i class="fas fa-star"></i> Enlaces de Patrocinadores</h4>
             <label style="font-size:0.75rem; font-weight:bold;">Patrocinador Principal (Header):</label>
@@ -625,8 +631,8 @@
             </div>
 
             <div id="pozoLiveTablaView" class="hidden card">
-                <h4 style="color:var(--padel-blue); margin-bottom:8px; font-size:0.9rem;"><i class="fas fa-trophy"></i> Clasificación en Tiempo Real</h4>
-                <div class="table-responsive"><table id="tablaPozoLive"><thead><tr><th>Pos</th><th>Jugador</th><th>Total</th><th>🍺</th></tr></thead><tbody id="tablaPozoLiveBody"></tbody></table></div>
+                <h4 style="color:var(--padel-blue); margin-bottom:8px; font-size:0.9rem;"><i class="fas fa-trophy"></i> Clasificación de la Jornada</h4>
+                <div class="table-responsive"><table id="tablaPozoLive"><thead><tr><th>Pos</th><th>Jugador</th><th>Puntos Jornada</th><th>🍺</th></tr></thead><tbody id="tablaPozoLiveBody"></tbody></table></div>
             </div>
         </div>
 
@@ -706,6 +712,7 @@
         let appConfig = JSON.parse(localStorage.getItem("11padel_app_config")) || {
             appLogoUrl: "https://instagram.com",
             mainUrl: "https://instagram.com/sbtotalpadel",
+            waCustomMsg: "",
             banner1Url: "https://instagram.com/chuletasnkrs",
             banner2Url: "https://instagram.com/motio",
             banner3Url: "https://instagram.com/room",
@@ -792,7 +799,7 @@
                 const res = await fetch(CLOUD_DB_URL);
                 if (res.ok) {
                     const data = await res.json();
-                    if (data && (data.mainUrl || data.appLogoUrl || data.torneos)) {
+                    if (data && (data.mainUrl || data.appLogoUrl || data.torneos || data.waCustomMsg !== undefined)) {
                         appConfig = Object.assign({}, appConfig, data);
                         localStorage.setItem("11padel_app_config", JSON.stringify(appConfig));
                         aplicarEnlaces();
@@ -826,6 +833,7 @@
             
             document.getElementById("adminAppLogoUrl").value = appConfig.appLogoUrl || "";
             document.getElementById("adminMainSponsorUrl").value = appConfig.mainUrl || "";
+            document.getElementById("adminWaCustomMsg").value = appConfig.waCustomMsg || "";
             document.getElementById("adminBanner1Url").value = appConfig.banner1Url || "";
             document.getElementById("adminBanner2Url").value = appConfig.banner2Url || "";
             document.getElementById("adminBanner3Url").value = appConfig.banner3Url || "";
@@ -851,6 +859,7 @@
         async function guardarEnlacesEnFirebase() {
             appConfig.appLogoUrl = document.getElementById("adminAppLogoUrl").value.trim() || "https://instagram.com";
             appConfig.mainUrl = document.getElementById("adminMainSponsorUrl").value.trim() || "https://instagram.com/sbtotalpadel";
+            appConfig.waCustomMsg = document.getElementById("adminWaCustomMsg").value.trim() || "";
             appConfig.banner1Url = document.getElementById("adminBanner1Url").value.trim() || "https://instagram.com";
             appConfig.banner2Url = document.getElementById("adminBanner2Url").value.trim() || "https://instagram.com";
             appConfig.banner3Url = document.getElementById("adminBanner3Url").value.trim() || "https://instagram.com";
@@ -1022,36 +1031,50 @@
             return pos;
         }
 
-        // TABLA GENERAL DE LIGA (SUMATORIA POZO Y 8 LOCO)
+        // TABLA GENERAL DE LIGA (Puntos por Jornada + Total acumulado + Ranking por Total)
         function renderTablaGeneralLiga() {
-            const th = document.getElementById("tablaLigaHead"); const tb = document.getElementById("tablaLigaBody");
+            const th = document.getElementById("tablaLigaHead"); 
+            const tb = document.getElementById("tablaLigaBody");
             tb.innerHTML = "";
+            
             if (modoSeleccionado === 'pozo') {
                 let h = "<tr><th>Pos</th><th>Jugador</th><th>Total</th>";
-                ligaActiva.jornadas.forEach((j, idx) => h += `<th>J${idx+1}</th>`);
-                h += "<th>🍺</th></tr>"; th.innerHTML = h;
+                ligaActiva.jornadas.forEach((j, idx) => { h += `<th>J${idx+1}</th>`; });
+                h += "<th>🍺</th></tr>"; 
+                th.innerHTML = h;
+
                 const stats = {};
+                // Registrar todos los participantes que hayan estado en al menos una jornada
                 ligaActiva.jornadas.forEach(j => {
-                    j.convocados.forEach(p => { if (!stats[p]) stats[p] = { total: 0, list: [], cags: 0 }; });
+                    j.convocados.forEach(p => { 
+                        if (!stats[p]) stats[p] = { total: 0, list: [], cags: 0 }; 
+                    });
                 });
+
+                // Calcular puntos por jornada individual y acumular al total general
                 ligaActiva.jornadas.forEach(j => {
                     Object.keys(stats).forEach(p => {
-                        let pts = 0; 
-                        if (j.rondas) {
+                        let ptsJornada = 0; 
+                        if (j.rondas && j.convocados.includes(p)) {
                             j.rondas.forEach(r => {
-                                pts += (parseInt(r[p]) || 0);
+                                ptsJornada += (parseInt(r[p]) || 0);
                             });
                         }
-                        stats[p].list.push(pts); 
-                        stats[p].total += pts;
+                        stats[p].list.push(ptsJornada); 
+                        stats[p].total += ptsJornada;
                         stats[p].cags += (j.caguamas && j.caguamas[p] ? j.caguamas[p] : 0);
                     });
                 });
+
+                // Ranking ordenado en base al Total de Puntos
                 const sorted = Object.entries(stats).sort((a,b) => b[1].total - a[1].total);
                 sorted.forEach(([p, dat], idx) => {
                     const rowClass = idx === 0 ? 'podium-1' : '';
-                    let r = `<tr class="${rowClass}"><td>${obtenerIconoPosicion(idx+1)}</td><td><strong>${p}</strong></td><td style="color:var(--padel-green); font-weight:bold;">${dat.total}</td>`;
-                    dat.list.forEach(val => r += `<td>${val}</td>`);
+                    let r = `<tr class="${rowClass}">
+                        <td>${obtenerIconoPosicion(idx+1)}</td>
+                        <td><strong>${p}</strong></td>
+                        <td style="color:var(--padel-green); font-weight:bold; font-size:0.95rem;">${dat.total}</td>`;
+                    dat.list.forEach(val => { r += `<td>${val}</td>`; });
                     r += `<td style="color:var(--padel-orange); font-weight:bold;">🍺 ${dat.cags}</td></tr>`;
                     tb.innerHTML += r;
                 });
@@ -1298,21 +1321,21 @@
             }
         }
 
-        // TABLA EN VIVO: POZO (SUMATORIA EXACTA DE TODAS LAS RONDAS)
+        // TABLA EN VIVO: POZO (SOLO PUNTOS DE LA JORNADA EN CURSO)
         function renderTablaPozoLive() {
             const tb = document.getElementById("tablaPozoLiveBody");
             tb.innerHTML = "";
-            const tot = {};
-            jornadaActiva.convocados.forEach(p => { tot[p] = 0; });
+            const totJornada = {};
+            jornadaActiva.convocados.forEach(p => { totJornada[p] = 0; });
             
-            // Suma ronda por ronda
+            // Suma exclusiva de las rondas de esta jornada
             jornadaActiva.rondas.forEach(r => {
                 jornadaActiva.convocados.forEach(p => {
-                    tot[p] += (parseInt(r[p]) || 0);
+                    totJornada[p] += (parseInt(r[p]) || 0);
                 });
             });
 
-            const sorted = Object.entries(tot).sort((a,b) => b[1] - a[1]);
+            const sorted = Object.entries(totJornada).sort((a,b) => b[1] - a[1]);
             sorted.forEach(([p, v], idx) => {
                 const rowClass = idx === 0 ? 'podium-1' : '';
                 tb.innerHTML += `
@@ -1412,15 +1435,15 @@
                 const pts = rData[p];
                 const cags = jornadaActiva.caguamas[p] || 0;
 
-                // Suma acumulada total hasta el momento para referencia visual del jugador
-                let totalAcumulado = 0;
-                jornadaActiva.rondas.forEach(r => { totalAcumulado += (parseInt(r[p]) || 0); });
+                // Total de esta jornada hasta el momento
+                let totalJornada = 0;
+                jornadaActiva.rondas.forEach(r => { totalJornada += (parseInt(r[p]) || 0); });
 
                 cont.innerHTML += `
                 <div class="pozo-row">
                     <div>
                         <strong style="color:var(--padel-dark);">${p}</strong>
-                        <div style="font-size:0.7rem; color:gray;">Acumulado: <strong style="color:var(--padel-green);">${totalAcumulado} pts</strong></div>
+                        <div style="font-size:0.7rem; color:gray;">Jornada: <strong style="color:var(--padel-green);">${totalJornada} pts</strong></div>
                         <button class="caguama-badge" style="margin-top:3px;" onclick="jornadaActiva.caguamas['${p}']=(jornadaActiva.caguamas['${p}']||0)+1; saveLigaActiva(); showPozoRound(${n});">🍺 ${cags}</button>
                     </div>
                     <div class="score-ctrl">
@@ -1433,7 +1456,6 @@
         }
 
         function agregarRondaPozo() {
-            // Crea una nueva ronda limpia iniciando a todos en 0 sin modificar las anteriores
             const nuevaRonda = {}; 
             jornadaActiva.convocados.forEach(p => { nuevaRonda[p] = 0; });
             jornadaActiva.rondas.push(nuevaRonda); 
@@ -1531,9 +1553,17 @@
             if (confirm("¿Finalizar jornada?")) { jornadaActiva.finalizada = true; saveLigaActiva(); backToLigaDetalle(); }
         }
 
-        // COMPARTIR WHATSAPP
+        // FUNCIÓN AUXILIAR: TEXTO DE PIE PARA WHATSAPP
+        function obtenerPieWhatsApp() {
+            if (appConfig.waCustomMsg && appConfig.waCustomMsg.trim() !== "") {
+                return `\n\n📢 *${appConfig.waCustomMsg.trim()}*`;
+            }
+            return "";
+        }
+
+        // COMPARTIR WHATSAPP POZO (SOLO PUNTOS DE LA JORNADA EN CURSO)
         function compartirWhatsAppPozo() {
-            let txt = `*🎾 11PADEL POINT PRO - POZO*\n🏆 *Liga:* ${ligaActiva.nombre}\n📅 *Jornada:* ${jornadaActiva.nombre}\n\n*TABLA DE PUNTOS ACUMULADOS:*\n`;
+            let txt = `*🎾 11PADEL POINT PRO - POZO*\n🏆 *Liga:* ${ligaActiva.nombre}\n📅 *Jornada:* ${jornadaActiva.nombre}\n\n*RESULTADOS DE LA JORNADA:*\n`;
             const tot = {}; 
             jornadaActiva.convocados.forEach(p => { tot[p] = 0; });
             jornadaActiva.rondas.forEach(r => {
@@ -1545,15 +1575,20 @@
                 const med = idx === 0 ? '🥇 ' : (idx === 1 ? '🥈 ' : (idx === 2 ? '🥉 ' : ''));
                 txt += `${idx+1}. ${med}${p} - *${v} Pts* | 🍺 ${jornadaActiva.caguamas[p]||0}\n`;
             });
+
+            txt += obtenerPieWhatsApp();
             window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
         }
 
+        // COMPARTIR WHATSAPP 8 LOCO
         function compartirWhatsApp8Loco() {
             let txt = `*🎾 11PADEL POINT PRO - 8 LOCO*\n🏆 *Liga:* ${ligaActiva.nombre}\n📅 *Jornada:* ${jornadaActiva.nombre}\n\n*MARCADORES EN VIVO:*\n`;
             jornadaActiva.rounds.forEach((r, idx) => {
                 txt += `*Ronda ${idx+1}:*\n`;
                 r.matches.forEach(m => txt += `${m.p1.join('&')} (${m.score1}) vs (${m.score2}) ${m.p2.join('&')}\n`);
             });
+
+            txt += obtenerPieWhatsApp();
             window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
         }
 

@@ -371,7 +371,7 @@
             line-height: 1.3;
         }
 
-        /* MODAL VISOR LIGHTBOX DE FOTOS EN GRANDE CON BOTÓN DE DESCARGA */
+        /* MODAL VISOR LIGHTBOX */
         .lightbox-modal {
             position: fixed;
             inset: 0;
@@ -1179,7 +1179,7 @@
                 <textarea id="adminNewsDesc" placeholder="Breve texto sobre el torneo, convocatoria o aviso del club"></textarea>
             </div>
 
-            <!-- PESTAÑA 4: COMUNIDAD (20 FOTOS) -->
+            <!-- PESTAÑA 4: COMUNIDAD (20 FOTOS) CON REORDENAMIENTO -->
             <div id="adminTabContentCommunity" class="hidden">
                 <h4 style="color:var(--padel-volt); font-size:0.85rem; margin-bottom:8px;">
                     <i class="fas fa-images"></i> Carrusel de Comunidad (Hasta 20 Fotos)
@@ -1199,7 +1199,14 @@
                     </button>
                 </div>
                 
-                <div id="adminCommunityListContainer" style="margin-top:12px; display:flex; flex-direction:column; gap:8px; max-height:240px; overflow-y:auto; padding-right:4px;"></div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; margin-bottom:6px;">
+                    <span style="font-size:0.75rem; font-weight:800; color:var(--padel-volt);">
+                        <i class="fas fa-sort"></i> Reordenar Fotos (Primero ➔ Último)
+                    </span>
+                    <small style="font-size:0.68rem; color:var(--txt-muted);">Usa las flechas o cambia el número</small>
+                </div>
+
+                <div id="adminCommunityListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto; padding-right:4px;"></div>
             </div>
 
             <!-- PESTAÑA 5: WHATSAPP -->
@@ -1523,6 +1530,38 @@
             }
         }
 
+        // FUNCIONES DE REORDENAMIENTO DE FOTOS EN COMUNIDAD
+        function moverFotoComunidad(index, direccion) {
+            const list = appConfig.communityMoments || [];
+            const nuevoIndex = index + direccion;
+
+            if (nuevoIndex < 0 || nuevoIndex >= list.length) return;
+
+            const item = list.splice(index, 1)[0];
+            list.splice(nuevoIndex, 0, item);
+
+            renderAdminListaFotos();
+            renderCommunityCarousel();
+            showToast(`Foto movida a la posición #${nuevoIndex + 1}`);
+        }
+
+        function reordenarFotoDirecto(indexActual, nuevoIndexInput) {
+            const list = appConfig.communityMoments || [];
+            let destino = parseInt(nuevoIndexInput) - 1;
+
+            if (isNaN(destino)) return;
+            if (destino < 0) destino = 0;
+            if (destino >= list.length) destino = list.length - 1;
+            if (destino === indexActual) return;
+
+            const item = list.splice(indexActual, 1)[0];
+            list.splice(destino, 0, item);
+
+            renderAdminListaFotos();
+            renderCommunityCarousel();
+            showToast(`Foto reubicada en la posición #${destino + 1}`);
+        }
+
         function renderAdminListaFotos() {
             const list = appConfig.communityMoments || [];
             const countSpan = document.getElementById("countAdminFotos");
@@ -1538,13 +1577,40 @@
             }
 
             list.forEach((item, idx) => {
+                const esPrimero = idx === 0;
+                const esUltimo = idx === list.length - 1;
+
                 cont.innerHTML += `
-                    <div style="display:flex; align-items:center; justify-content:space-between; background:#0b1120; padding:6px 10px; border-radius:8px; border:1px solid var(--border-glow);">
-                        <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
-                            <img src="${item.img}" style="width:36px; height:36px; object-fit:cover; border-radius:6px;">
-                            <span style="font-size:0.75rem; color:var(--txt-main); text-overflow:ellipsis; white-space:nowrap; overflow:hidden; max-width:180px;">${item.caption}</span>
+                    <div style="display:flex; align-items:center; justify-content:space-between; background:#0b1120; padding:8px 10px; border-radius:10px; border:1px solid var(--border-glow); gap:8px;">
+                        
+                        <!-- Miniatura y posición -->
+                        <div style="display:flex; align-items:center; gap:8px; overflow:hidden; flex:1;">
+                            <div style="display:flex; flex-direction:column; align-items:center; min-width:24px;">
+                                <span style="font-size:0.7rem; font-weight:900; color:var(--padel-volt);">#${idx + 1}</span>
+                            </div>
+                            <img src="${item.img}" style="width:40px; height:40px; object-fit:cover; border-radius:6px; border:1px solid var(--border-glow);">
+                            <div style="display:flex; flex-direction:column; overflow:hidden;">
+                                <span style="font-size:0.75rem; font-weight:700; color:var(--txt-main); text-overflow:ellipsis; white-space:nowrap; overflow:hidden;">${item.caption}</span>
+                                <small style="font-size:0.65rem; color:var(--txt-dim);">${idx === 0 ? '★ Primera en mostrarse' : (esUltimo ? 'Fin del carrusel' : 'En rotación')}</small>
+                            </div>
                         </div>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="eliminarFotoComunidad(${idx})" style="padding:4px 8px;"><i class="fas fa-trash"></i></button>
+
+                        <!-- Controles de reordenar y eliminar -->
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <button type="button" class="btn btn-dark btn-sm" onclick="moverFotoComunidad(${idx}, -1)" ${esPrimero ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''} style="padding:4px 8px;" title="Mover hacia arriba / adelante">
+                                <i class="fas fa-chevron-up"></i>
+                            </button>
+                            <button type="button" class="btn btn-dark btn-sm" onclick="moverFotoComunidad(${idx}, 1)" ${esUltimo ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''} style="padding:4px 8px;" title="Mover hacia abajo / atrás">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <select onchange="reordenarFotoDirecto(${idx}, this.value)" style="width:42px; padding:3px; font-size:0.75rem; background:var(--bg-card-subtle); color:var(--txt-main); border:1px solid var(--border-glow); border-radius:6px; margin:0;" title="Cambiar número de orden directo">
+                                ${list.map((_, i) => `<option value="${i + 1}" ${i === idx ? 'selected' : ''}>${i + 1}</option>`).join('')}
+                            </select>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarFotoComunidad(${idx})" style="padding:4px 8px;" title="Eliminar foto">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+
                     </div>
                 `;
             });
@@ -1575,7 +1641,7 @@
             });
         }
 
-        // CONTROL DEL MODAL LIGHTBOX EXCLUSIVO DEL CARRUSEL DE FOTOS
+        // CONTROL DEL MODAL LIGHTBOX
         let fotoSeleccionadaActual = null;
 
         function abrirLightbox(index) {
@@ -1619,7 +1685,6 @@
             try {
                 showToast("Iniciando descarga...");
 
-                // Caso 1: Imagen en Base64
                 if (src.startsWith("data:")) {
                     const a = document.createElement("a");
                     a.href = src;
@@ -1631,7 +1696,6 @@
                     return;
                 }
 
-                // Caso 2: Imagen por URL (Fetch y Blob)
                 const res = await fetch(src, { mode: 'cors' });
                 const blob = await res.blob();
                 const blobUrl = window.URL.createObjectURL(blob);
@@ -1646,7 +1710,6 @@
 
                 showToast("¡Imagen guardada!");
             } catch (err) {
-                // Fallback para imágenes externas con restricciones CORS
                 const win = window.open(src, '_blank');
                 if (win) {
                     showToast("Mantén presionada la foto para guardarla");
@@ -1734,7 +1797,6 @@
                     }
                 }
 
-                // Si el usuario tiene el lightbox abierto no se auto-desplaza para no causar saltos
                 const modal = document.getElementById("lightboxModal");
                 if (modal && modal.classList.contains("active")) return;
 
@@ -2391,7 +2453,6 @@
             });
         }
 
-        // CONTROL INDIVIDUAL DE CAGUAMAS
         function modificarCaguamaJugador(player, cambio, roundNum = null) {
             if (!jornadaActiva.caguamas) jornadaActiva.caguamas = {};
             const actual = jornadaActiva.caguamas[player] || 0;

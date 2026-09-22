@@ -257,10 +257,10 @@
         .sponsor-btn-fallback { font-size: 0.72rem; font-weight: 700; color: var(--txt-muted); display: flex; align-items: center; gap: 4px; }
         .sponsors-footer-text { font-size: 0.75rem; font-weight: 800; color: var(--padel-orange); margin-top: 10px; letter-spacing: 0.5px; }
 
-        /* NUEVA SECCIÓN: NOTICIAS & REPOST */
+        /* SECCIÓN: NOTICIAS & REPOST */
         .news-card-container {
-            background: var(--bg-card); border-radius: 18px; padding: 14px;
-            margin-bottom: 14px; box-shadow: var(--card-shadow); border: 1px solid var(--border-glow);
+            background: var(--bg-card); border-radius: 18px; padding: 16px;
+            margin-top: 18px; margin-bottom: 14px; box-shadow: var(--card-shadow); border: 1px solid var(--border-glow);
             border-left: 5px solid var(--padel-blue);
         }
         .news-header-badge {
@@ -289,6 +289,66 @@
             border-color: var(--padel-volt); color: var(--padel-volt); transform: scale(0.98);
         }
 
+        /* SECCIÓN: COMUNIDAD & MOMENTOS */
+        .community-carousel-card {
+            background: var(--bg-card); border-radius: 18px; padding: 16px;
+            margin-top: 14px; margin-bottom: 14px; box-shadow: var(--card-shadow); border: 1px solid var(--border-glow);
+        }
+        .community-header {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+        }
+        .community-title {
+            font-size: 0.85rem; font-weight: 800; color: var(--txt-main); text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .community-carousel {
+            display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+            padding-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+            scroll-behavior: smooth;
+        }
+        .community-carousel::-webkit-scrollbar { display: none; }
+        
+        .community-item-box {
+            flex: 0 0 210px !important;
+            width: 210px !important;
+            scroll-snap-align: start;
+            background: #0b1120;
+            border: 1px solid var(--border-glow);
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+            position: relative;
+        }
+        .community-img-wrap {
+            width: 210px;
+            height: 240px;
+            background: #050811;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .community-img-tag {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .community-caption-box {
+            padding: 10px 12px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--txt-main);
+            background: var(--bg-card-subtle);
+            border-top: 1px solid var(--border-glow);
+            min-height: 54px;
+            display: flex;
+            align-items: center;
+            line-height: 1.3;
+        }
+
         /* CARRUSEL DE TORNEOS */
         .tournaments-container {
             background: var(--bg-card); border-radius: 18px; padding: 14px;
@@ -303,6 +363,7 @@
         .tournaments-carousel {
             display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
             padding-bottom: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+            scroll-behavior: smooth;
         }
         .tournaments-carousel::-webkit-scrollbar { display: none; }
         
@@ -380,27 +441,147 @@
         }
         .btn-tournament-link:active { transform: scale(0.96); }
 
-        /* MODOS DE JUEGO */
+        /* GRID PRINCIPAL DE MODOS DE JUEGO */
         .section-title { font-size: 0.85rem; font-weight: 800; color: var(--txt-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 14px 0 10px 4px; }
-        .mode-box-card {
-            background: var(--bg-card); border-radius: 16px; padding: 16px; margin-bottom: 12px;
+        
+        .modes-grid-duo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .mode-hero-card {
+            background: #0f172a;
+            border-radius: 20px;
+            padding: 18px 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            min-height: 250px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1.5px solid rgba(0, 230, 118, 0.25);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+        }
+        .mode-hero-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(0, 230, 118, 0.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .mode-hero-card:active {
+            transform: scale(0.96);
+            box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+        }
+
+        .mode-hero-card.pozo {
+            border-color: rgba(56, 189, 248, 0.35);
+        }
+        .mode-hero-card.pozo::before {
+            background: radial-gradient(circle at center, rgba(2, 132, 199, 0.18) 0%, transparent 60%);
+        }
+        .mode-hero-card.pozo:active {
+            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+        }
+
+        .mode-hero-badge {
+            font-size: 0.62rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(0, 230, 118, 0.15);
+            color: var(--padel-volt);
+            border: 1px solid rgba(0, 230, 118, 0.35);
+            margin-bottom: 8px;
+        }
+        .mode-hero-card.pozo .mode-hero-badge {
+            background: rgba(2, 132, 199, 0.2);
+            color: var(--padel-blue-glow);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+
+        .mode-hero-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(0, 230, 118, 0.25) 0%, rgba(0, 176, 255, 0.1) 100%);
+            border: 1.5px solid var(--padel-volt);
+            color: var(--padel-volt);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 10px 0 12px 0;
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.3);
+        }
+        .mode-hero-card.pozo .mode-hero-icon {
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.3) 0%, rgba(56, 189, 248, 0.1) 100%);
+            border-color: var(--padel-blue-glow);
+            color: var(--padel-blue-glow);
+            box-shadow: 0 0 20px rgba(2, 132, 199, 0.4);
+        }
+
+        .mode-hero-title {
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: var(--txt-main);
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+        .mode-hero-sub {
+            font-size: 0.7rem;
+            color: var(--txt-muted);
+            line-height: 1.3;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .btn-mode-hero-action {
+            width: 100%;
+            height: 36px;
+            border-radius: 10px;
+            font-size: 0.78rem;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border: none;
+            cursor: pointer;
+            background: var(--padel-volt);
+            color: #080d1a;
+            box-shadow: 0 4px 12px rgba(0, 230, 118, 0.35);
+        }
+        .mode-hero-card.pozo .btn-mode-hero-action {
+            background: var(--padel-blue);
+            color: white;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+        }
+
+        /* TARJETA DEL PADRÓN */
+        .mode-box-card.padron {
+            background: var(--bg-card); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px;
             cursor: pointer; display: flex; align-items: center; gap: 14px; box-shadow: var(--card-shadow);
-            border: 1px solid var(--border-glow); border-left: 5px solid var(--padel-volt); transition: all 0.2s;
+            border: 1px solid var(--border-glow); border-left: 5px solid var(--padel-purple); transition: all 0.2s;
         }
-        .mode-box-card:active { transform: scale(0.98); background: var(--bg-card-subtle); }
-        .mode-box-card.pozo { border-left-color: var(--padel-blue); }
-        .mode-box-card.padron { border-left-color: var(--padel-purple); }
-        
-        .mode-icon-circle {
-            width: 48px; height: 48px; min-width: 48px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #080d1a; background: var(--padel-volt);
-            box-shadow: 0 4px 12px rgba(0, 230, 118, 0.25);
+        .mode-box-card.padron:active { transform: scale(0.98); background: var(--bg-card-subtle); }
+        .mode-box-card.padron .mode-icon-circle {
+            width: 44px; height: 44px; min-width: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: white; background: var(--padel-purple);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
         }
-        .mode-box-card.pozo .mode-icon-circle { background: var(--padel-blue); color: white; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3); }
-        .mode-box-card.padron .mode-icon-circle { background: var(--padel-purple); color: white; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3); }
-        
-        .mode-info-title { font-size: 1rem; font-weight: 800; color: var(--txt-main); }
-        .mode-info-sub { font-size: 0.78rem; color: var(--txt-muted); font-weight: 500; margin-top: 2px; }
 
         /* COMPONENTES GENERALES DARK */
         .card { background: var(--bg-card); border-radius: 18px; box-shadow: var(--card-shadow); padding: 18px; margin-bottom: 14px; border: 1px solid var(--border-glow); }
@@ -424,6 +605,19 @@
         .tab.active { background: var(--bg-card-subtle); color: var(--padel-volt); border: 1px solid var(--border-active); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
+        /* PESTAÑAS DEL PANEL ADMIN */
+        .admin-nav-tabs {
+            display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border-glow);
+        }
+        .admin-tab-btn {
+            background: #0b1120; color: var(--txt-muted); border: 1px solid var(--border-glow);
+            padding: 8px 14px; border-radius: 10px; font-size: 0.75rem; font-weight: 800;
+            white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+        }
+        .admin-tab-btn.active {
+            background: var(--bg-card-subtle); color: var(--padel-volt); border-color: var(--border-active);
+        }
 
         .scroll-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; }
         .chip-pill { background: #0b1120; color: var(--txt-muted); padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; cursor: pointer; border: 1px solid var(--border-glow); white-space: nowrap; transition: all 0.2s; }
@@ -453,7 +647,7 @@
             display: inline-block;
         }
 
-        /* MATCH CENTER: CANCHA */
+        /* MATCH CENTER */
         .padel-court-card {
             background: linear-gradient(180deg, #091a2e 0%, #06111f 100%);
             border: 1.5px solid var(--padel-blue-glow);
@@ -488,9 +682,54 @@
             display: inline-block; background: rgba(2, 132, 199, 0.25); color: var(--padel-blue-glow); font-size: 0.68rem;
             font-weight: 800; padding: 2px 8px; border-radius: 6px; margin-bottom: 8px; border: 1px solid rgba(56, 189, 248, 0.3);
         }
-        .court-side-team { display: flex; justify-content: space-between; align-items: center; }
+        .court-side-team { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 
-        /* CONTROLES DE MARCADOR */
+        /* LISTA DE JUGADORES CON BOTÓN CAGUAMA INDIVIDUAL EN 8 LOCO */
+        .team-players-column {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+        .player-row-unit {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 3px 6px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .player-name-txt {
+            font-weight: 800;
+            color: var(--txt-main);
+            font-size: 0.85rem;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .btn-caguama-ind {
+            background: rgba(245, 158, 11, 0.18);
+            color: var(--padel-orange);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            border-radius: 6px;
+            padding: 2px 7px;
+            font-weight: 800;
+            font-size: 0.72rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            user-select: none;
+            transition: all 0.15s;
+        }
+        .btn-caguama-ind:active {
+            transform: scale(0.92);
+            background: rgba(245, 158, 11, 0.35);
+        }
+
+        /* MARCADOR DIGITAL */
         .score-ctrl { display: flex; align-items: center; gap: 6px; }
         .score-btn {
             width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border-glow);
@@ -634,31 +873,87 @@
             </div>
         </div>
 
-        <!-- SECCIÓN: NOTICIAS & REPOST DE CLUBES -->
-        <div class="news-card-container" id="sectionNewsFeed">
-            <div class="news-header-badge">
-                <span class="news-tag"><i class="fas fa-rss"></i> Repost Oficial</span>
-                <small style="color:var(--txt-dim); font-size:0.7rem; font-weight:700;"><i class="fab fa-instagram"></i> Club Destacado</small>
-            </div>
-            <div class="news-club-title" id="newsClubName">
-                <i class="fas fa-bullhorn" style="color:var(--padel-blue-glow);"></i> <span>SB TOTAL PADEL</span>
-            </div>
-            <div class="news-body-txt" id="newsPostDesc">
-                ¡Gran convocatoria este fin de semana! Revisa los horarios y parejas confirmadas en la publicación oficial.
-            </div>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="btn-news-link" id="newsPostLink">
-                <span>Ver Publicación Oficial en Instagram</span> <i class="fas fa-external-link-alt"></i>
-            </a>
-        </div>
-
-        <!-- SECCIÓN: PRÓXIMOS TORNEOS -->
+        <!-- SECCIÓN: PRÓXIMOS TORNEOS (AUTO-SCROLL 4 SEG) -->
         <div class="tournaments-container" id="sectionTournaments">
             <div class="tournaments-header-title">
                 <span><i class="fas fa-trophy"></i> Convocatorias & Torneos Oficiales</span>
                 <small style="color:var(--txt-dim); font-size:0.7rem; font-weight:700;">Desliza ➔</small>
             </div>
             <div class="tournaments-carousel" id="tournamentsGridContainer">
-                <!-- 4 flyers dinámicos -->
+                <!-- Anuncios activos renderizados dinámicamente -->
+            </div>
+        </div>
+
+        <!-- HUB PRINCIPAL DE MODOS -->
+        <div id="viewHubModos">
+            <div class="section-title">Modos de Juego Disponibles</div>
+
+            <!-- FILA PRINCIPAL: 2 BOTONES GRANDES FORMATO HERO CARD -->
+            <div class="modes-grid-duo">
+                <!-- BOTÓN 1: 8 LOCO / AMERICANO -->
+                <div class="mode-hero-card" onclick="entrarModo('americano')">
+                    <div class="mode-hero-badge">Formato Dinámico</div>
+                    <div class="mode-hero-icon"><i class="fas fa-random"></i></div>
+                    <div>
+                        <div class="mode-hero-title">8 LOCO</div>
+                        <div class="mode-hero-sub">Partidos rotativos con cambios continuos de pareja.</div>
+                    </div>
+                    <button type="button" class="btn-mode-hero-action">
+                        <span>JUGAR</span> <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- BOTÓN 2: POZO / REY DE LA PISTA -->
+                <div class="mode-hero-card pozo" onclick="entrarModo('pozo')">
+                    <div class="mode-hero-badge">Rey de Pista</div>
+                    <div class="mode-hero-icon"><i class="fas fa-crown"></i></div>
+                    <div>
+                        <div class="mode-hero-title">POZO PRO</div>
+                        <div class="mode-hero-sub">Puntaje individual directo acumulativo por ronda.</div>
+                    </div>
+                    <button type="button" class="btn-mode-hero-action">
+                        <span>JUGAR</span> <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- BOTÓN SECUNDARIO: PADRÓN DE JUGADORES -->
+            <div class="mode-box-card padron" onclick="abrirPadronJugadores()">
+                <div class="mode-icon-circle"><i class="fas fa-users"></i></div>
+                <div>
+                    <div class="mode-info-title">Padrón de Jugadores</div>
+                    <div class="mode-info-sub">Gestión de convocados y plantilla habitual del club.</div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: NOTICIAS & REPOST -->
+            <div class="news-card-container" id="sectionNewsFeed">
+                <div class="news-header-badge">
+                    <span class="news-tag"><i class="fas fa-rss"></i> Repost Oficial</span>
+                    <small style="color:var(--txt-dim); font-size:0.7rem; font-weight:700;"><i class="fab fa-instagram"></i> Club Destacado</small>
+                </div>
+                <div class="news-club-title" id="newsClubName">
+                    <i class="fas fa-bullhorn" style="color:var(--padel-blue-glow);"></i> <span>SB TOTAL PADEL</span>
+                </div>
+                <div class="news-body-txt" id="newsPostDesc">
+                    ¡Gran convocatoria este fin de semana! Revisa los horarios y parejas confirmadas en la publicación oficial.
+                </div>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="btn-news-link" id="newsPostLink">
+                    <span>Ver Publicación Oficial en Instagram</span> <i class="fas fa-external-link-alt"></i>
+                </a>
+            </div>
+
+            <!-- SECCIÓN: COMUNIDAD & MOMENTOS -->
+            <div class="community-carousel-card" id="sectionCommunityMoments">
+                <div class="community-header">
+                    <div class="community-title">
+                        <i class="fas fa-camera-retro" style="color:var(--padel-volt);"></i> Comunidad & Momentos
+                    </div>
+                    <small style="color:var(--txt-dim); font-size:0.7rem; font-weight:700;">Desliza ➔</small>
+                </div>
+                <div class="community-carousel" id="communityCarouselContainer">
+                    <!-- Renderizado dinámico de fotos -->
+                </div>
             </div>
         </div>
 
@@ -676,108 +971,108 @@
             </div>
         </div>
 
-        <!-- PANEL DE ADMINISTRACIÓN GLOBAL -->
+        <!-- PANEL DE ADMINISTRACIÓN GLOBAL CON PESTAÑAS -->
         <div id="viewAdmin" class="card hidden">
             <div class="card-header">
                 <span><i class="fas fa-sliders-h" style="color:var(--padel-volt);"></i> Panel de Control Global</span>
                 <button class="btn btn-sm btn-dark" onclick="cerrarPanelAdmin()">Cerrar</button>
             </div>
             
-            <h4 style="color:var(--padel-volt); font-size:0.85rem; margin-top:4px;"><i class="fas fa-share-alt"></i> Redes Sociales de la App</h4>
-            <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Enlace Redes 11Padel (Logo Principal):</label>
-            <input type="url" id="adminAppLogoUrl" placeholder="https://instagram.com/11padelpro">
-
-            <!-- CONFIGURACIÓN DE NOTICIA / REPOST -->
-            <h4 style="color:var(--padel-blue-glow); font-size:0.85rem; margin-top:16px; border-top:1px solid var(--border-glow); padding-top:12px;"><i class="fas fa-rss"></i> Sección News & Repost</h4>
-            <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Nombre del Club / Fuente:</label>
-            <input type="text" id="adminNewsClub" placeholder="Ej: Club Padel Point Ags">
-            
-            <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted); margin-top:6px; display:block;">Link de la Publicación (Instagram, Reel o Post):</label>
-            <input type="url" id="adminNewsLink" placeholder="https://instagram.com/p/...">
-            
-            <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted); margin-top:6px; display:block;">Texto o Resumen de la Noticia:</label>
-            <textarea id="adminNewsDesc" placeholder="Breve texto sobre el torneo, convocatoria o aviso del club"></textarea>
-
-            <!-- MENSAJE GENERAL PARA WHATSAPP -->
-            <h4 style="color:#25d366; font-size:0.85rem; margin-top:16px; border-top:1px solid var(--border-glow); padding-top:12px;"><i class="fab fa-whatsapp"></i> Mensaje de Pie para WhatsApp</h4>
-            <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Este texto aparecerá al final de todos los reportes de WhatsApp:</label>
-            <textarea id="adminWaCustomMsg" placeholder="Ej: Síguenos en @11padelpro • Torneo patrocinado por SB TOTAL PADEL"></textarea>
-
-            <h4 style="color:var(--padel-orange); font-size:0.85rem; margin-top:16px; border-top:1px solid var(--border-glow); padding-top:12px;"><i class="fas fa-star"></i> Enlaces de Patrocinadores</h4>
-            <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Patrocinador Principal (Header):</label>
-            <input type="url" id="adminMainSponsorUrl" placeholder="https://instagram.com/sbtotalpadel">
-
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
-                <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 1:</label><input type="url" id="adminBanner1Url" placeholder="https://..."></div>
-                <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 2:</label><input type="url" id="adminBanner2Url" placeholder="https://..."></div>
-                <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 3:</label><input type="url" id="adminBanner3Url" placeholder="https://..."></div>
-                <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 4:</label><input type="url" id="adminBanner4Url" placeholder="https://..."></div>
-                <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 5:</label><input type="url" id="adminBanner5Url" placeholder="https://..."></div>
-                <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 6:</label><input type="url" id="adminBanner6Url" placeholder="https://..."></div>
+            <!-- NAVEGACIÓN POR PESTAÑAS DENTRO DEL PANEL ADMIN -->
+            <div class="admin-nav-tabs">
+                <button type="button" class="admin-tab-btn active" id="btnAdminTabBanners" onclick="switchAdminSubTab('banners')">
+                    <i class="fas fa-ad"></i> Banners & Redes
+                </button>
+                <button type="button" class="admin-tab-btn" id="btnAdminTabTorneos" onclick="switchAdminSubTab('torneos')">
+                    <i class="fas fa-trophy"></i> Torneos (8)
+                </button>
+                <button type="button" class="admin-tab-btn" id="btnAdminTabNews" onclick="switchAdminSubTab('news')">
+                    <i class="fas fa-rss"></i> Noticia / Repost
+                </button>
+                <button type="button" class="admin-tab-btn" id="btnAdminTabCommunity" onclick="switchAdminSubTab('community')">
+                    <i class="fas fa-images"></i> Comunidad (20)
+                </button>
+                <button type="button" class="admin-tab-btn" id="btnAdminTabWhatsApp" onclick="switchAdminSubTab('whatsapp')">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
             </div>
 
-            <h4 style="color:var(--padel-blue); font-size:0.85rem; margin-top:16px; border-top:1px solid var(--border-glow); padding-top:12px;"><i class="fas fa-calendar-alt"></i> 4 Flyers de Torneos</h4>
-            
-            <div style="background:var(--bg-card-subtle); border:1px solid var(--border-glow); border-radius:12px; padding:10px; margin-top:8px;">
-                <strong style="font-size:0.8rem; color:var(--txt-main);">Torneo 1</strong>
-                <input type="text" id="adminT1Name" placeholder="Nombre: Open Anual Club Central">
-                <input type="url" id="adminT1Link" placeholder="Link WhatsApp/Web: https://wa.me/52...">
-                <input type="text" id="adminT1Img" placeholder="Ruta Flyer: img/torneo1.png">
+            <!-- PESTAÑA 1: BANNERS & REDES -->
+            <div id="adminTabContentBanners">
+                <h4 style="color:var(--padel-volt); font-size:0.85rem; margin-bottom:8px;"><i class="fas fa-share-alt"></i> Redes Sociales de la App</h4>
+                <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Enlace Redes 11Padel (Logo Principal):</label>
+                <input type="url" id="adminAppLogoUrl" placeholder="https://instagram.com/11padelpro">
+
+                <h4 style="color:var(--padel-orange); font-size:0.85rem; margin-top:16px; border-top:1px solid var(--border-glow); padding-top:12px;"><i class="fas fa-star"></i> Enlaces de Patrocinadores</h4>
+                <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Patrocinador Principal (Header):</label>
+                <input type="url" id="adminMainSponsorUrl" placeholder="https://instagram.com/sbtotalpadel">
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
+                    <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 1:</label><input type="url" id="adminBanner1Url" placeholder="https://..."></div>
+                    <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 2:</label><input type="url" id="adminBanner2Url" placeholder="https://..."></div>
+                    <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 3:</label><input type="url" id="adminBanner3Url" placeholder="https://..."></div>
+                    <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 4:</label><input type="url" id="adminBanner4Url" placeholder="https://..."></div>
+                    <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 5:</label><input type="url" id="adminBanner5Url" placeholder="https://..."></div>
+                    <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 6:</label><input type="url" id="adminBanner6Url" placeholder="https://..."></div>
+                </div>
             </div>
 
-            <div style="background:var(--bg-card-subtle); border:1px solid var(--border-glow); border-radius:12px; padding:10px; margin-top:8px;">
-                <strong style="font-size:0.8rem; color:var(--txt-main);">Torneo 2</strong>
-                <input type="text" id="adminT2Name" placeholder="Nombre: Nocturno Americano SB">
-                <input type="url" id="adminT2Link" placeholder="Link WhatsApp/Web: https://wa.me/52...">
-                <input type="text" id="adminT2Img" placeholder="Ruta Flyer: img/torneo2.png">
+            <!-- PESTAÑA 2: TORNEOS (8) -->
+            <div id="adminTabContentTorneos" class="hidden">
+                <h4 style="color:var(--padel-blue-glow); font-size:0.85rem; margin-bottom:4px;">
+                    <i class="fas fa-calendar-alt"></i> Gestión de 8 Convocatorias & Torneos
+                </h4>
+                <p style="font-size:0.72rem; color:var(--txt-muted); margin-bottom:10px;">Palomea la casilla para que el anuncio se muestre en el carrusel público. Si la desmarcas, se ocultará automáticamente.</p>
+                <div id="adminTorneosListControls"></div>
             </div>
 
-            <div style="background:var(--bg-card-subtle); border:1px solid var(--border-glow); border-radius:12px; padding:10px; margin-top:8px;">
-                <strong style="font-size:0.8rem; color:var(--txt-main);">Torneo 3</strong>
-                <input type="text" id="adminT3Name" placeholder="Nombre: Relámpago Padel Pro">
-                <input type="url" id="adminT3Link" placeholder="Link WhatsApp/Web: https://wa.me/52...">
-                <input type="text" id="adminT3Img" placeholder="Ruta Flyer: img/torneo3.png">
+            <!-- PESTAÑA 3: NOTICIA / REPOST -->
+            <div id="adminTabContentNews" class="hidden">
+                <h4 style="color:var(--padel-blue-glow); font-size:0.85rem; margin-bottom:8px;"><i class="fas fa-rss"></i> Sección News & Repost</h4>
+                <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Nombre del Club / Fuente:</label>
+                <input type="text" id="adminNewsClub" placeholder="Ej: Club Padel Point Ags">
+                
+                <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted); margin-top:8px; display:block;">Link de la Publicación (Instagram, Reel o Post):</label>
+                <input type="url" id="adminNewsLink" placeholder="https://instagram.com/p/...">
+                
+                <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted); margin-top:8px; display:block;">Texto o Resumen de la Noticia:</label>
+                <textarea id="adminNewsDesc" placeholder="Breve texto sobre el torneo, convocatoria o aviso del club"></textarea>
             </div>
 
-            <div style="background:var(--bg-card-subtle); border:1px solid var(--border-glow); border-radius:12px; padding:10px; margin-top:8px;">
-                <strong style="font-size:0.8rem; color:var(--txt-main);">Torneo 4</strong>
-                <input type="text" id="adminT4Name" placeholder="Nombre: Torneo Mixto de Verano">
-                <input type="url" id="adminT4Link" placeholder="Link WhatsApp/Web: https://wa.me/52...">
-                <input type="text" id="adminT4Img" placeholder="Ruta Flyer: img/torneo4.png">
+            <!-- PESTAÑA 4: COMUNIDAD (20 FOTOS) -->
+            <div id="adminTabContentCommunity" class="hidden">
+                <h4 style="color:var(--padel-volt); font-size:0.85rem; margin-bottom:8px;">
+                    <i class="fas fa-images"></i> Carrusel de Comunidad (Hasta 20 Fotos)
+                </h4>
+                <div style="background:var(--bg-card-subtle); padding:12px; border-radius:12px; border:1px solid var(--border-glow);">
+                    <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Subir Foto desde tu Celular / PC:</label>
+                    <input type="file" id="adminCommunityFileInput" accept="image/*" style="margin-top:4px; padding:6px; background:#0b1120;" onchange="procesarFotoComunidad(this)">
+                    
+                    <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted); margin-top:8px; display:block;">O pega URL directa de la imagen:</label>
+                    <input type="text" id="adminCommunityUrlInput" placeholder="https://... o data:image/...">
+                    
+                    <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted); margin-top:8px; display:block;">Pie de foto / Descripción breve:</label>
+                    <input type="text" id="adminCommunityCaptionInput" placeholder="Ej: Final de 2da Fuerza Club SB • Campeones">
+                    
+                    <button type="button" class="btn btn-green btn-sm" style="width:100%; margin-top:10px;" onclick="agregarFotoComunidad()">
+                        <i class="fas fa-plus-circle"></i> Agregar Foto al Carrusel (<span id="countAdminFotos">0</span>/20)
+                    </button>
+                </div>
+                
+                <div id="adminCommunityListContainer" style="margin-top:12px; display:flex; flex-direction:column; gap:8px; max-height:240px; overflow-y:auto; padding-right:4px;"></div>
             </div>
 
-            <button class="btn btn-green" style="width:100%; margin-top:16px; padding:12px;" onclick="guardarEnlacesEnFirebase()">
-                <i class="fas fa-cloud-upload-alt"></i> Sincronizar en Todos los Dispositivos
+            <!-- PESTAÑA 5: WHATSAPP -->
+            <div id="adminTabContentWhatsApp" class="hidden">
+                <h4 style="color:#25d366; font-size:0.85rem; margin-bottom:8px;"><i class="fab fa-whatsapp"></i> Mensaje de Pie para WhatsApp</h4>
+                <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Este texto aparecerá al final de todos los reportes de WhatsApp compartidos:</label>
+                <textarea id="adminWaCustomMsg" placeholder="Ej: Síguenos en @11padelpro • Torneo patrocinado por SB TOTAL PADEL"></textarea>
+            </div>
+
+            <!-- BOTÓN GLOBAL DE GUARDADO -->
+            <button class="btn btn-green" style="width:100%; margin-top:18px; padding:12px;" onclick="guardarEnlacesEnFirebase()">
+                <i class="fas fa-cloud-upload-alt"></i> Guardar y Sincronizar Todos los Cambios
             </button>
-        </div>
-
-        <!-- HUB PRINCIPAL DE MODOS -->
-        <div id="viewHubModos">
-            <div class="section-title">Modos de Juego Disponibles</div>
-
-            <div class="mode-box-card" onclick="entrarModo('americano')">
-                <div class="mode-icon-circle"><i class="fas fa-random"></i></div>
-                <div>
-                    <div class="mode-info-title">Modo 8 Loco / Americano</div>
-                    <div class="mode-info-sub">Partidos rotativos continuos con descansos equitativos.</div>
-                </div>
-            </div>
-
-            <div class="mode-box-card pozo" onclick="entrarModo('pozo')">
-                <div class="mode-icon-circle"><i class="fas fa-crown"></i></div>
-                <div>
-                    <div class="mode-info-title">Modo Pozo / Rey de Pista</div>
-                    <div class="mode-info-sub">Puntaje individual acumulativo directo por ronda.</div>
-                </div>
-            </div>
-
-            <div class="mode-box-card padron" onclick="abrirPadronJugadores()">
-                <div class="mode-icon-circle"><i class="fas fa-users"></i></div>
-                <div>
-                    <div class="mode-info-title">Padrón de Jugadores</div>
-                    <div class="mode-info-sub">Gestión de convocados y plantilla habitual del club.</div>
-                </div>
-            </div>
         </div>
 
         <!-- VISTA: LIGAS DEL MODO SELECCIONADO -->
@@ -964,6 +1259,16 @@
             }
         }
 
+        function switchAdminSubTab(tabName) {
+            const tabs = ['banners', 'torneos', 'news', 'community', 'whatsapp'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`btnAdminTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                const content = document.getElementById(`adminTabContent${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (btn) btn.classList.toggle('active', t === tabName);
+                if (content) content.classList.toggle('hidden', t !== tabName);
+            });
+        }
+
         let appConfig = JSON.parse(localStorage.getItem("11padel_app_config")) || {
             appLogoUrl: "https://instagram.com",
             mainUrl: "https://instagram.com/sbtotalpadel",
@@ -971,6 +1276,10 @@
             newsClub: "SB TOTAL PADEL",
             newsDesc: "¡Gran convocatoria este fin de semana! Revisa los horarios y parejas confirmadas en la publicación oficial.",
             newsLink: "https://instagram.com/sbtotalpadel",
+            communityMoments: [
+                { img: "img/torneo1.png", caption: "Premiación Torneo Open SB • Finalistas" },
+                { img: "img/torneo2.png", caption: "Jornada Nocturna de Americano • Excelente ambiente" }
+            ],
             banner1Url: "https://instagram.com/chuletasnkrs",
             banner2Url: "https://instagram.com/motio",
             banner3Url: "https://instagram.com/room",
@@ -978,12 +1287,30 @@
             banner5Url: "https://instagram.com",
             banner6Url: "https://instagram.com",
             torneos: [
-                { nombre: "Torneo Open SB", link: "https://wa.me/", img: "img/torneo1.png" },
-                { nombre: "Americano Nocturno", link: "https://wa.me/", img: "img/torneo2.png" },
-                { nombre: "Relámpago de Fin de Semana", link: "https://wa.me/", img: "img/torneo3.png" },
-                { nombre: "Torneo de Verano", link: "https://wa.me/", img: "img/torneo4.png" }
+                { nombre: "Torneo Open SB", link: "https://wa.me/", img: "img/torneo1.png", activo: true },
+                { nombre: "Americano Nocturno", link: "https://wa.me/", img: "img/torneo2.png", activo: true },
+                { nombre: "Relámpago de Fin de Semana", link: "https://wa.me/", img: "img/torneo3.png", activo: true },
+                { nombre: "Torneo de Verano", link: "https://wa.me/", img: "img/torneo4.png", activo: true },
+                { nombre: "Torneo Mixto Central", link: "https://wa.me/", img: "img/torneo1.png", activo: false },
+                { nombre: "Copa Aguascalientes Padel", link: "https://wa.me/", img: "img/torneo2.png", activo: false },
+                { nombre: "Master Final Pro", link: "https://wa.me/", img: "img/torneo3.png", activo: false },
+                { nombre: "Circuito Regional SB", link: "https://wa.me/", img: "img/torneo4.png", activo: false }
             ]
         };
+
+        function inicializarOchoTorneos() {
+            if (!appConfig.torneos) appConfig.torneos = [];
+            while (appConfig.torneos.length < 8) {
+                const idx = appConfig.torneos.length + 1;
+                appConfig.torneos.push({
+                    nombre: `Torneo ${idx}`,
+                    link: "https://wa.me/",
+                    img: `img/torneo${((idx - 1) % 4) + 1}.png`,
+                    activo: idx <= 4
+                });
+            }
+        }
+        inicializarOchoTorneos();
 
         function getUserData() { 
             let d = JSON.parse(localStorage.getItem("11padel_app_data"));
@@ -1004,29 +1331,108 @@
             return clean;
         }
 
-        function aplicarEnlaces() {
-            const appLnk = document.getElementById("appLogoLink");
-            if (appLnk) appLnk.href = normalizarUrl(appConfig.appLogoUrl || "https://instagram.com");
+        function procesarFotoComunidad(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const maxW = 800;
+                        const scale = Math.min(maxW / img.width, 1);
+                        canvas.width = img.width * scale;
+                        canvas.height = img.height * scale;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        document.getElementById("adminCommunityUrlInput").value = canvas.toDataURL('image/jpeg', 0.8);
+                        showToast("Foto cargada y optimizada");
+                    };
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
 
-            const main = document.getElementById("sponsorMainLink");
-            if (main) main.href = normalizarUrl(appConfig.mainUrl);
-
-            for (let i = 1; i <= 6; i++) {
-                const btn = document.getElementById(`linkBanner${i}`);
-                if (btn) btn.href = normalizarUrl(appConfig[`banner${i}Url`]);
+        function agregarFotoComunidad() {
+            if (!appConfig.communityMoments) appConfig.communityMoments = [];
+            if (appConfig.communityMoments.length >= 20) {
+                return showToast("Límite máximo de 20 fotos alcanzado", "error");
             }
 
-            // Aplicar sección de noticias
-            const clubTxt = document.getElementById("newsClubName");
-            if (clubTxt) clubTxt.innerHTML = `<i class="fas fa-bullhorn" style="color:var(--padel-blue-glow);"></i> <span>${appConfig.newsClub || 'Club Destacado'}</span>`;
+            const url = document.getElementById("adminCommunityUrlInput").value.trim();
+            const cap = document.getElementById("adminCommunityCaptionInput").value.trim() || "Momento de Pádel";
 
-            const descTxt = document.getElementById("newsPostDesc");
-            if (descTxt) descTxt.textContent = appConfig.newsDesc || "Consulta los últimos anuncios y partidos.";
+            if (!url) return showToast("Sube una foto o pega una URL", "error");
 
-            const postLnk = document.getElementById("newsPostLink");
-            if (postLnk) postLnk.href = normalizarUrl(appConfig.newsLink);
+            appConfig.communityMoments.push({ img: url, caption: cap });
+            document.getElementById("adminCommunityUrlInput").value = "";
+            document.getElementById("adminCommunityCaptionInput").value = "";
+            document.getElementById("adminCommunityFileInput").value = "";
+            
+            renderAdminListaFotos();
+            renderCommunityCarousel();
+            showToast("Foto agregada al carrusel");
+        }
 
-            renderTorneosPublicos();
+        function eliminarFotoComunidad(index) {
+            if (confirm("¿Eliminar esta foto del carrusel?")) {
+                appConfig.communityMoments.splice(index, 1);
+                renderAdminListaFotos();
+                renderCommunityCarousel();
+                showToast("Foto eliminada");
+            }
+        }
+
+        function renderAdminListaFotos() {
+            const list = appConfig.communityMoments || [];
+            const countSpan = document.getElementById("countAdminFotos");
+            if (countSpan) countSpan.textContent = list.length;
+
+            const cont = document.getElementById("adminCommunityListContainer");
+            if (!cont) return;
+            cont.innerHTML = "";
+
+            if (list.length === 0) {
+                cont.innerHTML = "<p style='color:var(--txt-dim); font-size:0.75rem; text-align:center;'>No hay fotos en el carrusel.</p>";
+                return;
+            }
+
+            list.forEach((item, idx) => {
+                cont.innerHTML += `
+                    <div style="display:flex; align-items:center; justify-content:space-between; background:#0b1120; padding:6px 10px; border-radius:8px; border:1px solid var(--border-glow);">
+                        <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+                            <img src="${item.img}" style="width:36px; height:36px; object-fit:cover; border-radius:6px;">
+                            <span style="font-size:0.75rem; color:var(--txt-main); text-overflow:ellipsis; white-space:nowrap; overflow:hidden; max-width:180px;">${item.caption}</span>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="eliminarFotoComunidad(${idx})" style="padding:4px 8px;"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+            });
+        }
+
+        function renderCommunityCarousel() {
+            const cont = document.getElementById("communityCarouselContainer");
+            if (!cont) return;
+            cont.innerHTML = "";
+
+            const list = appConfig.communityMoments || [];
+            if (list.length === 0) {
+                cont.innerHTML = "<p style='color:var(--txt-dim); font-size:0.8rem; padding:12px;'>Pronto compartiremos los mejores momentos del club.</p>";
+                return;
+            }
+
+            list.slice(0, 20).forEach(item => {
+                cont.innerHTML += `
+                    <div class="community-item-box">
+                        <div class="community-img-wrap">
+                            <img src="${item.img}" class="community-img-tag" alt="Momento" onerror="this.src='img/torneo1.png'">
+                        </div>
+                        <div class="community-caption-box">
+                            ${item.caption}
+                        </div>
+                    </div>
+                `;
+            });
         }
 
         function renderTorneosPublicos() {
@@ -1034,17 +1440,20 @@
             if (!grid) return;
             grid.innerHTML = "";
 
-            let lista = appConfig.torneos || [];
-            while (lista.length < 4) {
-                lista.push({ nombre: `Torneo ${lista.length + 1}`, link: "https://wa.me/", img: `img/torneo${lista.length + 1}.png` });
+            inicializarOchoTorneos();
+            const activos = (appConfig.torneos || []).filter(t => t.activo !== false);
+
+            if (activos.length === 0) {
+                grid.innerHTML = "<p style='color:var(--txt-dim); font-size:0.8rem; padding:14px; text-align:center;'>No hay convocatorias activas en este momento.</p>";
+                return;
             }
 
-            lista.slice(0, 4).forEach((t, idx) => {
-                const imgSrc = t.img || `img/torneo${idx+1}.png`;
+            activos.forEach(t => {
+                const imgSrc = t.img || 'img/torneo1.png';
                 grid.innerHTML += `
                     <div class="tournament-item-card">
                         <div class="tournament-flyer-wrapper">
-                            <img src="${imgSrc}" alt="Flyer Torneo ${idx+1}" class="tournament-flyer-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                            <img src="${imgSrc}" alt="${t.nombre}" class="tournament-flyer-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                             <div class="tournament-fallback-icon" style="display:none;">
                                 <i class="fas fa-trophy"></i>
                                 <span>Flyer Oficial</span>
@@ -1061,13 +1470,95 @@
             });
         }
 
+        function renderAdminTorneosControls() {
+            const cont = document.getElementById("adminTorneosListControls");
+            if (!cont) return;
+            cont.innerHTML = "";
+
+            inicializarOchoTorneos();
+
+            appConfig.torneos.forEach((t, i) => {
+                const idx = i + 1;
+                const isChecked = t.activo !== false ? 'checked' : '';
+                cont.innerHTML += `
+                    <div style="background:var(--bg-card-subtle); border:1px solid var(--border-glow); border-radius:12px; padding:10px; margin-top:8px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                            <strong style="font-size:0.82rem; color:var(--txt-main);">Anuncio ${idx}</strong>
+                            <label style="display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:800; cursor:pointer; color:${isChecked ? 'var(--padel-volt)' : 'var(--txt-muted)'};">
+                                <input type="checkbox" id="adminT${idx}Activo" ${isChecked} style="width:auto; margin:0; accent-color:var(--padel-volt);">
+                                Mostrar en App
+                            </label>
+                        </div>
+                        <input type="text" id="adminT${idx}Name" placeholder="Nombre del Torneo" value="${t.nombre || ''}">
+                        <input type="url" id="adminT${idx}Link" placeholder="Link de WhatsApp o Web" value="${t.link || ''}">
+                        <input type="text" id="adminT${idx}Img" placeholder="Ruta o URL del Flyer (ej. img/torneo1.png)" value="${t.img || ''}">
+                    </div>
+                `;
+            });
+        }
+
+        let autoScrollInterval = null;
+        function iniciarAutoScrollCarruseles() {
+            if (autoScrollInterval) clearInterval(autoScrollInterval);
+
+            autoScrollInterval = setInterval(() => {
+                const cTorneos = document.getElementById("tournamentsGridContainer");
+                if (cTorneos && cTorneos.children.length > 1) {
+                    const step = 212;
+                    const maxScroll = cTorneos.scrollWidth - cTorneos.clientWidth;
+                    if (cTorneos.scrollLeft >= maxScroll - 10) {
+                        cTorneos.scrollTo({ left: 0, behavior: 'smooth' });
+                    } else {
+                        cTorneos.scrollBy({ left: step, behavior: 'smooth' });
+                    }
+                }
+
+                const cComunidad = document.getElementById("communityCarouselContainer");
+                if (cComunidad && cComunidad.children.length > 1) {
+                    const step = 222;
+                    const maxScroll = cComunidad.scrollWidth - cComunidad.clientWidth;
+                    if (cComunidad.scrollLeft >= maxScroll - 10) {
+                        cComunidad.scrollTo({ left: 0, behavior: 'smooth' });
+                    } else {
+                        cComunidad.scrollBy({ left: step, behavior: 'smooth' });
+                    }
+                }
+            }, 4000);
+        }
+
+        function aplicarEnlaces() {
+            const appLnk = document.getElementById("appLogoLink");
+            if (appLnk) appLnk.href = normalizarUrl(appConfig.appLogoUrl || "https://instagram.com");
+
+            const main = document.getElementById("sponsorMainLink");
+            if (main) main.href = normalizarUrl(appConfig.mainUrl);
+
+            for (let i = 1; i <= 6; i++) {
+                const btn = document.getElementById(`linkBanner${i}`);
+                if (btn) btn.href = normalizarUrl(appConfig[`banner${i}Url`]);
+            }
+
+            const clubTxt = document.getElementById("newsClubName");
+            if (clubTxt) clubTxt.innerHTML = `<i class="fas fa-bullhorn" style="color:var(--padel-blue-glow);"></i> <span>${appConfig.newsClub || 'Club Destacado'}</span>`;
+
+            const descTxt = document.getElementById("newsPostDesc");
+            if (descTxt) descTxt.textContent = appConfig.newsDesc || "Consulta los últimos anuncios y partidos.";
+
+            const postLnk = document.getElementById("newsPostLink");
+            if (postLnk) postLnk.href = normalizarUrl(appConfig.newsLink);
+
+            renderTorneosPublicos();
+            renderCommunityCarousel();
+        }
+
         async function sincronizarEnlacesDesdeLaNube() {
             try {
                 const res = await fetch(CLOUD_DB_URL);
                 if (res.ok) {
                     const data = await res.json();
-                    if (data && (data.mainUrl || data.appLogoUrl || data.torneos || data.waCustomMsg !== undefined || data.newsLink !== undefined)) {
+                    if (data && (data.mainUrl || data.appLogoUrl || data.torneos || data.waCustomMsg !== undefined || data.newsLink !== undefined || data.communityMoments !== undefined)) {
                         appConfig = Object.assign({}, appConfig, data);
+                        inicializarOchoTorneos();
                         localStorage.setItem("11padel_app_config", JSON.stringify(appConfig));
                         aplicarEnlaces();
                     }
@@ -1123,12 +1614,10 @@
             document.getElementById("adminBanner5Url").value = appConfig.banner5Url || "";
             document.getElementById("adminBanner6Url").value = appConfig.banner6Url || "";
 
-            const t = appConfig.torneos || [];
-            for (let i = 1; i <= 4; i++) {
-                document.getElementById(`adminT${i}Name`).value = t[i-1]?.nombre || "";
-                document.getElementById(`adminT${i}Link`).value = t[i-1]?.link || "";
-                document.getElementById(`adminT${i}Img`).value = t[i-1]?.img || `img/torneo${i}.png`;
-            }
+            renderAdminTorneosControls();
+            renderAdminListaFotos();
+
+            switchAdminSubTab('banners');
 
             adminCard.scrollIntoView({ behavior: 'smooth' });
             showToast("Acceso Autorizado");
@@ -1153,11 +1642,12 @@
             appConfig.banner6Url = document.getElementById("adminBanner6Url").value.trim() || "https://instagram.com";
 
             const torneosEditados = [];
-            for (let i = 1; i <= 4; i++) {
-                const nom = document.getElementById(`adminT${i}Name`).value.trim();
-                const lnk = document.getElementById(`adminT${i}Link`).value.trim();
-                const img = document.getElementById(`adminT${i}Img`).value.trim() || `img/torneo${i}.png`;
-                torneosEditados.push({ nombre: nom || `Torneo ${i}`, link: lnk, img: img });
+            for (let i = 1; i <= 8; i++) {
+                const nom = document.getElementById(`adminT${i}Name`) ? document.getElementById(`adminT${i}Name`).value.trim() : `Torneo ${i}`;
+                const lnk = document.getElementById(`adminT${i}Link`) ? document.getElementById(`adminT${i}Link`).value.trim() : "https://wa.me/";
+                const img = document.getElementById(`adminT${i}Img`) ? document.getElementById(`adminT${i}Img`).value.trim() : `img/torneo${((i-1)%4)+1}.png`;
+                const act = document.getElementById(`adminT${i}Activo`) ? document.getElementById(`adminT${i}Activo`).checked : true;
+                torneosEditados.push({ nombre: nom || `Torneo ${i}`, link: lnk, img: img, activo: act });
             }
             appConfig.torneos = torneosEditados;
 
@@ -1184,7 +1674,6 @@
             cerrarPanelAdmin();
         }
 
-        // CONTROL DE MODOS
         let modoSeleccionado = null;
         function entrarModo(m) {
             modoSeleccionado = m;
@@ -1630,7 +2119,7 @@
             const tb = document.getElementById("tabla8LocoLiveBody");
             tb.innerHTML = "";
             const stats = {};
-            jornadaActiva.convocados.forEach(p => stats[p] = { pj:0, w:0, diff:0, pts:0, cags: jornadaActiva.caguamas[p] || 0 });
+            jornadaActiva.convocados.forEach(p => stats[p] = { pj:0, w:0, diff:0, pts:0, cags: (jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0 });
 
             if (jornadaActiva.rounds) {
                 jornadaActiva.rounds.forEach(r => {
@@ -1640,13 +2129,11 @@
                             const s1 = parseInt(m.score1) || 0;
                             const s2 = parseInt(m.score2) || 0;
                             m.p1.forEach(p => {
-                                stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
                                 stats[p].pj++;
                                 stats[p].diff += (s1 - s2);
                                 if (s1 > s2) { stats[p].w++; stats[p].pts += 3; }
                             });
                             m.p2.forEach(p => {
-                                stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
                                 stats[p].pj++;
                                 stats[p].diff += (s2 - s1);
                                 if (s2 > s1) { stats[p].w++; stats[p].pts += 3; }
@@ -1675,6 +2162,20 @@
                     </tr>
                 `;
             });
+        }
+
+        // CONTROL INDIVIDUAL DE CAGUAMAS
+        function modificarCaguamaJugador(player, cambio, roundNum = null) {
+            if (!jornadaActiva.caguamas) jornadaActiva.caguamas = {};
+            const actual = jornadaActiva.caguamas[player] || 0;
+            jornadaActiva.caguamas[player] = Math.max(0, actual + cambio);
+            saveLigaActiva();
+
+            if (modoSeleccionado === 'pozo') {
+                showPozoRound(roundNum || jornadaActiva.rondaActual);
+            } else {
+                show8LocoRound(roundNum || jornadaActiva.currentRound);
+            }
         }
 
         function renderPozoNav() {
@@ -1710,7 +2211,7 @@
             jornadaActiva.convocados.forEach(p => {
                 if (rData[p] === undefined) rData[p] = 0;
                 const pts = rData[p];
-                const cags = jornadaActiva.caguamas[p] || 0;
+                const cags = (jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0;
 
                 let totalJornada = 0;
                 jornadaActiva.rondas.forEach(r => { totalJornada += (parseInt(r[p]) || 0); });
@@ -1720,7 +2221,7 @@
                     <div>
                         <strong style="color:var(--txt-main); font-size:0.95rem;">${p}</strong>
                         <div style="font-size:0.72rem; color:var(--txt-muted); margin-top:2px;">Jornada: <strong style="color:var(--padel-volt); font-size:0.8rem;">${totalJornada} pts</strong></div>
-                        <button class="caguama-badge" style="margin-top:4px;" onclick="jornadaActiva.caguamas['${p}']=(jornadaActiva.caguamas['${p}']||0)+1; saveLigaActiva(); showPozoRound(${n});">🍺 ${cags}</button>
+                        <button class="caguama-badge" style="margin-top:4px;" onclick="modificarCaguamaJugador('${p}', 1, ${n})" title="Toca para +1">🍺 ${cags}</button>
                     </div>
                     <div class="score-ctrl">
                         <button type="button" class="score-btn" onclick="modificarPuntosPozo(${n}, '${p}', -1)">−</button>
@@ -1776,26 +2277,47 @@
             saveLigaActiva();
         }
 
+        // VISTA MATCH CENTER EN 8 LOCO: CAGUAMAS INDIVIDUALES POR JUGADOR
         function show8LocoRound(n) {
             jornadaActiva.currentRound = n; render8LocoNav();
             const curr = jornadaActiva.rounds[n-1]; 
             const cont = document.getElementById("amMatchesContainer"); 
             cont.innerHTML = "";
 
+            if (!jornadaActiva.caguamas) jornadaActiva.caguamas = {};
+
             if (curr.descansan && curr.descansan.length > 0) {
                 cont.innerHTML += `<div class="bye-banner"><i class="fas fa-bed"></i> Descansan esta ronda: ${curr.descansan.join(', ')}</div>`;
             }
 
             curr.matches.forEach((m, idx) => {
+                const p1A = m.p1[0];
+                const p1B = m.p1[1];
+                const p2A = m.p2[0];
+                const p2B = m.p2[1];
+
+                const cags1A = jornadaActiva.caguamas[p1A] || 0;
+                const cags1B = jornadaActiva.caguamas[p1B] || 0;
+                const cags2A = jornadaActiva.caguamas[p2A] || 0;
+                const cags2B = jornadaActiva.caguamas[p2B] || 0;
+
                 cont.innerHTML += `
                 <div class="padel-court-card">
                     <span class="court-title-badge"><i class="fas fa-layer-group"></i> PISTA ${idx+1}</span>
                     
+                    <!-- PAREJA 1 -->
                     <div class="court-side-team">
-                        <div style="flex:1;">
-                            <div style="font-weight:800; color:var(--txt-main); font-size:0.92rem;">${m.p1.join(' & ')}</div>
-                            <button class="caguama-badge" style="margin-top:3px;" onclick="jornadaActiva.caguamas['${m.p1[0]}']=(jornadaActiva.caguamas['${m.p1[0]}']||0)+1; show8LocoRound(${n}); saveLigaActiva();">🍺 ${jornadaActiva.caguamas[m.p1[0]]||0}</button>
+                        <div class="team-players-column">
+                            <div class="player-row-unit">
+                                <span class="player-name-txt">${p1A}</span>
+                                <button type="button" class="btn-caguama-ind" onclick="modificarCaguamaJugador('${p1A}', 1, ${n})" title="Toca para +1 caguama">🍺 ${cags1A}</button>
+                            </div>
+                            <div class="player-row-unit">
+                                <span class="player-name-txt">${p1B}</span>
+                                <button type="button" class="btn-caguama-ind" onclick="modificarCaguamaJugador('${p1B}', 1, ${n})" title="Toca para +1 caguama">🍺 ${cags1B}</button>
+                            </div>
                         </div>
+
                         <div class="score-ctrl">
                             <button type="button" class="score-btn" onclick="cambiarPuntos8Loco(${n-1}, ${idx}, 1, -1)">−</button>
                             <input type="number" class="score-in" value="${m.score1 !== undefined ? m.score1 : 0}" oninput="escribirPuntos8Loco(${n-1}, ${idx}, 1, this.value)">
@@ -1805,11 +2327,19 @@
 
                     <div class="padel-court-net"></div>
 
+                    <!-- PAREJA 2 -->
                     <div class="court-side-team">
-                        <div style="flex:1;">
-                            <div style="font-weight:800; color:var(--txt-main); font-size:0.92rem;">${m.p2.join(' & ')}</div>
-                            <button class="caguama-badge" style="margin-top:3px;" onclick="jornadaActiva.caguamas['${m.p2[0]}']=(jornadaActiva.caguamas['${m.p2[0]}']||0)+1; show8LocoRound(${n}); saveLigaActiva();">🍺 ${jornadaActiva.caguamas[m.p2[0]]||0}</button>
+                        <div class="team-players-column">
+                            <div class="player-row-unit">
+                                <span class="player-name-txt">${p2A}</span>
+                                <button type="button" class="btn-caguama-ind" onclick="modificarCaguamaJugador('${p2A}', 1, ${n})" title="Toca para +1 caguama">🍺 ${cags2A}</button>
+                            </div>
+                            <div class="player-row-unit">
+                                <span class="player-name-txt">${p2B}</span>
+                                <button type="button" class="btn-caguama-ind" onclick="modificarCaguamaJugador('${p2B}', 1, ${n})" title="Toca para +1 caguama">🍺 ${cags2B}</button>
+                            </div>
                         </div>
+
                         <div class="score-ctrl">
                             <button type="button" class="score-btn" onclick="cambiarPuntos8Loco(${n-1}, ${idx}, 2, -1)">−</button>
                             <input type="number" class="score-in" value="${m.score2 !== undefined ? m.score2 : 0}" oninput="escribirPuntos8Loco(${n-1}, ${idx}, 2, this.value)">
@@ -1924,7 +2454,7 @@
             });
             Object.entries(tot).sort((a,b)=>b[1]-a[1]).forEach(([p, v], idx) => {
                 const med = idx === 0 ? '🥇 ' : (idx === 1 ? '🥈 ' : (idx === 2 ? '🥉 ' : ''));
-                txt += `${idx+1}. ${med}${p} - *${v} Pts* | 🍺 ${jornadaActiva.caguamas[p]||0}\n`;
+                txt += `${idx+1}. ${med}${p} - *${v} Pts* | 🍺 ${(jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0}\n`;
             });
 
             txt += obtenerPieWhatsApp();
@@ -1936,6 +2466,12 @@
             jornadaActiva.rounds.forEach((r, idx) => {
                 txt += `*Ronda ${idx+1}:*\n`;
                 r.matches.forEach(m => txt += `${m.p1.join('&')} (${m.score1}) vs (${m.score2}) ${m.p2.join('&')}\n`);
+            });
+
+            txt += `\n*🍺 CONSUMO DE CAGUAMAS:*\n`;
+            jornadaActiva.convocados.forEach(p => {
+                const c = (jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0;
+                if (c > 0) txt += `• ${p}: ${c}\n`;
             });
 
             txt += obtenerPieWhatsApp();
@@ -1957,6 +2493,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             aplicarEnlaces();
             sincronizarEnlacesDesdeLaNube();
+            iniciarAutoScrollCarruseles();
         });
     </script>
 </body>

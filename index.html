@@ -47,7 +47,6 @@
             --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
         }
 
-        /* Eliminar flechas nativas en inputs numéricos */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -72,7 +71,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* PANTALLA DE INICIO (SPLASH SCREEN / WELCOME) */
+        /* PANTALLA DE INICIO (SPLASH SCREEN) */
         #splashScreen {
             position: fixed;
             inset: 0;
@@ -124,9 +123,7 @@
             user-select: none;
         }
 
-        .splash-info-center {
-            margin-top: 24px;
-        }
+        .splash-info-center { margin-top: 24px; }
         .splash-title-app {
             font-size: 1.25rem;
             font-weight: 900;
@@ -172,7 +169,7 @@
 
         .container { max-width: 680px; margin: 0 auto; width: 100%; }
 
-        /* HEADER ELEGANTE CON GLASSMORPHISM */
+        /* HEADER */
         header {
             background: rgba(17, 24, 39, 0.75);
             backdrop-filter: blur(16px);
@@ -217,7 +214,7 @@
         }
         .btn-gear-admin:active { transform: scale(0.92); color: var(--padel-volt); border-color: var(--padel-volt); }
 
-        /* SECCIÓN DE PATROCINADORES "OFFICIAL PARTNERS" */
+        /* PATROCINADORES OFICIALES */
         .sponsors-card-container {
             background: var(--bg-card); border-radius: 18px; padding: 14px;
             margin-bottom: 14px; box-shadow: var(--card-shadow); border: 1px solid var(--border-glow); text-align: center;
@@ -259,6 +256,38 @@
         }
         .sponsor-btn-fallback { font-size: 0.72rem; font-weight: 700; color: var(--txt-muted); display: flex; align-items: center; gap: 4px; }
         .sponsors-footer-text { font-size: 0.75rem; font-weight: 800; color: var(--padel-orange); margin-top: 10px; letter-spacing: 0.5px; }
+
+        /* NUEVA SECCIÓN: NOTICIAS & REPOST */
+        .news-card-container {
+            background: var(--bg-card); border-radius: 18px; padding: 14px;
+            margin-bottom: 14px; box-shadow: var(--card-shadow); border: 1px solid var(--border-glow);
+            border-left: 5px solid var(--padel-blue);
+        }
+        .news-header-badge {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+        }
+        .news-tag {
+            font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+            background: rgba(2, 132, 199, 0.2); color: var(--padel-blue-glow);
+            padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+        .news-club-title {
+            font-size: 0.95rem; font-weight: 800; color: var(--txt-main); margin-bottom: 4px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .news-body-txt {
+            font-size: 0.8rem; color: var(--txt-muted); line-height: 1.4; margin-bottom: 12px;
+        }
+        .btn-news-link {
+            background: #0b1120; color: var(--txt-main); text-decoration: none;
+            padding: 10px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 800;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            border: 1px solid var(--border-glow); transition: all 0.2s;
+        }
+        .btn-news-link:active {
+            border-color: var(--padel-volt); color: var(--padel-volt); transform: scale(0.98);
+        }
 
         /* CARRUSEL DE TORNEOS */
         .tournaments-container {
@@ -351,7 +380,7 @@
         }
         .btn-tournament-link:active { transform: scale(0.96); }
 
-        /* MODOS DE JUEGO (CARDS MODERNAS) */
+        /* MODOS DE JUEGO */
         .section-title { font-size: 0.85rem; font-weight: 800; color: var(--txt-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 14px 0 10px 4px; }
         .mode-box-card {
             background: var(--bg-card); border-radius: 16px; padding: 16px; margin-bottom: 12px;
@@ -400,7 +429,7 @@
         .chip-pill { background: #0b1120; color: var(--txt-muted); padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; cursor: pointer; border: 1px solid var(--border-glow); white-space: nowrap; transition: all 0.2s; }
         .chip-pill.active { background: var(--padel-blue); color: white; border-color: var(--padel-blue-glow); box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4); }
 
-        /* FILA POZO CON ESTILO DARK */
+        /* FILA POZO */
         .pozo-row {
             display: flex;
             justify-content: space-between;
@@ -424,7 +453,7 @@
             display: inline-block;
         }
 
-        /* MATCH CENTER: CANCHA DE PÁDEL PROFESIONAL */
+        /* MATCH CENTER: CANCHA */
         .padel-court-card {
             background: linear-gradient(180deg, #091a2e 0%, #06111f 100%);
             border: 1.5px solid var(--padel-blue-glow);
@@ -461,7 +490,7 @@
         }
         .court-side-team { display: flex; justify-content: space-between; align-items: center; }
 
-        /* CONTROLES DE MARCADOR DIGITAL TÁCTIL */
+        /* CONTROLES DE MARCADOR */
         .score-ctrl { display: flex; align-items: center; gap: 6px; }
         .score-btn {
             width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border-glow);
@@ -483,7 +512,7 @@
             padding: 8px 12px; font-size: 0.78rem; font-weight: 800; margin-bottom: 12px; text-align: center;
         }
 
-        /* TABLAS DE RESULTADOS Y RANKING PROFESIONAL */
+        /* TABLAS */
         .table-responsive { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-glow); background: #0b1120; }
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
         th { background: var(--bg-card-subtle); color: var(--txt-muted); padding: 10px 8px; font-weight: 800; text-align: center; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-glow); }
@@ -493,7 +522,7 @@
         .podium-1 td { color: var(--padel-volt) !important; font-weight: 800; }
         .podium-icon { font-size: 1.1rem; vertical-align: middle; margin-right: 3px; }
 
-        /* INPUTS Y MODALES PROFESIONALES */
+        /* INPUTS Y MODALES */
         input, textarea { 
             width: 100%; padding: 10px 14px; border: 1px solid var(--border-glow); border-radius: 10px; margin-top: 5px;
             background: #0b1120; color: var(--txt-main); font-size: 0.85rem; outline: none; transition: border-color 0.2s;
@@ -524,7 +553,7 @@
 </head>
 <body>
 
-    <!-- PANTALLA DE INICIO (SPLASH SCREEN: LOGO APP × LOGO PATROCINADOR) -->
+    <!-- PANTALLA DE INICIO (SPLASH SCREEN) -->
     <div id="splashScreen">
         <div class="splash-collab-box">
             <div class="splash-logo-item">
@@ -549,7 +578,7 @@
         </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL DE LA APP -->
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="container">
         <!-- HEADER OFICIAL -->
         <header>
@@ -567,7 +596,7 @@
             </button>
         </header>
 
-        <!-- BANNER DE PATROCINADORES OFICIALES (OFFICIAL PARTNERS) -->
+        <!-- BANNER DE PATROCINADORES OFICIALES -->
         <div class="sponsors-card-container">
             <div class="sponsors-label-top">
                 <i class="fas fa-shield-alt"></i> Official Partners • Aguascalientes
@@ -605,6 +634,23 @@
             </div>
         </div>
 
+        <!-- SECCIÓN: NOTICIAS & REPOST DE CLUBES -->
+        <div class="news-card-container" id="sectionNewsFeed">
+            <div class="news-header-badge">
+                <span class="news-tag"><i class="fas fa-rss"></i> Repost Oficial</span>
+                <small style="color:var(--txt-dim); font-size:0.7rem; font-weight:700;"><i class="fab fa-instagram"></i> Club Destacado</small>
+            </div>
+            <div class="news-club-title" id="newsClubName">
+                <i class="fas fa-bullhorn" style="color:var(--padel-blue-glow);"></i> <span>SB TOTAL PADEL</span>
+            </div>
+            <div class="news-body-txt" id="newsPostDesc">
+                ¡Gran convocatoria este fin de semana! Revisa los horarios y parejas confirmadas en la publicación oficial.
+            </div>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="btn-news-link" id="newsPostLink">
+                <span>Ver Publicación Oficial en Instagram</span> <i class="fas fa-external-link-alt"></i>
+            </a>
+        </div>
+
         <!-- SECCIÓN: PRÓXIMOS TORNEOS -->
         <div class="tournaments-container" id="sectionTournaments">
             <div class="tournaments-header-title">
@@ -616,7 +662,7 @@
             </div>
         </div>
 
-        <!-- MODAL DE AUTENTICACIÓN ADMIN (COMPATIBLE CON ENTER Y BOTONES TÁCTILES) -->
+        <!-- MODAL DE AUTENTICACIÓN ADMIN -->
         <div id="modalAuthAdmin" class="modal">
             <div class="modal-content" style="max-width:340px; text-align:center;">
                 <div style="font-size:2.2rem; color:var(--padel-volt); margin-bottom:10px;"><i class="fas fa-shield-alt"></i></div>
@@ -640,6 +686,17 @@
             <h4 style="color:var(--padel-volt); font-size:0.85rem; margin-top:4px;"><i class="fas fa-share-alt"></i> Redes Sociales de la App</h4>
             <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Enlace Redes 11Padel (Logo Principal):</label>
             <input type="url" id="adminAppLogoUrl" placeholder="https://instagram.com/11padelpro">
+
+            <!-- CONFIGURACIÓN DE NOTICIA / REPOST -->
+            <h4 style="color:var(--padel-blue-glow); font-size:0.85rem; margin-top:16px; border-top:1px solid var(--border-glow); padding-top:12px;"><i class="fas fa-rss"></i> Sección News & Repost</h4>
+            <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Nombre del Club / Fuente:</label>
+            <input type="text" id="adminNewsClub" placeholder="Ej: Club Padel Point Ags">
+            
+            <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted); margin-top:6px; display:block;">Link de la Publicación (Instagram, Reel o Post):</label>
+            <input type="url" id="adminNewsLink" placeholder="https://instagram.com/p/...">
+            
+            <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted); margin-top:6px; display:block;">Texto o Resumen de la Noticia:</label>
+            <textarea id="adminNewsDesc" placeholder="Breve texto sobre el torneo, convocatoria o aviso del club"></textarea>
 
             <!-- MENSAJE GENERAL PARA WHATSAPP -->
             <h4 style="color:#25d366; font-size:0.85rem; margin-top:16px; border-top:1px solid var(--border-glow); padding-top:12px;"><i class="fab fa-whatsapp"></i> Mensaje de Pie para WhatsApp</h4>
@@ -836,7 +893,7 @@
             </div>
         </div>
 
-        <!-- BOTÓN FLOTANTE RÁPIDO WHATSAPP EN JORNADA -->
+        <!-- BOTÓN FLOTANTE WHATSAPP -->
         <div class="floating-wa-btn hidden" id="globalFloatingWaBtn" onclick="compartirWhatsAppRapido()" title="Enviar Marcadores por WhatsApp">
             <i class="fab fa-whatsapp"></i>
         </div>
@@ -879,11 +936,8 @@
 
     <script>
         const CLOUD_DB_URL = "https://padel-pro-4c4d7-default-rtdb.firebaseio.com/sponsors.json";
-        
-        // HASH CRIPTOGRÁFICO SHA-256 DEL PIN "lopl1984" (Protegido contra inspección de código)
         const MASTER_PIN_HASH = "805a5a9a47d2d38fa45d6542fc7d7d33d9c7bb09146fe494a317e34ef30c8227";
 
-        // Función nativa para convertir texto a hash SHA-256 con salvaguarda para navegadores móviles
         async function sha256(message) {
             try {
                 if (window.crypto && crypto.subtle) {
@@ -898,10 +952,8 @@
             return null;
         }
 
-        // Variable en memoria RAM durante la sesión activa del admin
         let sesionAdminHash = MASTER_PIN_HASH;
 
-        // FUNCIÓN PARA ENTRAR A LA APP DESDE LA SPLASH SCREEN
         function entrarAppPrincipal() {
             const splash = document.getElementById("splashScreen");
             if (splash) {
@@ -916,6 +968,9 @@
             appLogoUrl: "https://instagram.com",
             mainUrl: "https://instagram.com/sbtotalpadel",
             waCustomMsg: "",
+            newsClub: "SB TOTAL PADEL",
+            newsDesc: "¡Gran convocatoria este fin de semana! Revisa los horarios y parejas confirmadas en la publicación oficial.",
+            newsLink: "https://instagram.com/sbtotalpadel",
             banner1Url: "https://instagram.com/chuletasnkrs",
             banner2Url: "https://instagram.com/motio",
             banner3Url: "https://instagram.com/room",
@@ -961,10 +1016,19 @@
                 if (btn) btn.href = normalizarUrl(appConfig[`banner${i}Url`]);
             }
 
+            // Aplicar sección de noticias
+            const clubTxt = document.getElementById("newsClubName");
+            if (clubTxt) clubTxt.innerHTML = `<i class="fas fa-bullhorn" style="color:var(--padel-blue-glow);"></i> <span>${appConfig.newsClub || 'Club Destacado'}</span>`;
+
+            const descTxt = document.getElementById("newsPostDesc");
+            if (descTxt) descTxt.textContent = appConfig.newsDesc || "Consulta los últimos anuncios y partidos.";
+
+            const postLnk = document.getElementById("newsPostLink");
+            if (postLnk) postLnk.href = normalizarUrl(appConfig.newsLink);
+
             renderTorneosPublicos();
         }
 
-        // RENDER DE CARRUSEL DE 4 TORNEOS
         function renderTorneosPublicos() {
             const grid = document.getElementById("tournamentsGridContainer");
             if (!grid) return;
@@ -1002,7 +1066,7 @@
                 const res = await fetch(CLOUD_DB_URL);
                 if (res.ok) {
                     const data = await res.json();
-                    if (data && (data.mainUrl || data.appLogoUrl || data.torneos || data.waCustomMsg !== undefined)) {
+                    if (data && (data.mainUrl || data.appLogoUrl || data.torneos || data.waCustomMsg !== undefined || data.newsLink !== undefined)) {
                         appConfig = Object.assign({}, appConfig, data);
                         localStorage.setItem("11padel_app_config", JSON.stringify(appConfig));
                         aplicarEnlaces();
@@ -1013,7 +1077,6 @@
             }
         }
 
-        // SEGURIDAD ADMIN CON DOBLE CAPA (SHA-256 + SALVAGUARDA DE ENTRADA)
         function solicitarAccesoAdmin() {
             const input = document.getElementById("inputMasterPinPrompt");
             if (input) input.value = "";
@@ -1049,6 +1112,9 @@
             
             document.getElementById("adminAppLogoUrl").value = appConfig.appLogoUrl || "";
             document.getElementById("adminMainSponsorUrl").value = appConfig.mainUrl || "";
+            document.getElementById("adminNewsClub").value = appConfig.newsClub || "";
+            document.getElementById("adminNewsLink").value = appConfig.newsLink || "";
+            document.getElementById("adminNewsDesc").value = appConfig.newsDesc || "";
             document.getElementById("adminWaCustomMsg").value = appConfig.waCustomMsg || "";
             document.getElementById("adminBanner1Url").value = appConfig.banner1Url || "";
             document.getElementById("adminBanner2Url").value = appConfig.banner2Url || "";
@@ -1075,6 +1141,9 @@
         async function guardarEnlacesEnFirebase() {
             appConfig.appLogoUrl = document.getElementById("adminAppLogoUrl").value.trim() || "https://instagram.com";
             appConfig.mainUrl = document.getElementById("adminMainSponsorUrl").value.trim() || "https://instagram.com/sbtotalpadel";
+            appConfig.newsClub = document.getElementById("adminNewsClub").value.trim() || "Club Destacado";
+            appConfig.newsLink = document.getElementById("adminNewsLink").value.trim() || "https://instagram.com";
+            appConfig.newsDesc = document.getElementById("adminNewsDesc").value.trim() || "";
             appConfig.waCustomMsg = document.getElementById("adminWaCustomMsg").value.trim() || "";
             appConfig.banner1Url = document.getElementById("adminBanner1Url").value.trim() || "https://instagram.com";
             appConfig.banner2Url = document.getElementById("adminBanner2Url").value.trim() || "https://instagram.com";
@@ -1092,7 +1161,6 @@
             }
             appConfig.torneos = torneosEditados;
 
-            // En el paquete que viaja a Firebase mandamos el HASH, cumpliendo la regla sin exponer tu clave real
             const payloadParaNube = Object.assign({}, appConfig, {
                 adminPass: sesionAdminHash || MASTER_PIN_HASH
             });
@@ -1109,7 +1177,7 @@
                 });
 
                 if (!response.ok) throw new Error("Error de autorización en Firebase");
-                showToast("¡Patrocinadores sincronizados exitosamente!");
+                showToast("¡Configuración sincronizada exitosamente!");
             } catch (e) {
                 showToast("Guardado local (Error al sincronizar con la nube).", "error");
             }
@@ -1174,7 +1242,6 @@
             }
         }
 
-        // PADRÓN DE JUGADORES
         function agregarJugadorPadron() {
             const inp = document.getElementById("inputNuevoJugador"); 
             const nom = inp.value.trim();
@@ -1215,7 +1282,6 @@
             });
         }
 
-        // DETALLE DE LIGA
         let ligaActiva = null;
         function abrirLigaDetalle(id) {
             const d = getUserData();
@@ -1251,7 +1317,6 @@
             return pos;
         }
 
-        // TABLA GENERAL DE LIGA (PUNTOS INDIVIDUALES POR JORNADA + TOTAL ACUMULADO)
         function renderTablaGeneralLiga() {
             const th = document.getElementById("tablaLigaHead"); 
             const tb = document.getElementById("tablaLigaBody");
@@ -1359,7 +1424,6 @@
             saveUserData(d);
         }
 
-        // CONVOCATORIA
         let convocadosSeleccionados = [];
         function abrirModalNuevaJornada() {
             document.getElementById("jornadaNombreInput").value = `Jornada ${ligaActiva.jornadas.length + 1}`;
@@ -1388,7 +1452,6 @@
             renderPills();
         }
 
-        // ROUND-ROBIN AMERICANO (N par -> N-1 rondas, N impar -> N rondas)
         function generarRondas8Loco(players) {
             let pool = [...players];
             const n = pool.length;
@@ -1511,7 +1574,6 @@
             abrirLigaDetalle(ligaActiva.id);
         }
 
-        // PESTAÑAS EN VIVO DENTRO DE LA JORNADA
         function switchLiveTab(modo, vista) {
             if (modo === 'pozo') {
                 const btnP = document.getElementById("tabLiveBtnPozoPistas");
@@ -1538,7 +1600,6 @@
             }
         }
 
-        // TABLA EN VIVO: POZO (SOLO PUNTOS DE LA JORNADA EN CURSO)
         function renderTablaPozoLive() {
             const tb = document.getElementById("tablaPozoLiveBody");
             tb.innerHTML = "";
@@ -1565,7 +1626,6 @@
             });
         }
 
-        // TABLA EN VIVO: 8 LOCO
         function renderTabla8LocoLive() {
             const tb = document.getElementById("tabla8LocoLiveBody");
             tb.innerHTML = "";
@@ -1580,11 +1640,13 @@
                             const s1 = parseInt(m.score1) || 0;
                             const s2 = parseInt(m.score2) || 0;
                             m.p1.forEach(p => {
+                                stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
                                 stats[p].pj++;
                                 stats[p].diff += (s1 - s2);
                                 if (s1 > s2) { stats[p].w++; stats[p].pts += 3; }
                             });
                             m.p2.forEach(p => {
+                                stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
                                 stats[p].pj++;
                                 stats[p].diff += (s2 - s1);
                                 if (s2 > s1) { stats[p].w++; stats[p].pts += 3; }
@@ -1615,7 +1677,6 @@
             });
         }
 
-        // GESTIÓN Y PERSISTENCIA DE PUNTOS EN POZO
         function renderPozoNav() {
             const cont = document.getElementById("pozoRoundsNav"); 
             cont.innerHTML = "";
@@ -1688,7 +1749,6 @@
             }
         }
 
-        // 8 LOCO LIVE (CANCHAS REALISTAS Y MARCADOR TÁCTIL BLINDADO)
         function render8LocoNav() {
             const cont = document.getElementById("amRoundsNav"); cont.innerHTML = "";
             for (let i=1; i<=jornadaActiva.rounds.length; i++) {
@@ -1768,7 +1828,6 @@
             if (confirm("¿Finalizar oficialmente esta jornada?")) { jornadaActiva.finalizada = true; saveLigaActiva(); backToLigaDetalle(); }
         }
 
-        // FUNCIÓN AUXILIAR: TEXTO DE PIE PARA WHATSAPP
         function obtenerPieWhatsApp() {
             if (appConfig.waCustomMsg && appConfig.waCustomMsg.trim() !== "") {
                 return `\n\n📢 *${appConfig.waCustomMsg.trim()}*`;
@@ -1776,7 +1835,6 @@
             return "";
         }
 
-        // COMPARTIR TABLA GENERAL DE TODA LA LIGA POR WHATSAPP
         function compartirWhatsAppTablaGeneralLiga() {
             if (!ligaActiva || !ligaActiva.jornadas.length) {
                 return showToast("No hay jornadas registradas en la liga para compartir.", "error");
@@ -1855,7 +1913,6 @@
             window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
         }
 
-        // COMPARTIR WHATSAPP POZO (SOLO PUNTOS DE LA JORNADA EN CURSO)
         function compartirWhatsAppPozo() {
             let txt = `*🎾 11PADEL POINT PRO - POZO*\n🏆 *Liga:* ${ligaActiva.nombre}\n📅 *Jornada:* ${jornadaActiva.nombre}\n\n*RESULTADOS DE LA JORNADA:*\n`;
             const tot = {}; 
@@ -1874,7 +1931,6 @@
             window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
         }
 
-        // COMPARTIR WHATSAPP 8 LOCO
         function compartirWhatsApp8Loco() {
             let txt = `*🎾 11PADEL POINT PRO - 8 LOCO*\n🏆 *Liga:* ${ligaActiva.nombre}\n📅 *Jornada:* ${jornadaActiva.nombre}\n\n*MARCADORES EN VIVO:*\n`;
             jornadaActiva.rounds.forEach((r, idx) => {

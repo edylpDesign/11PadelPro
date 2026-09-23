@@ -1256,7 +1256,6 @@
                 <h3 style="color:var(--txt-main); margin-bottom:6px; font-weight:800;"><i class="fas fa-baseball-ball" style="color:var(--padel-orange);"></i> Nuevo Partido Pro</h3>
                 <p style="font-size:0.75rem; color:var(--txt-muted); margin-bottom:12px;">Selecciona del padrón o registra un jugador al vuelo:</p>
                 
-                <!-- REGISTRO RÁPIDO AL VUELO EN PARTIDO PRO -->
                 <div style="background:var(--bg-card-subtle); padding:10px; border-radius:12px; border:1px solid var(--border-glow); margin-bottom:12px;">
                     <span style="font-size:0.72rem; font-weight:800; color:var(--padel-volt);">+ Registro Rápido al Vuelo:</span>
                     <div style="display:flex; gap:6px; margin-top:6px;">
@@ -1265,7 +1264,6 @@
                     </div>
                 </div>
 
-                <!-- PAREJA 1 -->
                 <div style="background:var(--bg-card-subtle); padding:10px; border-radius:12px; border:1px solid var(--border-glow); margin-bottom:10px;">
                     <strong style="font-size:0.78rem; color:var(--padel-volt);">PAREJA 1</strong>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:4px;">
@@ -1282,7 +1280,6 @@
                     </div>
                 </div>
 
-                <!-- PAREJA 2 -->
                 <div style="background:var(--bg-card-subtle); padding:10px; border-radius:12px; border:1px solid var(--border-glow); margin-bottom:14px;">
                     <strong style="font-size:0.78rem; color:var(--padel-orange);">PAREJA 2</strong>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:4px;">
@@ -1861,6 +1858,16 @@
             return clean;
         }
 
+        // APERTURA ROBUSTA DE WHATSAPP (COMPATIBLE CON MÓVILES Y BLOQUEADORES)
+        function abrirEnlaceWhatsApp(txt) {
+            const url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(txt);
+            const win = window.open(url, "_blank");
+            if (!win || win.closed || typeof win.closed === 'undefined') {
+                window.location.href = url;
+            }
+        }
+
+        // POBLAR SELECTORES DEL PADRÓN EN MODALES
         function llenarSelectoresPadron(selectIds, valorPorDefecto = "") {
             const d = getUserData();
             const lista = d.jugadores || [];
@@ -1878,6 +1885,7 @@
             });
         }
 
+        // REGISTRO AL VUELO GENERAL PARA CUALQUIER MODAL
         function registrarJugadorExpressDesdeModal(origen) {
             let inputId = "inputRegistroExpress";
             if (origen === 'partido') inputId = "inputRegistroExpressPartido";
@@ -2639,6 +2647,7 @@
                     }
                     if (j.caguamas) Object.entries(j.caguamas).forEach(([p, c]) => { stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 }; stats[p].cags += c; });
                 });
+
                 const sorted = Object.entries(stats).sort((a,b) => {
                     if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
                     return b[1].diff - a[1].diff;
@@ -2646,7 +2655,7 @@
 
                 sorted.forEach(([p, dat], idx) => {
                     const rowClass = idx === 0 ? 'podium-1' : '';
-                    tb.innerHTML += `<tr class="${rowClass}"><td>${obtenerIconoPosicion(idx+1)}</td><td><strong>${p}</strong></td><td>${dat.pj}</td><td>${dat.w}</td><td style="color:var(--padel-volt); font-weight:900;">${dat.pts}</td><td>${dat.diff}</td><td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td></tr>`;
+                    tb.innerHTML += `<tr class="${rowClass}"><td>${obtenerIconoPosicion(idx+1)}</td><td><strong>${p}</strong></td><td>${dat.pj}</td><td>${dat.w}</td><td style="color:var(--padel-volt); font-weight:900; font-size:1rem;">${dat.pts}</td><td>${dat.diff}</td><td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td></tr>`;
                 });
                 if (!sorted.length) tb.innerHTML = "<tr><td colspan='7'>Sin partidos jugados</td></tr>";
             }
@@ -3697,7 +3706,7 @@
 
             txt += `\n*🍺 Caguamas:* ${partidoState.p1[0]}: ${partidoState.caguamas.p1A || 0} | ${partidoState.p1[1]}: ${partidoState.caguamas.p1B || 0} | ${partidoState.p2[0]}: ${partidoState.caguamas.p2A || 0} | ${partidoState.p2[1]}: ${partidoState.caguamas.p2B || 0}\n`;
             txt += obtenerPieWhatsApp();
-            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
+            abrirEnlaceWhatsApp(txt);
         }
 
         function obtenerPieWhatsApp() {
@@ -3708,7 +3717,7 @@
         }
 
         function compartirWhatsAppTablaGeneralLiga() {
-            if (!ligaActiva || !ligaActiva.jornadas.length) {
+            if (!ligaActiva || !ligaActiva.jornadas || !ligaActiva.jornadas.length) {
                 return showToast("No hay jornadas registradas en la liga para compartir.", "error");
             }
 
@@ -3752,15 +3761,15 @@
                                 if (esJugado) {
                                     const s1 = parseInt(m.score1) || 0;
                                     const s2 = parseInt(m.score2) || 0;
-                                    const t1 = m.p1.join(' & ');
-                                    const t2 = m.p2.join(' & ');
-                                    stats[t1] = stats[t1] || { pj:0, pg:0, pts:0, diff:0, cags:0 };
-                                    stats[t2] = stats[t2] || { pj:0, pg:0, pts:0, diff:0, cags:0 };
-                                    stats[t1].pj++; stats[t2].pj++;
-                                    stats[t1].diff += (s1 - s2); stats[t2].diff += (s2 - s1);
-                                    stats[t1].pts += s1; stats[t2].pts += s2;
-                                    if (s1 > s2) stats[t1].pg++;
-                                    else if (s2 > s1) stats[t2].pg++;
+                                    const t1Name = m.p1.join(' & ');
+                                    const t2Name = m.p2.join(' & ');
+                                    stats[t1Name] = stats[t1Name] || { pj:0, pg:0, pts:0, diff:0, cags:0 };
+                                    stats[t2Name] = stats[t2Name] || { pj:0, pg:0, pts:0, diff:0, cags:0 };
+                                    stats[t1Name].pj++; stats[t2Name].pj++;
+                                    stats[t1Name].diff += (s1 - s2); stats[t2Name].diff += (s2 - s1);
+                                    stats[t1Name].pts += s1; stats[t2Name].pts += s2;
+                                    if (s1 > s2) stats[t1Name].pg++;
+                                    else if (s2 > s1) stats[t2Name].pg++;
                                 }
                             });
                         });
@@ -3775,6 +3784,7 @@
                     txt += `${idx+1}. ${med}*${team}* - *${dat.pts} Pts* (PJ:${dat.pj} | PG:${dat.pg} | Diff:${dat.diff > 0 ? '+'+dat.diff : dat.diff})\n`;
                 });
             } else {
+                // AMERICANO / 8 LOCO
                 const stats = {};
                 ligaActiva.jornadas.forEach(j => {
                     if (j.rounds) {
@@ -3800,7 +3810,12 @@
                             });
                         });
                     }
-                    if (j.caguamas) Object.entries(j.caguamas).forEach(([p, c]) => { stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 }; stats[p].cags += c; });
+                    if (j.caguamas) {
+                        Object.entries(j.caguamas).forEach(([p, c]) => {
+                            stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
+                            stats[p].cags += c;
+                        });
+                    }
                 });
 
                 const sorted = Object.entries(stats).sort((a,b) => {
@@ -3809,13 +3824,13 @@
                 });
 
                 sorted.forEach(([p, dat], idx) => {
-                    const rowClass = idx === 0 ? 'podium-1' : '';
+                    const med = idx === 0 ? '🥇 ' : (idx === 1 ? '🥈 ' : (idx === 2 ? '🥉 ' : ''));
                     txt += `${idx+1}. ${med}*${p}* - *${dat.pts} Pts* (PJ:${dat.pj} | W:${dat.w} | Diff:${dat.diff > 0 ? '+'+dat.diff : dat.diff} | 🍺 ${dat.cags})\n`;
                 });
             }
 
             txt += obtenerPieWhatsApp();
-            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
+            abrirEnlaceWhatsApp(txt);
         }
 
         function compartirWhatsAppPozo() {
@@ -3830,7 +3845,7 @@
                 txt += `${idx+1}. ${med}${p} - *${v} Pts* | 🍺 ${(jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0}\n`;
             });
             txt += obtenerPieWhatsApp();
-            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
+            abrirEnlaceWhatsApp(txt);
         }
 
         function compartirWhatsApp8Loco() {
@@ -3856,7 +3871,7 @@
             }
 
             txt += obtenerPieWhatsApp();
-            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), "_blank");
+            abrirEnlaceWhatsApp(txt);
         }
 
         function compartirWhatsAppRapido() {

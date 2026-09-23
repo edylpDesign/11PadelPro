@@ -1223,15 +1223,20 @@
         <!-- HUB PRINCIPAL DE MODOS -->
         <div id="viewHubModos">
             
-            <!-- SECCIÓN: FALTA 1 (BOLSA DE RETAS ABIERTAS) -->
+            <!-- SECCIÓN: FALTA 1 (BOLSA DE RETAS ABIERTAS CON REFRESH EN VIVO) -->
             <div class="retas-hub-card" id="sectionFalta1">
                 <div class="retas-hub-header">
                     <div class="retas-hub-title">
                         <i class="fas fa-user-plus" style="color:var(--padel-volt);"></i> Retas Abiertas • ¡Falta 1!
                     </div>
-                    <button type="button" class="btn btn-sm btn-green" onclick="abrirModalPublicarReta()">
-                        + Publicar Reta
-                    </button>
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" class="btn btn-sm btn-dark" style="padding:6px 9px;" onclick="sincronizarRetasDesdeNube(true)" title="Actualizar retas">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-green" onclick="abrirModalPublicarReta()">
+                            + Publicar Reta
+                        </button>
+                    </div>
                 </div>
                 <div class="retas-list-container" id="retasListContainer"></div>
             </div>
@@ -1338,7 +1343,7 @@
                 <h3 style="color:var(--txt-main); margin-bottom:6px; font-weight:800;">
                     <i class="fas fa-user-plus" style="color:var(--padel-volt);"></i> Publicar Reta Abierta
                 </h3>
-                <p style="font-size:0.75rem; color:var(--txt-muted); margin-bottom:12px;">Se publicará para todos los jugadores y caducará automáticamente tras el partido:</p>
+                <p style="font-size:0.75rem; color:var(--txt-muted); margin-bottom:12px;">Se publicará en vivo para todos los usuarios y caducará automáticamente tras el partido:</p>
                 
                 <label style="font-size:0.72rem; color:var(--txt-dim);">Club / Ubicación:</label>
                 <input type="text" id="inputRetaClub" placeholder="Ej. SB Total Padel, Padel Point, etc.">
@@ -1382,7 +1387,7 @@
 
                 <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
                     <button type="button" class="btn btn-dark btn-sm" onclick="closeModal('modalPublicarReta')">Cancelar</button>
-                    <button type="button" class="btn btn-green btn-sm" onclick="guardarRetaAbierta()">Publicar Reta ➔</button>
+                    <button type="button" class="btn btn-green btn-sm" id="btnGuardarRetaSubmit" onclick="guardarRetaAbierta()">Publicar Reta ➔</button>
                 </div>
             </div>
         </div>
@@ -1873,7 +1878,7 @@
         </div>
     </div>
 
-    <!-- MODAL NUEVA JORNADA CON BOTONES DE CANCELAR Y CIERRE INTEGRADOS -->
+    <!-- MODAL NUEVA JORNADA -->
     <div id="modalNuevaJornada" class="modal" onclick="closeModalOnBackdrop(event, 'modalNuevaJornada')">
         <div class="modal-content">
             <button type="button" class="modal-close-icon" onclick="closeModal('modalNuevaJornada')">×</button>
@@ -2086,9 +2091,10 @@
         }
 
         // ==========================================
-        // MÓDULO: RETAS ABIERTAS (FALTA 1) - AUTOCADUCIDAD Y PERMISOS
+        // MÓDULO: RETAS ABIERTAS (FALTA 1) - SINCRONIZACIÓN PRIORITARIA Y POLLING EN VIVO
         // ==========================================
         let retasAbiertas = JSON.parse(localStorage.getItem("11padel_retas_abiertas")) || [];
+        let pollingRetasTimer = null;
 
         function obtenerMiTokenDispositivo() {
             let token = localStorage.getItem("11padel_device_token");
@@ -2117,7 +2123,7 @@
             document.getElementById("modalPublicarReta").classList.add("active");
         }
 
-        async function sincronizarRetasDesdeNube() {
+        async function sincronizarRetasDesdeNube(mostrarMensajeManual = false) {
             try {
                 const res = await fetch(RETAS_DB_URL);
                 if (res.ok) {
@@ -2127,12 +2133,22 @@
                     } else {
                         retasAbiertas = [];
                     }
+                    verificarYLimpiarRetasCaducadas();
+                    localStorage.setItem("11padel_retas_abiertas", JSON.stringify(retasAbiertas));
+                    renderRetasAbiertas();
+                    if (mostrarMensajeManual) showToast("Tablón actualizado en vivo");
                 }
-            } catch (err) {}
-            
-            verificarYLimpiarRetasCaducadas();
-            localStorage.setItem("11padel_retas_abiertas", JSON.stringify(retasAbiertas));
-            renderRetasAbiertas();
+            } catch (err) {
+                if (mostrarMensajeManual) showToast("Sin conexión a la nube", "error");
+            }
+        }
+
+        function iniciarPollingRetas() {
+            if (pollingRetasTimer) clearInterval(pollingRetasTimer);
+            // Consulta Firebase cada 15 segundos para reflejar nuevas retas automáticamente
+            pollingRetasTimer = setInterval(() => {
+                sincronizarRetasDesdeNube(false);
+            }, 15000);
         }
 
         async function verificarYLimpiarRetasCaducadas() {
@@ -2174,8 +2190,9 @@
             const fechaTexto = fechaObj.toLocaleDateString('es-MX', opcionesFecha);
             const horarioFormateado = `${fechaTexto} • ${horaVal} hrs`;
 
+            const idReta = "reta_" + Date.now();
             const nuevaReta = {
-                id: "reta_" + Date.now(),
+                id: idReta,
                 club,
                 fechaVal,
                 horaVal,
@@ -2188,19 +2205,39 @@
                 fechaCreacion: Date.now()
             };
 
-            retasAbiertas.unshift(nuevaReta);
-            localStorage.setItem("11padel_retas_abiertas", JSON.stringify(retasAbiertas));
-            renderRetasAbiertas();
-            closeModal("modalPublicarReta");
-            showToast("¡Reta publicada con éxito!");
+            const btnSubmit = document.getElementById("btnGuardarRetaSubmit");
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.textContent = "Publicando...";
+            }
 
             try {
-                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/retas/${nuevaReta.id}.json`, {
+                showToast("Sincronizando con todos los usuarios...");
+                const resp = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/retas/${idReta}.json`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(nuevaReta)
                 });
-            } catch (e) {}
+
+                if (!resp.ok) throw new Error("Error al publicar en Firebase");
+
+                // Actualizar inmediatamente tras guardado en Firebase
+                await sincronizarRetasDesdeNube(false);
+                closeModal("modalPublicarReta");
+                showToast("¡Reta publicada para todos los jugadores!");
+            } catch (err) {
+                // Respaldo local en caso de falla de conexión
+                retasAbiertas.unshift(nuevaReta);
+                localStorage.setItem("11padel_retas_abiertas", JSON.stringify(retasAbiertas));
+                renderRetasAbiertas();
+                closeModal("modalPublicarReta");
+                showToast("Guardada localmente (Verifica tu conexión)", "error");
+            } finally {
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = "Publicar Reta ➔";
+                }
+            }
         }
 
         async function eliminarReta(id, creadorToken) {
@@ -2212,17 +2249,17 @@
                 return showToast("Solo el creador o el administrador pueden borrar esta reta.", "error");
             }
 
-            if (confirm("¿Eliminar esta reta del tablón?")) {
-                retasAbiertas = retasAbiertas.filter(r => r.id !== id);
-                localStorage.setItem("11padel_retas_abiertas", JSON.stringify(retasAbiertas));
-                renderRetasAbiertas();
-                showToast("Reta retirada");
-
+            if (confirm("¿Eliminar esta reta del tablón de todos los usuarios?")) {
                 try {
                     await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/retas/${id}.json`, {
                         method: 'DELETE'
                     });
                 } catch (e) {}
+
+                retasAbiertas = retasAbiertas.filter(r => r.id !== id);
+                localStorage.setItem("11padel_retas_abiertas", JSON.stringify(retasAbiertas));
+                renderRetasAbiertas();
+                showToast("Reta retirada del tablón");
             }
         }
 
@@ -2800,7 +2837,8 @@
             } catch (e) {
                 aplicarEnlaces();
             }
-            sincronizarRetasDesdeNube();
+            sincronizarRetasDesdeNube(false);
+            iniciarPollingRetas();
         }
 
         function solicitarAccesoAdmin() {
@@ -3052,16 +3090,15 @@
 
                 const sorted = Object.entries(stats).sort((a,b) => b[1].total - a[1].total);
                 sorted.forEach(([p, dat], idx) => {
-                    const rowClass = idx === 0 ? 'podium-1' : '';
-                    let r = `<tr class="${rowClass}">
+                    const med = idx === 0 ? '🥇 ' : (idx === 1 ? '🥈 ' : (idx === 2 ? '🥉 ' : ''));
+                    const desglose = dat.list.map((v, i) => `J${i+1}:${v}`).join(' | ');
+                    tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
                         <td>${obtenerIconoPosicion(idx+1)}</td>
                         <td><strong>${p}</strong></td>
-                        <td style="color:var(--padel-volt); font-weight:900; font-size:1rem;">${dat.total}</td>`;
-                    dat.list.forEach(val => { r += `<td>${val}</td>`; });
-                    r += `<td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td></tr>`;
-                    tb.innerHTML += r;
+                        <td style="color:var(--padel-volt); font-weight:900;">${dat.total}</td>
+                        <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
+                    </tr>`;
                 });
-                if (!sorted.length) tb.innerHTML = "<tr><td colspan='4'>Sin jornadas registradas</td></tr>";
             } else if (modoSeleccionado === 'teams') {
                 th.innerHTML = "<tr><th>Pos</th><th>Pareja / Equipo</th><th>PJ</th><th>PG</th><th>Pts</th><th>+/-</th><th>🍺</th></tr>";
                 const stats = {};
@@ -3097,9 +3134,11 @@
                     return b[1].diff - a[1].diff;
                 });
                 sorted.forEach(([team, dat], idx) => {
+                    const med = idx === 0 ? '🥇 ' : (idx === 1 ? '🥈 ' : (idx === 2 ? '🥉 ' : ''));
                     tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}"><td>${obtenerIconoPosicion(idx+1)}</td><td><strong>${team}</strong></td><td>${dat.pj}</td><td>${dat.pg}</td><td style="color:var(--padel-volt); font-weight:900;">${dat.pts}</td><td>${dat.diff > 0 ? '+'+dat.diff : dat.diff}</td><td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td></tr>`;
                 });
             } else {
+                // AMERICANO / 8 LOCO
                 th.innerHTML = "<tr><th>Pos</th><th>Jugador</th><th>PJ</th><th>W</th><th>Pts</th><th>+/-</th><th>🍺</th></tr>";
                 const stats = {};
                 ligaActiva.jornadas.forEach(j => {
@@ -4290,7 +4329,7 @@
                     txt += `${idx+1}. ${med}*${team}* - *${dat.pts} Pts* (PJ:${dat.pj} | PG:${dat.pg} | Diff:${dat.diff > 0 ? '+'+dat.diff : dat.diff})\n`;
                 });
             } else {
-                // AMERICANO / 8 LOCO
+                // MODO AMERICANO / 8 LOCO
                 const stats = {};
                 ligaActiva.jornadas.forEach(j => {
                     if (j.rounds) {
@@ -4298,6 +4337,7 @@
                             (r.matches || []).forEach(m => {
                                 const s1 = parseInt(m.score1) || 0;
                                 const s2 = parseInt(m.score2) || 0;
+
                                 (m.p1 || []).forEach(p => {
                                     stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
                                     stats[p].pj++;

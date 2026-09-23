@@ -560,6 +560,88 @@
         }
         .btn-tournament-link:active { transform: scale(0.96); }
 
+        /* SECCIÓN: FALTA 1 (BOLSA DE RETAS ABIERTAS) */
+        .retas-hub-card {
+            background: var(--bg-card);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 14px;
+            border: 1.5px solid rgba(0, 230, 118, 0.35);
+            box-shadow: var(--card-shadow);
+        }
+        .retas-hub-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .retas-hub-title {
+            font-size: 0.88rem;
+            font-weight: 900;
+            color: var(--txt-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .retas-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 290px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .reta-item-row {
+            background: #0b1120;
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .reta-info-left {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            flex: 1;
+            overflow: hidden;
+        }
+        .reta-club-name {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--txt-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .reta-details-sub {
+            font-size: 0.72rem;
+            color: var(--txt-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .badge-falta-cuantos {
+            font-size: 0.65rem;
+            font-weight: 900;
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--padel-orange);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        .badge-reta-nivel {
+            font-size: 0.65rem;
+            font-weight: 900;
+            background: rgba(56, 189, 248, 0.2);
+            color: var(--padel-blue-glow);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
         /* GRID PRINCIPAL DE MODOS DE JUEGO (HERO CARDS 2x2) */
         .section-title { font-size: 0.85rem; font-weight: 800; color: var(--txt-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 14px 0 10px 4px; }
         
@@ -741,7 +823,7 @@
             box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
         }
 
-        /* TARJETA DEL PADRÓN */
+        /* TARJETA DEL PADRÓN CON DETALLES */
         .mode-box-card.padron {
             background: var(--bg-card); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px;
             cursor: pointer; display: flex; align-items: center; gap: 14px; box-shadow: var(--card-shadow);
@@ -752,6 +834,28 @@
             width: 44px; height: 44px; min-width: 44px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: white; background: var(--padel-purple);
             box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+        }
+
+        .padron-item-card {
+            background: #0b1120;
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .badge-categoria-padron {
+            font-size: 0.65rem;
+            font-weight: 800;
+            background: rgba(168, 85, 247, 0.2);
+            color: #d8b4fe;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            padding: 2px 6px;
+            border-radius: 6px;
+            display: inline-block;
         }
 
         /* COMPONENTES GENERALES DARK */
@@ -1118,6 +1222,20 @@
 
         <!-- HUB PRINCIPAL DE MODOS -->
         <div id="viewHubModos">
+            
+            <!-- SECCIÓN: FALTA 1 (BOLSA DE RETAS ABIERTAS) -->
+            <div class="retas-hub-card" id="sectionFalta1">
+                <div class="retas-hub-header">
+                    <div class="retas-hub-title">
+                        <i class="fas fa-user-plus" style="color:var(--padel-volt);"></i> Retas Abiertas • ¡Falta 1!
+                    </div>
+                    <button type="button" class="btn btn-sm btn-green" onclick="abrirModalPublicarReta()">
+                        + Publicar Reta
+                    </button>
+                </div>
+                <div class="retas-list-container" id="retasListContainer"></div>
+            </div>
+
             <div class="section-title">Modos de Juego Disponibles</div>
 
             <!-- GRID 2x2 DE HERO CARDS -->
@@ -1180,7 +1298,7 @@
                 <div class="mode-icon-circle"><i class="fas fa-users"></i></div>
                 <div>
                     <div class="mode-info-title">Padrón de Jugadores</div>
-                    <div class="mode-info-sub">Gestión de convocados y plantilla habitual del club.</div>
+                    <div class="mode-info-sub">Gestión de plantilla, teléfonos, categorías y perfiles.</div>
                 </div>
             </div>
 
@@ -1210,6 +1328,98 @@
                     <small style="color:var(--txt-dim); font-size:0.7rem; font-weight:700;">Toca una foto para ampliar ➔</small>
                 </div>
                 <div class="community-carousel" id="communityCarouselContainer"></div>
+            </div>
+        </div>
+
+        <!-- MODAL PARA PUBLICAR RETA (FALTA 1) -->
+        <div id="modalPublicarReta" class="modal" onclick="closeModalOnBackdrop(event, 'modalPublicarReta')">
+            <div class="modal-content">
+                <button type="button" class="modal-close-icon" onclick="closeModal('modalPublicarReta')">×</button>
+                <h3 style="color:var(--txt-main); margin-bottom:6px; font-weight:800;">
+                    <i class="fas fa-user-plus" style="color:var(--padel-volt);"></i> Publicar Reta Abierta
+                </h3>
+                <p style="font-size:0.75rem; color:var(--txt-muted); margin-bottom:12px;">Se publicará para todos los jugadores y caducará automáticamente tras el partido:</p>
+                
+                <label style="font-size:0.72rem; color:var(--txt-dim);">Club / Ubicación:</label>
+                <input type="text" id="inputRetaClub" placeholder="Ej. SB Total Padel, Padel Point, etc.">
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px;">
+                    <div>
+                        <label style="font-size:0.72rem; color:var(--txt-dim);">Fecha del Partido:</label>
+                        <input type="date" id="inputRetaFecha" style="color-scheme:dark;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; color:var(--txt-dim);">Hora del Partido:</label>
+                        <input type="time" id="inputRetaHora" style="color-scheme:dark;">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px;">
+                    <div>
+                        <label style="font-size:0.72rem; color:var(--txt-dim);">Nivel Sugerido:</label>
+                        <select id="selectRetaNivel">
+                            <option value="4ª / 5ª Fuerza">4ª / 5ª Fuerza (Intermedio)</option>
+                            <option value="5ª / 6ª Fuerza">5ª / 6ª Fuerza (Iniciación)</option>
+                            <option value="3ª / 4ª Fuerza">3ª / 4ª Fuerza (Avanzado)</option>
+                            <option value="2ª / 3ª Fuerza">2ª / 3ª Fuerza (Open)</option>
+                            <option value="Abierto a todo nivel">Cualquier nivel</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; color:var(--txt-dim);">¿Cuántos faltan?:</label>
+                        <select id="selectRetaCuantos">
+                            <option value="Falta 1 jugador">Falta 1</option>
+                            <option value="Faltan 2 jugadores">Faltan 2</option>
+                            <option value="Faltan 3 jugadores">Faltan 3</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-top:4px;">
+                    <label style="font-size:0.72rem; color:var(--txt-dim);">WhatsApp del Organizador (para que te escriban):</label>
+                    <input type="tel" id="inputRetaWhatsapp" placeholder="Ej. 4491234567">
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                    <button type="button" class="btn btn-dark btn-sm" onclick="closeModal('modalPublicarReta')">Cancelar</button>
+                    <button type="button" class="btn btn-green btn-sm" onclick="guardarRetaAbierta()">Publicar Reta ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL PARA EDITAR JUGADOR DEL PADRÓN -->
+        <div id="modalEditarJugador" class="modal" onclick="closeModalOnBackdrop(event, 'modalEditarJugador')">
+            <div class="modal-content">
+                <button type="button" class="modal-close-icon" onclick="closeModal('modalEditarJugador')">×</button>
+                <h3 style="color:var(--txt-main); margin-bottom:6px; font-weight:800;">
+                    <i class="fas fa-user-edit" style="color:var(--padel-volt);"></i> Editar Ficha de Jugador
+                </h3>
+                <p style="font-size:0.75rem; color:var(--txt-muted); margin-bottom:12px;">Modifica su nombre, teléfono o asigna su categoría oficial:</p>
+                
+                <input type="hidden" id="editJugadorIndex">
+
+                <label style="font-size:0.72rem; color:var(--txt-dim);">Nombre y Apellido:</label>
+                <input type="text" id="editJugadorNombre" placeholder="Nombre completo">
+
+                <label style="font-size:0.72rem; color:var(--txt-dim); margin-top:8px; display:block;">Categoría / Fuerza:</label>
+                <select id="editJugadorCategoria">
+                    <option value="Sin Categoría">Sin Categoría Definida</option>
+                    <option value="1ª Fuerza">1ª Fuerza (Pro / Élite)</option>
+                    <option value="2ª Fuerza">2ª Fuerza</option>
+                    <option value="3ª Fuerza">3ª Fuerza</option>
+                    <option value="4ª Fuerza">4ª Fuerza</option>
+                    <option value="5ª Fuerza">5ª Fuerza</option>
+                    <option value="6ª Fuerza">6ª Fuerza (Iniciación)</option>
+                    <option value="Open / Libre">Open / Libre</option>
+                </select>
+
+                <label style="font-size:0.72rem; color:var(--txt-dim); margin-top:8px; display:block;">Teléfono de Contacto / WhatsApp:</label>
+                <input type="tel" id="editJugadorTelefono" placeholder="Ej. 4491234567">
+
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                    <button type="button" class="btn btn-dark btn-sm" onclick="closeModal('modalEditarJugador')">Cancelar</button>
+                    <button type="button" class="btn btn-green btn-sm" onclick="guardarEdicionJugador()">Guardar Cambios</button>
+                </div>
             </div>
         </div>
 
@@ -1498,7 +1708,7 @@
                 <div id="adminCommunityListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto; padding-right:4px;"></div>
             </div>
 
-            <!-- PESTAÑA 5: WHATSAPP (MENSAJE AL PIE PARA TODOS LOS REPORTES) -->
+            <!-- PESTAÑA 5: WHATSAPP -->
             <div id="adminTabContentWhatsapp" class="hidden">
                 <div style="background:rgba(37, 211, 102, 0.1); border:1px solid rgba(37, 211, 102, 0.3); border-radius:14px; padding:12px; margin-bottom:12px;">
                     <h4 style="color:#25d366; font-size:0.9rem; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
@@ -1726,6 +1936,7 @@
 
     <script>
         const CLOUD_DB_URL = "https://padel-pro-4c4d7-default-rtdb.firebaseio.com/sponsors.json";
+        const RETAS_DB_URL = "https://padel-pro-4c4d7-default-rtdb.firebaseio.com/retas.json";
         const MASTER_PIN_HASH = "805a5a9a47d2d38fa45d6542fc7d7d33d9c7bb09146fe494a317e34ef30c8227";
 
         async function sha256(message) {
@@ -1751,6 +1962,329 @@
                 setTimeout(() => {
                     splash.style.display = "none";
                 }, 400);
+            }
+        }
+
+        // ==========================================
+        // GESTIÓN DEL PADRÓN: LECTURA Y EDICIÓN
+        // ==========================================
+        function normalizarJugador(j) {
+            if (typeof j === 'string') {
+                return { nombre: j.trim(), telefono: "", categoria: "Sin Categoría" };
+            }
+            return {
+                nombre: (j.nombre || "").trim(),
+                telefono: (j.telefono || "").trim(),
+                categoria: (j.categoria || "Sin Categoría").trim()
+            };
+        }
+
+        function obtenerNombreJugador(j) {
+            if (typeof j === 'string') return j.trim();
+            return (j && j.nombre ? j.nombre.trim() : "");
+        }
+
+        function renderPadron() {
+            const d = getUserData(); 
+            const cont = document.getElementById("listaJugadoresPadron");
+            if (!cont) return;
+            cont.innerHTML = "";
+
+            if (!d.jugadores || d.jugadores.length === 0) {
+                cont.innerHTML = "<p style='color:var(--txt-dim); font-size:0.85rem; padding:16px; text-align:center;'>No hay jugadores en el padrón. Agrega uno arriba.</p>";
+                return;
+            }
+
+            d.jugadores.forEach((item, index) => {
+                const jObj = normalizarJugador(item);
+                const telTxt = jObj.telefono ? `<small style="color:var(--txt-muted); font-size:0.7rem;"><i class="fab fa-whatsapp" style="color:#25d366;"></i> ${jObj.telefono}</small>` : '';
+                
+                cont.innerHTML += `
+                    <div class="padron-item-card">
+                        <div style="display:flex; flex-direction:column; gap:2px; flex:1; overflow:hidden;">
+                            <strong style="color:var(--txt-main); font-size:0.88rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${jObj.nombre}</strong>
+                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                <span class="badge-categoria-padron">${jObj.categoria}</span>
+                                ${telTxt}
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            <button type="button" class="btn btn-sm btn-dark" style="padding:5px 8px;" onclick="abrirModalEditarJugador(${index})" title="Editar información">
+                                <i class="fas fa-edit" style="color:var(--padel-volt);"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" style="padding:5px 8px;" onclick="borrarJugadorPadron(${index})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function agregarJugadorPadron() {
+            const inp = document.getElementById("inputNuevoJugador"); 
+            const nom = inp.value.trim();
+            if (!nom) return; 
+            const d = getUserData();
+
+            const yaExiste = (d.jugadores || []).some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
+            if (yaExiste) return showToast("Jugador ya registrado", "error");
+
+            d.jugadores.push({ nombre: nom, telefono: "", categoria: "Sin Categoría" }); 
+            saveUserData(d); 
+            inp.value = ""; 
+            renderPadron();
+            showToast("Jugador agregado al padrón");
+        }
+
+        function borrarJugadorPadron(idx) {
+            const d = getUserData();
+            const nom = obtenerNombreJugador(d.jugadores[idx]);
+            if (confirm(`¿Eliminar a "${nom}" del padrón?`)) {
+                d.jugadores.splice(idx, 1);
+                saveUserData(d);
+                renderPadron();
+                showToast("Jugador eliminado");
+            }
+        }
+
+        function abrirModalEditarJugador(index) {
+            const d = getUserData();
+            const item = d.jugadores[index];
+            if (!item) return;
+
+            const jObj = normalizarJugador(item);
+            document.getElementById("editJugadorIndex").value = index;
+            document.getElementById("editJugadorNombre").value = jObj.nombre;
+            document.getElementById("editJugadorTelefono").value = jObj.telefono;
+            document.getElementById("editJugadorCategoria").value = jObj.categoria || "Sin Categoría";
+
+            document.getElementById("modalEditarJugador").classList.add("active");
+        }
+
+        function guardarEdicionJugador() {
+            const idx = parseInt(document.getElementById("editJugadorIndex").value);
+            const nuevoNom = document.getElementById("editJugadorNombre").value.trim();
+            const nuevoTel = document.getElementById("editJugadorTelefono").value.trim().replace(/\D/g, '');
+            const nuevaCat = document.getElementById("editJugadorCategoria").value;
+
+            if (!nuevoNom) return showToast("El nombre no puede estar vacío", "error");
+
+            const d = getUserData();
+            if (isNaN(idx) || !d.jugadores[idx]) return;
+
+            d.jugadores[idx] = {
+                nombre: nuevoNom,
+                telefono: nuevoTel,
+                categoria: nuevaCat
+            };
+
+            saveUserData(d);
+            closeModal("modalEditarJugador");
+            renderPadron();
+            showToast("Información actualizada");
+        }
+
+        // ==========================================
+        // MÓDULO: RETAS ABIERTAS (FALTA 1) - AUTOCADUCIDAD Y PERMISOS
+        // ==========================================
+        let retasAbiertas = JSON.parse(localStorage.getItem("11padel_retas_abiertas")) || [];
+
+        function obtenerMiTokenDispositivo() {
+            let token = localStorage.getItem("11padel_device_token");
+            if (!token) {
+                token = "dev_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
+                localStorage.setItem("11padel_device_token", token);
+            }
+            return token;
+        }
+
+        function abrirModalPublicarReta() {
+            document.getElementById("inputRetaClub").value = "";
+            document.getElementById("inputRetaWhatsapp").value = "";
+            
+            const hoy = new Date().toISOString().split("T")[0];
+            const inputFecha = document.getElementById("inputRetaFecha");
+            if (inputFecha) inputFecha.value = hoy;
+
+            const inputHora = document.getElementById("inputRetaHora");
+            if (inputHora) {
+                const ahora = new Date();
+                ahora.setHours(ahora.getHours() + 1);
+                inputHora.value = ahora.toTimeString().substring(0, 5);
+            }
+
+            document.getElementById("modalPublicarReta").classList.add("active");
+        }
+
+        async function sincronizarRetasDesdeNube() {
+            try {
+                const res = await fetch(RETAS_DB_URL);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data) {
+                        retasAbiertas = Object.values(data);
+                    } else {
+                        retasAbiertas = [];
+                    }
+                }
+            } catch (err) {}
+            
+            verificarYLimpiarRetasCaducadas();
+            localStorage.setItem("11padel_retas_abiertas", JSON.stringify(retasAbiertas));
+            renderRetasAbiertas();
+        }
+
+        async function verificarYLimpiarRetasCaducadas() {
+            const ahora = Date.now();
+            const retasVigentes = [];
+
+            for (const r of retasAbiertas) {
+                if (r.timestampExpira && r.timestampExpira < ahora) {
+                    fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/retas/${r.id}.json`, {
+                        method: 'DELETE'
+                    }).catch(() => {});
+                } else {
+                    retasVigentes.push(r);
+                }
+            }
+            retasAbiertas = retasVigentes;
+        }
+
+        async function guardarRetaAbierta() {
+            const club = document.getElementById("inputRetaClub").value.trim();
+            const fechaVal = document.getElementById("inputRetaFecha").value;
+            const horaVal = document.getElementById("inputRetaHora").value;
+            const nivel = document.getElementById("selectRetaNivel").value;
+            const cuantos = document.getElementById("selectRetaCuantos").value;
+            let wa = document.getElementById("inputRetaWhatsapp").value.trim().replace(/\D/g, '');
+
+            if (!club || !fechaVal || !horaVal || !wa) {
+                return showToast("Completa club, fecha, hora y WhatsApp", "error");
+            }
+
+            const fechaHoraString = `${fechaVal}T${horaVal}:00`;
+            const fechaObj = new Date(fechaHoraString);
+            const timestampPartido = isNaN(fechaObj.getTime()) ? Date.now() : fechaObj.getTime();
+            const timestampExpira = timestampPartido + (2 * 60 * 60 * 1000);
+
+            if (wa.length === 10) wa = "52" + wa;
+
+            const opcionesFecha = { weekday: 'short', day: 'numeric', month: 'short' };
+            const fechaTexto = fechaObj.toLocaleDateString('es-MX', opcionesFecha);
+            const horarioFormateado = `${fechaTexto} • ${horaVal} hrs`;
+
+            const nuevaReta = {
+                id: "reta_" + Date.now(),
+                club,
+                fechaVal,
+                horaVal,
+                horarioTexto: horarioFormateado,
+                nivel,
+                cuantos,
+                wa,
+                creadorToken: obtenerMiTokenDispositivo(),
+                timestampExpira,
+                fechaCreacion: Date.now()
+            };
+
+            retasAbiertas.unshift(nuevaReta);
+            localStorage.setItem("11padel_retas_abiertas", JSON.stringify(retasAbiertas));
+            renderRetasAbiertas();
+            closeModal("modalPublicarReta");
+            showToast("¡Reta publicada con éxito!");
+
+            try {
+                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/retas/${nuevaReta.id}.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuevaReta)
+                });
+            } catch (e) {}
+        }
+
+        async function eliminarReta(id, creadorToken) {
+            const miToken = obtenerMiTokenDispositivo();
+            const esAdmin = (sesionAdminHash === MASTER_PIN_HASH);
+            const esCreador = (creadorToken && creadorToken === miToken);
+
+            if (!esAdmin && !esCreador) {
+                return showToast("Solo el creador o el administrador pueden borrar esta reta.", "error");
+            }
+
+            if (confirm("¿Eliminar esta reta del tablón?")) {
+                retasAbiertas = retasAbiertas.filter(r => r.id !== id);
+                localStorage.setItem("11padel_retas_abiertas", JSON.stringify(retasAbiertas));
+                renderRetasAbiertas();
+                showToast("Reta retirada");
+
+                try {
+                    await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/retas/${id}.json`, {
+                        method: 'DELETE'
+                    });
+                } catch (e) {}
+            }
+        }
+
+        function unirmeAReta(club, horarioTexto, cuantos, wa) {
+            const msg = `¡Qué tal! Vi en 11Padel Pro que les ${cuantos.toLowerCase()} para la reta en *${club}* (${horarioTexto}). ¿Sigue disponible el lugar?`;
+            const url = `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;
+            abrirEnlaceWhatsAppDirecto(url);
+        }
+
+        function renderRetasAbiertas() {
+            const cont = document.getElementById("retasListContainer");
+            if (!cont) return;
+            cont.innerHTML = "";
+
+            if (!retasAbiertas || retasAbiertas.length === 0) {
+                cont.innerHTML = `
+                    <div style="text-align:center; padding:16px 10px; color:var(--txt-muted); font-size:0.78rem;">
+                        <i class="fas fa-baseball-ball" style="color:var(--padel-volt); font-size:1.2rem; margin-bottom:4px; display:block;"></i>
+                        No hay retas buscando jugador en este momento.<br>
+                        <strong style="color:var(--txt-main);">¿Armaste un partido y les falta uno? Pulsa "+ Publicar Reta" arriba.</strong>
+                    </div>
+                `;
+                return;
+            }
+
+            const miToken = obtenerMiTokenDispositivo();
+            const esAdmin = (sesionAdminHash === MASTER_PIN_HASH);
+
+            retasAbiertas.forEach(r => {
+                const esCreador = (r.creadorToken && r.creadorToken === miToken);
+                const puedeBorrar = esAdmin || esCreador;
+                const textoHorario = r.horarioTexto || `${r.fechaVal || ''} ${r.horaVal || ''}`;
+
+                cont.innerHTML += `
+                    <div class="reta-item-row">
+                        <div class="reta-info-left">
+                            <span class="reta-club-name"><i class="fas fa-map-marker-alt" style="color:var(--padel-volt); font-size:0.75rem;"></i> ${r.club}</span>
+                            <div class="reta-details-sub">
+                                <span><i class="fas fa-clock"></i> ${textoHorario}</span>
+                                <span class="badge-falta-cuantos">${r.cuantos}</span>
+                                <span class="badge-reta-nivel">${r.nivel}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button type="button" class="btn btn-sm btn-wa" style="padding:6px 10px; font-size:0.75rem;" onclick="unirmeAReta('${r.club}', '${textoHorario}', '${r.cuantos}', '${r.wa}')">
+                                <i class="fab fa-whatsapp"></i> ¡Me apunto!
+                            </button>
+                            ${puedeBorrar ? `
+                                <button type="button" class="btn btn-sm btn-danger" style="padding:6px 8px;" onclick="eliminarReta('${r.id}', '${r.creadorToken || ''}')" title="Borrar reta (Creador/Admin)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function abrirEnlaceWhatsAppDirecto(url) {
+            const win = window.open(url, "_blank");
+            if (!win || win.closed || typeof win.closed === 'undefined') {
+                window.location.href = url;
             }
         }
 
@@ -1858,16 +2392,11 @@
             return clean;
         }
 
-        // APERTURA ROBUSTA DE WHATSAPP (COMPATIBLE CON MÓVILES Y BLOQUEADORES)
         function abrirEnlaceWhatsApp(txt) {
             const url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(txt);
-            const win = window.open(url, "_blank");
-            if (!win || win.closed || typeof win.closed === 'undefined') {
-                window.location.href = url;
-            }
+            abrirEnlaceWhatsAppDirecto(url);
         }
 
-        // POBLAR SELECTORES DEL PADRÓN EN MODALES
         function llenarSelectoresPadron(selectIds, valorPorDefecto = "") {
             const d = getUserData();
             const lista = d.jugadores || [];
@@ -1877,15 +2406,15 @@
                 if (!sel) return;
                 sel.innerHTML = `<option value="">-- Elige del Padrón --</option>`;
                 lista.forEach(j => {
-                    sel.innerHTML += `<option value="${j}">${j}</option>`;
+                    const nom = obtenerNombreJugador(j);
+                    sel.innerHTML += `<option value="${nom}">${nom}</option>`;
                 });
-                if (valorPorDefecto && lista.includes(valorPorDefecto)) {
+                if (valorPorDefecto) {
                     sel.value = valorPorDefecto;
                 }
             });
         }
 
-        // REGISTRO AL VUELO GENERAL PARA CUALQUIER MODAL
         function registrarJugadorExpressDesdeModal(origen) {
             let inputId = "inputRegistroExpress";
             if (origen === 'partido') inputId = "inputRegistroExpressPartido";
@@ -1897,8 +2426,9 @@
             if (!nom) return showToast("Escribe un nombre", "error");
 
             const d = getUserData();
-            if (!d.jugadores.includes(nom)) {
-                d.jugadores.push(nom);
+            const yaExiste = (d.jugadores || []).some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
+            if (!yaExiste) {
+                d.jugadores.push({ nombre: nom, telefono: "", categoria: "Sin Categoría" });
                 saveUserData(d);
             }
             inp.value = "";
@@ -2251,6 +2781,8 @@
 
             renderTorneosPublicos();
             renderCommunityCarousel();
+            renderRetasAbiertas();
+            renderPadron();
         }
 
         async function sincronizarEnlacesDesdeLaNube() {
@@ -2268,6 +2800,7 @@
             } catch (e) {
                 aplicarEnlaces();
             }
+            sincronizarRetasDesdeNube();
         }
 
         function solicitarAccesoAdmin() {
@@ -2289,6 +2822,7 @@
                 sesionAdminHash = MASTER_PIN_HASH;
                 closeModal("modalAuthAdmin");
                 abrirPanelAdmin();
+                renderRetasAbiertas();
             } else {
                 showToast("PIN incorrecto. Acceso denegado.", "error");
             }
@@ -2395,6 +2929,7 @@
             document.getElementById("viewPartidoVivo").classList.add("hidden");
             document.getElementById("globalFloatingWaBtn").classList.add("hidden");
             document.getElementById("viewHubModos").classList.remove("hidden");
+            renderRetasAbiertas();
         }
 
         function abrirPadronJugadores() {
@@ -2443,46 +2978,6 @@
                 else if (modoSeleccionado === 'teams') d.ligasTeams = d.ligasTeams.filter(x => x.id !== id);
                 saveUserData(d); renderLigasDelModo();
             }
-        }
-
-        function agregarJugadorPadron() {
-            const inp = document.getElementById("inputNuevoJugador"); 
-            const nom = inp.value.trim();
-            if (!nom) return; 
-            const d = getUserData();
-            if (d.jugadores.includes(nom)) return showToast("Jugador ya registrado", "error");
-            d.jugadores.push(nom); 
-            saveUserData(d); 
-            inp.value = ""; 
-            renderPadron();
-            showToast("Jugador agregado");
-        }
-
-        function borrarJugadorPadron(idx) {
-            const d = getUserData();
-            const eliminado = d.jugadores[idx];
-            if (confirm(`¿Eliminar a "${eliminado}" del padrón?`)) {
-                d.jugadores.splice(idx, 1);
-                saveUserData(d);
-                renderPadron();
-                showToast("Jugador eliminado");
-            }
-        }
-
-        function renderPadron() {
-            const d = getUserData(); 
-            const cont = document.getElementById("listaJugadoresPadron");
-            cont.innerHTML = "";
-            if (d.jugadores.length === 0) {
-                cont.innerHTML = "<p style='color:var(--txt-dim); font-size:0.85rem; padding:16px; text-align:center;'>No hay jugadores en el padrón. Agrega uno arriba.</p>";
-                return;
-            }
-            d.jugadores.forEach((j, index) => {
-                cont.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid var(--border-glow);">
-                    <span style="font-weight:700; color:var(--txt-main);">${j}</span>
-                    <button class="btn btn-sm btn-danger" onclick="borrarJugadorPadron(${index})"><i class="fas fa-trash"></i></button>
-                </div>`;
-            });
         }
 
         let ligaActiva = null;
@@ -2540,16 +3035,14 @@
 
                 const stats = {};
                 ligaActiva.jornadas.forEach(j => {
-                    j.convocados.forEach(p => { if (!stats[p]) stats[p] = { total: 0, list: [], cags: 0 }; });
+                    (j.convocados || []).forEach(p => { if (!stats[p]) stats[p] = { total: 0, list: [], cags: 0 }; });
                 });
 
                 ligaActiva.jornadas.forEach(j => {
                     Object.keys(stats).forEach(p => {
                         let ptsJornada = 0; 
-                        if (j.rondas && j.convocados.includes(p)) {
-                            j.rondas.forEach(r => {
-                                ptsJornada += (parseInt(r[p]) || 0);
-                            });
+                        if (j.rondas && (j.convocados || []).includes(p)) {
+                            j.rondas.forEach(r => { ptsJornada += (parseInt(r[p]) || 0); });
                         }
                         stats[p].list.push(ptsJornada); 
                         stats[p].total += ptsJornada;
@@ -2575,14 +3068,13 @@
                 ligaActiva.jornadas.forEach(j => {
                     if (j.rounds) {
                         j.rounds.forEach(r => {
-                            r.matches.forEach(m => {
-                                const esJugado = m.jugado || (parseInt(m.score1) > 0 || parseInt(m.score2) > 0);
-                                if (esJugado) {
-                                    const s1 = parseInt(m.score1) || 0;
-                                    const s2 = parseInt(m.score2) || 0;
-                                    const t1Name = m.p1.join(' & ');
-                                    const t2Name = m.p2.join(' & ');
+                            (r.matches || []).forEach(m => {
+                                const s1 = parseInt(m.score1) || 0;
+                                const s2 = parseInt(m.score2) || 0;
+                                const t1Name = (m.p1 || []).join(' & ');
+                                const t2Name = (m.p2 || []).join(' & ');
 
+                                if (t1Name && t2Name) {
                                     stats[t1Name] = stats[t1Name] || { pj:0, pg:0, pts:0, diff:0, cags:0 };
                                     stats[t2Name] = stats[t2Name] || { pj:0, pg:0, pts:0, diff:0, cags:0 };
 
@@ -2599,53 +3091,44 @@
                             });
                         });
                     }
-                    if (j.caguamas) {
-                        Object.entries(j.caguamas).forEach(([jugador, c]) => {
-                            Object.keys(stats).forEach(teamStr => {
-                                if (teamStr.includes(jugador)) stats[teamStr].cags += c;
-                            });
-                        });
-                    }
                 });
-
                 const sorted = Object.entries(stats).sort((a,b) => {
                     if (b[1].pg !== a[1].pg) return b[1].pg - a[1].pg;
                     return b[1].diff - a[1].diff;
                 });
-
                 sorted.forEach(([team, dat], idx) => {
-                    const rowClass = idx === 0 ? 'podium-1' : '';
-                    tb.innerHTML += `<tr class="${rowClass}"><td>${obtenerIconoPosicion(idx+1)}</td><td><strong>${team}</strong></td><td>${dat.pj}</td><td>${dat.pg}</td><td style="color:var(--padel-volt); font-weight:900; font-size:1rem;">${dat.pts}</td><td>${dat.diff > 0 ? '+'+dat.diff : dat.diff}</td><td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td></tr>`;
+                    tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}"><td>${obtenerIconoPosicion(idx+1)}</td><td><strong>${team}</strong></td><td>${dat.pj}</td><td>${dat.pg}</td><td style="color:var(--padel-volt); font-weight:900;">${dat.pts}</td><td>${dat.diff > 0 ? '+'+dat.diff : dat.diff}</td><td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td></tr>`;
                 });
-                if (!sorted.length) tb.innerHTML = "<tr><td colspan='7'>Sin partidos jugados en la liga</td></tr>";
             } else {
                 th.innerHTML = "<tr><th>Pos</th><th>Jugador</th><th>PJ</th><th>W</th><th>Pts</th><th>+/-</th><th>🍺</th></tr>";
                 const stats = {};
                 ligaActiva.jornadas.forEach(j => {
                     if (j.rounds) {
                         j.rounds.forEach(r => {
-                            r.matches.forEach(m => {
-                                const esJugado = m.jugado || (parseInt(m.score1) > 0 || parseInt(m.score2) > 0);
-                                if (esJugado) {
-                                    const s1 = parseInt(m.score1) || 0;
-                                    const s2 = parseInt(m.score2) || 0;
-                                    m.p1.forEach(p => {
-                                        stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
-                                        stats[p].pj++;
-                                        stats[p].diff += (s1 - s2);
-                                        if (s1 > s2) { stats[p].w++; stats[p].pts += 3; }
-                                    });
-                                    m.p2.forEach(p => {
-                                        stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
-                                        stats[p].pj++;
-                                        stats[p].diff += (s2 - s1);
-                                        if (s2 > s1) { stats[p].w++; stats[p].pts += 3; }
-                                    });
-                                }
+                            (r.matches || []).forEach(m => {
+                                const s1 = parseInt(m.score1) || 0;
+                                const s2 = parseInt(m.score2) || 0;
+                                (m.p1 || []).forEach(p => {
+                                    stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
+                                    stats[p].pj++;
+                                    stats[p].diff += (s1 - s2);
+                                    if (s1 > s2) { stats[p].w++; stats[p].pts += 3; }
+                                });
+                                (m.p2 || []).forEach(p => {
+                                    stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
+                                    stats[p].pj++;
+                                    stats[p].diff += (s2 - s1);
+                                    if (s2 > s1) { stats[p].w++; stats[p].pts += 3; }
+                                });
                             });
                         });
                     }
-                    if (j.caguamas) Object.entries(j.caguamas).forEach(([p, c]) => { stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 }; stats[p].cags += c; });
+                    if (j.caguamas) {
+                        Object.entries(j.caguamas).forEach(([p, c]) => {
+                            stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
+                            stats[p].cags += c;
+                        });
+                    }
                 });
 
                 const sorted = Object.entries(stats).sort((a,b) => {
@@ -2654,10 +3137,8 @@
                 });
 
                 sorted.forEach(([p, dat], idx) => {
-                    const rowClass = idx === 0 ? 'podium-1' : '';
-                    tb.innerHTML += `<tr class="${rowClass}"><td>${obtenerIconoPosicion(idx+1)}</td><td><strong>${p}</strong></td><td>${dat.pj}</td><td>${dat.w}</td><td style="color:var(--padel-volt); font-weight:900; font-size:1rem;">${dat.pts}</td><td>${dat.diff}</td><td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td></tr>`;
+                    tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}"><td>${obtenerIconoPosicion(idx+1)}</td><td><strong>${p}</strong></td><td>${dat.pj}</td><td>${dat.w}</td><td style="color:var(--padel-volt); font-weight:900;">${dat.pts}</td><td>${dat.diff}</td><td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td></tr>`;
                 });
-                if (!sorted.length) tb.innerHTML = "<tr><td colspan='7'>Sin partidos jugados</td></tr>";
             }
         }
 
@@ -2704,7 +3185,8 @@
                 llenarSelectoresPadron(["selectTeamP1", "selectTeamP2"]);
                 renderParejasFijasModal();
             } else {
-                convocadosSeleccionados = [...getUserData().jugadores];
+                const d = getUserData();
+                convocadosSeleccionados = (d.jugadores || []).map(j => obtenerNombreJugador(j));
                 renderPills();
             }
             document.getElementById("modalNuevaJornada").classList.add("active");
@@ -2717,8 +3199,13 @@
 
             const d = getUserData();
             let cambio = false;
-            if (!d.jugadores.includes(p1)) { d.jugadores.push(p1); cambio = true; }
-            if (!d.jugadores.includes(p2)) { d.jugadores.push(p2); cambio = true; }
+            [p1, p2].forEach(nom => {
+                const yaExiste = (d.jugadores || []).some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
+                if (!yaExiste) {
+                    d.jugadores.push({ nombre: nom, telefono: "", categoria: "Sin Categoría" });
+                    cambio = true;
+                }
+            });
             if (cambio) saveUserData(d);
 
             parejasFijasSeleccionadas.push([p1, p2]);
@@ -2758,14 +3245,19 @@
         function registrarJugadorExpress() {
             const inp = document.getElementById("inputRegistroExpress"); const nom = inp.value.trim();
             if (!nom) return; const d = getUserData();
-            if (!d.jugadores.includes(nom)) { d.jugadores.push(nom); saveUserData(d); }
+            const yaExiste = (d.jugadores || []).some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
+            if (!yaExiste) {
+                d.jugadores.push({ nombre: nom, telefono: "", categoria: "Sin Categoría" });
+                saveUserData(d);
+            }
             if (!convocadosSeleccionados.includes(nom)) convocadosSeleccionados.push(nom);
             inp.value = ""; renderPills();
         }
 
         function renderPills() {
             const d = getUserData(); const cont = document.getElementById("pillsConvocadosContainer"); cont.innerHTML = "";
-            d.jugadores.forEach(j => {
+            (d.jugadores || []).forEach(item => {
+                const j = obtenerNombreJugador(item);
                 const sel = convocadosSeleccionados.includes(j);
                 cont.innerHTML += `<div class="chip-pill ${sel?'active':''}" onclick="togglePill('${j}')">${sel?'✓ ':''}${j}</div>`;
             });
@@ -3405,15 +3897,20 @@
 
             const d = getUserData();
             const j = d.jugadores || [];
-            document.getElementById("partidoP1A").value = j[0] || "";
-            document.getElementById("partidoP1B").value = j[1] || "";
-            document.getElementById("partidoP2A").value = j[2] || "";
-            document.getElementById("partidoP2B").value = j[3] || "";
+            const j0 = j[0] ? obtenerNombreJugador(j[0]) : "";
+            const j1 = j[1] ? obtenerNombreJugador(j[1]) : "";
+            const j2 = j[2] ? obtenerNombreJugador(j[2]) : "";
+            const j3 = j[3] ? obtenerNombreJugador(j[3]) : "";
 
-            if (document.getElementById("selectPartidoP1A")) document.getElementById("selectPartidoP1A").value = j[0] || "";
-            if (document.getElementById("selectPartidoP1B")) document.getElementById("selectPartidoP1B").value = j[1] || "";
-            if (document.getElementById("selectPartidoP2A")) document.getElementById("selectPartidoP2A").value = j[2] || "";
-            if (document.getElementById("selectPartidoP2B")) document.getElementById("selectPartidoP2B").value = j[3] || "";
+            document.getElementById("partidoP1A").value = j0;
+            document.getElementById("partidoP1B").value = j1;
+            document.getElementById("partidoP2A").value = j2;
+            document.getElementById("partidoP2B").value = j3;
+
+            if (document.getElementById("selectPartidoP1A")) document.getElementById("selectPartidoP1A").value = j0;
+            if (document.getElementById("selectPartidoP1B")) document.getElementById("selectPartidoP1B").value = j1;
+            if (document.getElementById("selectPartidoP2A")) document.getElementById("selectPartidoP2A").value = j2;
+            if (document.getElementById("selectPartidoP2B")) document.getElementById("selectPartidoP2B").value = j3;
 
             document.getElementById("modalConfigPartido").classList.add("active");
         }
@@ -3427,7 +3924,11 @@
             const d = getUserData();
             let cambio = false;
             [p1A, p1B, p2A, p2B].forEach(nom => {
-                if (nom && !d.jugadores.includes(nom)) { d.jugadores.push(nom); cambio = true; }
+                const yaExiste = (d.jugadores || []).some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
+                if (nom && !yaExiste) {
+                    d.jugadores.push({ nombre: nom, telefono: "", categoria: "Sin Categoría" });
+                    cambio = true;
+                }
             });
             if (cambio) saveUserData(d);
 
@@ -3730,13 +4231,13 @@
             if (modoSeleccionado === 'pozo') {
                 const stats = {};
                 ligaActiva.jornadas.forEach(j => {
-                    j.convocados.forEach(p => { if (!stats[p]) stats[p] = { total: 0, list: [], cags: 0 }; });
+                    (j.convocados || []).forEach(p => { if (!stats[p]) stats[p] = { total: 0, list: [], cags: 0 }; });
                 });
 
                 ligaActiva.jornadas.forEach(j => {
                     Object.keys(stats).forEach(p => {
                         let ptsJornada = 0; 
-                        if (j.rondas && j.convocados.includes(p)) {
+                        if (j.rondas && (j.convocados || []).includes(p)) {
                             j.rondas.forEach(r => { ptsJornada += (parseInt(r[p]) || 0); });
                         }
                         stats[p].list.push(ptsJornada); 
@@ -3756,18 +4257,23 @@
                 ligaActiva.jornadas.forEach(j => {
                     if (j.rounds) {
                         j.rounds.forEach(r => {
-                            r.matches.forEach(m => {
-                                const esJugado = m.jugado || (parseInt(m.score1) > 0 || parseInt(m.score2) > 0);
-                                if (esJugado) {
-                                    const s1 = parseInt(m.score1) || 0;
-                                    const s2 = parseInt(m.score2) || 0;
-                                    const t1Name = m.p1.join(' & ');
-                                    const t2Name = m.p2.join(' & ');
+                            (r.matches || []).forEach(m => {
+                                const s1 = parseInt(m.score1) || 0;
+                                const s2 = parseInt(m.score2) || 0;
+                                const t1Name = (m.p1 || []).join(' & ');
+                                const t2Name = (m.p2 || []).join(' & ');
+
+                                if (t1Name && t2Name) {
                                     stats[t1Name] = stats[t1Name] || { pj:0, pg:0, pts:0, diff:0, cags:0 };
                                     stats[t2Name] = stats[t2Name] || { pj:0, pg:0, pts:0, diff:0, cags:0 };
-                                    stats[t1Name].pj++; stats[t2Name].pj++;
-                                    stats[t1Name].diff += (s1 - s2); stats[t2Name].diff += (s2 - s1);
-                                    stats[t1Name].pts += s1; stats[t2Name].pts += s2;
+
+                                    stats[t1Name].pj++;
+                                    stats[t2Name].pj++;
+                                    stats[t1Name].diff += (s1 - s2);
+                                    stats[t2Name].diff += (s2 - s1);
+                                    stats[t1Name].pts += s1;
+                                    stats[t2Name].pts += s2;
+
                                     if (s1 > s2) stats[t1Name].pg++;
                                     else if (s2 > s1) stats[t2Name].pg++;
                                 }
@@ -3789,24 +4295,21 @@
                 ligaActiva.jornadas.forEach(j => {
                     if (j.rounds) {
                         j.rounds.forEach(r => {
-                            r.matches.forEach(m => {
-                                const esJugado = m.jugado || (parseInt(m.score1) > 0 || parseInt(m.score2) > 0);
-                                if (esJugado) {
-                                    const s1 = parseInt(m.score1) || 0;
-                                    const s2 = parseInt(m.score2) || 0;
-                                    m.p1.forEach(p => {
-                                        stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
-                                        stats[p].pj++;
-                                        stats[p].diff += (s1 - s2);
-                                        if (s1 > s2) { stats[p].w++; stats[p].pts += 3; }
-                                    });
-                                    m.p2.forEach(p => {
-                                        stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
-                                        stats[p].pj++;
-                                        stats[p].diff += (s2 - s1);
-                                        if (s2 > s1) { stats[p].w++; stats[p].pts += 3; }
-                                    });
-                                }
+                            (r.matches || []).forEach(m => {
+                                const s1 = parseInt(m.score1) || 0;
+                                const s2 = parseInt(m.score2) || 0;
+                                (m.p1 || []).forEach(p => {
+                                    stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
+                                    stats[p].pj++;
+                                    stats[p].diff += (s1 - s2);
+                                    if (s1 > s2) { stats[p].w++; stats[p].pts += 3; }
+                                });
+                                (m.p2 || []).forEach(p => {
+                                    stats[p] = stats[p] || { pj:0, w:0, diff:0, pts:0, cags:0 };
+                                    stats[p].pj++;
+                                    stats[p].diff += (s2 - s1);
+                                    if (s2 > s1) { stats[p].w++; stats[p].pts += 3; }
+                                });
                             });
                         });
                     }
@@ -3853,7 +4356,9 @@
             let txt = `*🎾 11PADEL POINT PRO - ${esTeams ? 'AMERICANO TEAMS' : '8 LOCO'}*\n🏆 *Liga:* ${ligaActiva.nombre}\n📅 *Jornada:* ${jornadaActiva.nombre}\n\n*MARCADORES EN VIVO:*\n`;
             jornadaActiva.rounds.forEach((r, idx) => {
                 txt += `*Ronda ${idx+1}:*\n`;
-                r.matches.forEach(m => txt += `${m.p1.join('&')} (${m.score1}) vs (${m.score2}) ${m.p2.join('&')}\n`);
+                (r.matches || []).forEach(m => {
+                    txt += `${(m.p1 || []).join('&')} (${m.score1}) vs (${m.score2}) ${(m.p2 || []).join('&')}\n`;
+                });
             });
 
             txt += `\n*🍺 CONSUMO DE CAGUAMAS:*\n`;
@@ -3864,7 +4369,7 @@
                     if (c1 > 0 || c2 > 0) txt += `• ${pair[0]}: ${c1} | ${pair[1]}: ${c2}\n`;
                 });
             } else {
-                jornadaActiva.convocados.forEach(p => {
+                (jornadaActiva.convocados || []).forEach(p => {
                     const c = (jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0;
                     if (c > 0) txt += `• ${p}: ${c}\n`;
                 });

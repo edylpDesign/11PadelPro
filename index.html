@@ -89,7 +89,7 @@
         }
         .btn-splash-enter:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(0, 230, 118, 0.3); }
 
-        .container { max-width: 680px; margin: 0 auto; width: 100%; }
+        .container { max-width: 680px; margin: 0 auto; width: 100%; position: relative; z-index: 10; }
 
         /* BARRA DE PESTAÑAS TIPO NAVEGADOR */
         .browser-tabs-bar {
@@ -123,11 +123,7 @@
             user-select: none;
             transition: all 0.15s ease;
         }
-        .browser-tab span {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+        .browser-tab span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .browser-tab.active {
             background: var(--bg-card-subtle);
             color: var(--padel-volt);
@@ -135,14 +131,7 @@
             border-top: 2px solid var(--padel-volt);
             font-weight: 800;
         }
-        .browser-tab-close {
-            font-size: 0.85rem;
-            color: var(--txt-dim);
-            cursor: pointer;
-            border-radius: 50%;
-            padding: 0 3px;
-            line-height: 1;
-        }
+        .browser-tab-close { font-size: 0.85rem; color: var(--txt-dim); cursor: pointer; border-radius: 50%; padding: 0 3px; line-height: 1; }
         .browser-tab-close:hover { color: var(--padel-red); }
         .btn-new-browser-tab {
             background: transparent;
@@ -161,6 +150,7 @@
             -webkit-backdrop-filter: blur(16px); border-radius: 18px; padding: 10px 16px;
             box-shadow: var(--card-shadow); border: 1px solid var(--border-glow);
             margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+            position: relative; z-index: 100;
         }
         .brand-logos-zone { display: flex; align-items: center; gap: 16px; flex: 1; }
         .app-logo-link { display: flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; transition: transform 0.2s; }
@@ -172,9 +162,10 @@
         .sponsor-main-logo { height: 44px; width: auto; max-width: 140px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
 
         .btn-gear-admin {
-            width: 40px; height: 40px; border-radius: 12px; background: var(--bg-card-subtle);
+            width: 42px; height: 42px; border-radius: 12px; background: var(--bg-card-subtle);
             border: 1px solid var(--border-glow); color: var(--txt-muted); display: flex;
-            align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; transition: all 0.2s;
+            align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; transition: all 0.2s;
+            position: relative; z-index: 120;
         }
         .btn-gear-admin:active { transform: scale(0.92); color: var(--padel-volt); border-color: var(--padel-volt); }
 
@@ -538,7 +529,7 @@
         input:focus, select:focus, textarea:focus { border-color: var(--padel-volt); }
         textarea { resize: vertical; min-height: 70px; font-family: inherit; }
         
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; pointer-events: none; padding: 14px; transition: opacity 0.2s; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 20000; opacity: 0; pointer-events: none; padding: 14px; transition: opacity 0.2s; }
         .modal.active { opacity: 1; pointer-events: all; }
         .modal-content { background: var(--bg-card); border-radius: 20px; width: 100%; max-width: 480px; padding: 22px; max-height: 85vh; overflow-y: auto; border: 1px solid var(--border-glow); box-shadow: 0 10px 30px rgba(0,0,0,0.7); position: relative; }
         .modal-close-icon { position: absolute; top: 14px; right: 16px; background: transparent; border: none; color: var(--txt-muted); font-size: 1.3rem; cursor: pointer; padding: 4px; line-height: 1; }
@@ -556,7 +547,7 @@
 
         footer { text-align: center; font-size: 0.75rem; color: var(--txt-dim); margin-top: 24px; font-weight: 600; }
         footer strong { color: var(--padel-volt); }
-        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1f293d; border: 1px solid var(--border-glow); color: white; padding: 10px 20px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; opacity: 0; z-index: 3000; transition: 0.3s; pointer-events: none; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1f293d; border: 1px solid var(--border-glow); color: white; padding: 10px 20px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; opacity: 0; z-index: 30000; transition: 0.3s; pointer-events: none; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
         .toast.show { opacity: 1; }
 
         .game-point-btn {
@@ -580,12 +571,12 @@
             </div>
             <div class="splash-x-divider">×</div>
             <div class="splash-logo-item">
-                <img src="img/patrocinador_principal.png" alt="SB TOTAL PADEL" class="splash-logo-img" onerror="this.style.display='none'">
+                <img src="img/patrocinador_principal.png" alt="Patrocinador" class="splash-logo-img" onerror="this.style.display='none'">
             </div>
         </div>
         <div class="splash-info-center">
             <div class="splash-title-app">11PADEL POINT PRO</div>
-            <div class="splash-sub-partner">Presentado por SB TOTAL PADEL</div>
+            <div class="splash-sub-partner" id="splashPartnerTitle">Presentado por SB TOTAL PADEL</div>
             <p style="font-size:0.75rem; color:var(--txt-muted); margin-top:8px;">Circuito & Torneos Oficiales Aguascalientes</p>
         </div>
         <div class="splash-bottom-actions">
@@ -596,7 +587,7 @@
     </div>
 
     <div class="container">
-        <!-- BARRA DE PESTAÑAS TIPO NAVEGADOR CON BOTÓN + -->
+        <!-- BARRA DE PESTAÑAS TIPO NAVEGADOR -->
         <div class="browser-tabs-bar" id="browserTabsBar">
             <div id="browserTabsList" style="display:flex; gap:4px; overflow-x:auto; scrollbar-width:none;"></div>
             <button type="button" class="btn-new-browser-tab" onclick="crearNuevaPestañaNavegador()" title="Nueva pestaña">+</button>
@@ -607,11 +598,12 @@
                 <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="app-logo-link" id="appLogoLink" title="11Padel Oficial">
                     <img src="img/logo_11padel.png" alt="11Padel" class="logo-app-img" onerror="this.style.display='none'">
                 </a>
-                <a href="https://instagram.com/sbtotalpadel" target="_blank" rel="noopener noreferrer" class="sponsor-main-link" id="sponsorMainLink" title="SB TOTAL PADEL">
-                    <img src="img/patrocinador_principal.png" alt="SB TOTAL PADEL" class="sponsor-main-logo" onerror="this.style.display='none'">
+                <a href="https://instagram.com/sbtotalpadel" target="_blank" rel="noopener noreferrer" class="sponsor-main-link" id="sponsorMainLink" title="Patrocinador Principal">
+                    <img src="img/patrocinador_principal.png" alt="Patrocinador Principal" class="sponsor-main-logo" onerror="this.style.display='none'">
                 </a>
             </div>
-            <button class="btn-gear-admin" onclick="solicitarAccesoAdmin()" title="Acceso Administrador">
+            <!-- BOTÓN CANDADO ADMIN -->
+            <button type="button" class="btn-gear-admin" onclick="solicitarAccesoAdmin()" title="Acceso Administrador">
                 <i class="fas fa-lock"></i>
             </button>
         </header>
@@ -657,7 +649,7 @@
                     <div class="sponsor-btn-fallback" style="display:none;"><i class="fas fa-tag"></i> Espacio 6</div>
                 </a>
             </div>
-            <div class="sponsors-footer-text">Patrocinado por: SB TOTAL PADEL</div>
+            <div class="sponsors-footer-text" id="sponsorsFooterTxt">Patrocinado por: SB TOTAL PADEL</div>
         </div>
 
         <div class="tournaments-container" id="sectionTournaments">
@@ -951,10 +943,11 @@
             </div>
         </div>
 
-        <div id="viewAdmin" class="card hidden">
+        <!-- PANEL DE CONTROL GLOBAL (ADMIN) -->
+        <div id="viewAdmin" class="card hidden" style="position:relative; z-index:500;">
             <div class="card-header">
                 <span><i class="fas fa-sliders-h" style="color:var(--padel-volt);"></i> Panel de Control Global</span>
-                <button class="btn btn-sm btn-dark" onclick="cerrarPanelAdmin()">Cerrar</button>
+                <button type="button" class="btn btn-sm btn-dark" onclick="cerrarPanelAdmin()">Cerrar</button>
             </div>
             
             <div class="admin-nav-tabs">
@@ -980,9 +973,13 @@
                 <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Enlace Redes 11Padel (Logo Principal):</label>
                 <input type="url" id="adminAppLogoUrl" placeholder="https://instagram.com/11padelpro">
 
-                <h4 style="color:var(--padel-orange); font-size:0.85rem; margin-top:16px; border-top:1px solid var(--border-glow); padding-top:12px;"><i class="fas fa-star"></i> Enlaces de Patrocinadores</h4>
-                <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Patrocinador Principal (Header):</label>
-                <input type="url" id="adminMainSponsorUrl" placeholder="https://instagram.com/sbtotalpadel">
+                <h4 style="color:var(--padel-orange); font-size:0.85rem; margin-top:16px; border-top:1px solid var(--border-glow); padding-top:12px;"><i class="fas fa-star"></i> Enlaces y Nombres de Patrocinadores</h4>
+                
+                <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted);">Nombre del Patrocinador Principal (Pantalla de inicio y pie):</label>
+                <input type="text" id="adminMainSponsorName" placeholder="Ej. GRUPO EMPORIUM o SB TOTAL PADEL">
+
+                <label style="font-size:0.75rem; font-weight:700; color:var(--txt-muted); margin-top:8px; display:block;">Enlace Patrocinador Principal (Header):</label>
+                <input type="url" id="adminMainSponsorUrl" placeholder="https://instagram.com/...">
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px;">
                     <div><label style="font-size:0.72rem; font-weight:700; color:var(--txt-muted);">Espacio 1:</label><input type="url" id="adminBanner1Url" placeholder="https://..."></div>
@@ -1040,7 +1037,7 @@
                     </p>
                 </div>
                 <label style="font-size:0.75rem; font-weight:800; color:var(--txt-muted);">Escribe el mensaje o aviso final:</label>
-                <textarea id="adminWaCustomMsg" style="min-height:90px;" placeholder="Ej: Síguenos en Instagram @11padelpro • Torneo patrocinado por SB TOTAL PADEL"></textarea>
+                <textarea id="adminWaCustomMsg" style="min-height:90px;" placeholder="Ej: Síguenos en Instagram @11padelpro • Torneo patrocinado por..."></textarea>
                 <div style="background:var(--bg-card-subtle); border:1px solid var(--border-glow); border-radius:10px; padding:10px; margin-top:8px;">
                     <span style="font-size:0.68rem; font-weight:800; color:var(--txt-dim); text-transform:uppercase;">Vista previa al final del reporte:</span>
                     <div style="font-size:0.75rem; color:#25d366; font-style:italic; margin-top:4px;" id="waMsgPreview">📢 Tu mensaje personalizado aparecerá aquí</div>
@@ -1066,8 +1063,8 @@
             <h3 style="color:var(--txt-main); margin-bottom:10px; font-weight:800;">Crear Nueva Liga</h3>
             <input type="text" id="ligaNombreInput" placeholder="Nombre de la Liga (ej. Liga Sabatina Club SB)">
             <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
-                <button class="btn btn-dark btn-sm" onclick="closeModal('modalCrearLiga')">Cancelar</button>
-                <button class="btn btn-green btn-sm" onclick="guardarNuevaLiga()">Crear</button>
+                <button type="button" class="btn btn-dark btn-sm" onclick="closeModal('modalCrearLiga')">Cancelar</button>
+                <button type="button" class="btn btn-green btn-sm" onclick="guardarNuevaLiga()">Crear</button>
             </div>
         </div>
     </div>
@@ -1084,7 +1081,7 @@
                     <span style="font-size:0.72rem; font-weight:800; color:var(--padel-volt);">+ Registro Rápido al Vuelo (Padrón):</span>
                     <div style="display:flex; gap:6px; margin-top:6px;">
                         <input type="text" id="inputRegistroExpressTeams" placeholder="Nombre de nuevo jugador" style="margin:0;">
-                        <button class="btn btn-sm btn-green" onclick="registrarJugadorExpressDesdeModal('teams')">+</button>
+                        <button type="button" class="btn btn-sm btn-green" onclick="registrarJugadorExpressDesdeModal('teams')">+</button>
                     </div>
                 </div>
 
@@ -1102,7 +1099,7 @@
                             <input type="text" id="teamInputP2" placeholder="O escribe nombre">
                         </div>
                     </div>
-                    <button class="btn btn-sm btn-green" style="width:100%; margin-top:8px;" onclick="agregarParejaFijaExpress()">+ Añadir Pareja</button>
+                    <button type="button" class="btn btn-sm btn-green" style="width:100%; margin-top:8px;" onclick="agregarParejaFijaExpress()">+ Añadir Pareja</button>
                 </div>
 
                 <div style="font-size:0.75rem; font-weight:800; color:var(--txt-muted); margin-bottom:6px;">Parejas registradas (<span id="countTeamsRegistrados" style="color:var(--padel-volt);">0</span>):</div>
@@ -1114,7 +1111,7 @@
                     <span style="font-size:0.75rem; font-weight:800; color:var(--txt-muted);">Registro rápido al vuelo:</span>
                     <div style="display:flex; gap:6px; margin-top:6px;">
                         <input type="text" id="inputRegistroExpress" placeholder="Nombre y Apellido" style="margin:0;">
-                        <button class="btn btn-sm btn-green" onclick="registrarJugadorExpress()">+</button>
+                        <button type="button" class="btn btn-sm btn-green" onclick="registrarJugadorExpress()">+</button>
                     </div>
                 </div>
                 <p style="font-size:0.75rem; font-weight:800; color:var(--txt-muted); margin-bottom:6px;">Selecciona Convocados (<span id="countConvocados" style="color:var(--padel-volt);">0</span>):</p>
@@ -1211,7 +1208,7 @@
         </div>
     </div>
 
-    <!-- MODAL AUTH ADMIN -->
+    <!-- MODAL AUTH ADMIN (PIN) -->
     <div id="modalAuthAdmin" class="modal" onclick="closeModalOnBackdrop(event, 'modalAuthAdmin')">
         <div class="modal-content" style="max-width:340px; text-align:center;">
             <button type="button" class="modal-close-icon" onclick="closeModal('modalAuthAdmin')">×</button>
@@ -1237,7 +1234,7 @@
                 <span style="font-size:0.72rem; font-weight:800; color:var(--padel-volt);">+ Registro Rápido al Vuelo:</span>
                 <div style="display:flex; gap:6px; margin-top:6px;">
                     <input type="text" id="inputRegistroExpressPartido" placeholder="Nombre de nuevo jugador" style="margin:0;">
-                    <button class="btn btn-sm btn-green" onclick="registrarJugadorExpressDesdeModal('partido')">+</button>
+                    <button type="button" class="btn btn-sm btn-green" onclick="registrarJugadorExpressDesdeModal('partido')">+</button>
                 </div>
             </div>
 
@@ -1274,8 +1271,8 @@
             </div>
 
             <div style="display:flex; justify-content:flex-end; gap:8px;">
-                <button class="btn btn-dark btn-sm" onclick="closeModal('modalConfigPartido')">Cancelar</button>
-                <button class="btn btn-green btn-sm" onclick="comenzarPartidoOficial()">Comenzar Partido ➔</button>
+                <button type="button" class="btn btn-dark btn-sm" onclick="closeModal('modalConfigPartido')">Cancelar</button>
+                <button type="button" class="btn btn-green btn-sm" onclick="comenzarPartidoOficial()">Comenzar Partido ➔</button>
             </div>
         </div>
     </div>
@@ -1382,12 +1379,7 @@
             }
         }
 
-        function seleccionarPestañaNavegador(tabId) {
-            pestañaActivaId = tabId;
-            const tabObj = pestañasApp.find(x => x.id === tabId);
-            if (!tabObj) return;
-
-            // Ocultar todas las vistas principales
+        function ocultarTodasLasVistas() {
             document.getElementById("viewHubModos").classList.add("hidden");
             document.getElementById("viewLigasModo").classList.add("hidden");
             document.getElementById("viewPadron").classList.add("hidden");
@@ -1395,9 +1387,17 @@
             document.getElementById("viewPartidoVivo").classList.add("hidden");
             document.getElementById("viewJornadaPozoVivo").classList.add("hidden");
             document.getElementById("viewJornada8LocoVivo").classList.add("hidden");
+            document.getElementById("viewAdmin").classList.add("hidden");
             document.getElementById("globalFloatingWaBtn").classList.add("hidden");
+        }
 
-            // Restaurar estado de esta pestaña
+        function seleccionarPestañaNavegador(tabId) {
+            pestañaActivaId = tabId;
+            const tabObj = pestañasApp.find(x => x.id === tabId);
+            if (!tabObj) return;
+
+            ocultarTodasLasVistas();
+
             modoSeleccionado = tabObj.modo;
             if (tabObj.vista === 'viewPartidoVivo') {
                 document.getElementById("viewPartidoVivo").classList.remove("hidden");
@@ -1757,6 +1757,7 @@
 
         let appConfig = JSON.parse(localStorage.getItem("11padel_app_config")) || {
             appLogoUrl: "https://instagram.com",
+            mainSponsorName: "SB TOTAL PADEL",
             mainUrl: "https://instagram.com/sbtotalpadel",
             waCustomMsg: "",
             newsClub: "SB TOTAL PADEL",
@@ -2144,6 +2145,13 @@
             const main = document.getElementById("sponsorMainLink");
             if (main) main.href = normalizarUrl(appConfig.mainUrl);
 
+            const nomSponsor = appConfig.mainSponsorName || "SB TOTAL PADEL";
+            const splashTxt = document.getElementById("splashPartnerTitle");
+            if (splashTxt) splashTxt.textContent = `Presentado por ${nomSponsor}`;
+
+            const footerSponsor = document.getElementById("sponsorsFooterTxt");
+            if (footerSponsor) footerSponsor.textContent = `Patrocinado por: ${nomSponsor}`;
+
             for (let i = 1; i <= 6; i++) {
                 const btn = document.getElementById(`linkBanner${i}`);
                 if (btn) btn.href = normalizarUrl(appConfig[`banner${i}Url`]);
@@ -2182,11 +2190,15 @@
             iniciarPollingRetas();
         }
 
+        // ==========================================
+        // CONTROL DE ACCESO ADMIN CORREGIDO
+        // ==========================================
         function solicitarAccesoAdmin() {
             const input = document.getElementById("inputMasterPinPrompt");
             if (input) input.value = "";
-            document.getElementById("modalAuthAdmin").classList.add("active");
-            setTimeout(() => { if (input) input.focus(); }, 200);
+            const modal = document.getElementById("modalAuthAdmin");
+            if (modal) modal.classList.add("active");
+            setTimeout(() => { if (input) input.focus(); }, 150);
         }
 
         async function verificarPinAdmin() {
@@ -2206,10 +2218,14 @@
         }
 
         function abrirPanelAdmin() {
+            ocultarTodasLasVistas();
             const adminCard = document.getElementById("viewAdmin");
+            if (!adminCard) return;
+            
             adminCard.classList.remove("hidden");
             
             document.getElementById("adminAppLogoUrl").value = appConfig.appLogoUrl || "";
+            document.getElementById("adminMainSponsorName").value = appConfig.mainSponsorName || "";
             document.getElementById("adminMainSponsorUrl").value = appConfig.mainUrl || "";
             document.getElementById("adminNewsClub").value = appConfig.newsClub || "";
             document.getElementById("adminNewsLink").value = appConfig.newsLink || "";
@@ -2232,14 +2248,18 @@
             renderAdminTorneosControls();
             renderAdminListaFotos();
             switchAdminSubTab('banners');
-            adminCard.scrollIntoView({ behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             showToast("Acceso Autorizado");
         }
 
-        function cerrarPanelAdmin() { document.getElementById("viewAdmin").classList.add("hidden"); }
+        function cerrarPanelAdmin() {
+            document.getElementById("viewAdmin").classList.add("hidden");
+            seleccionarPestañaNavegador(pestañaActivaId);
+        }
 
         async function guardarEnlacesEnFirebase() {
             appConfig.appLogoUrl = document.getElementById("adminAppLogoUrl").value.trim() || "https://instagram.com";
+            appConfig.mainSponsorName = document.getElementById("adminMainSponsorName").value.trim() || "SB TOTAL PADEL";
             appConfig.mainUrl = document.getElementById("adminMainSponsorUrl").value.trim() || "https://instagram.com/sbtotalpadel";
             appConfig.newsClub = document.getElementById("adminNewsClub").value.trim() || "Club Destacado";
             appConfig.newsLink = document.getElementById("adminNewsLink").value.trim() || "https://instagram.com";
@@ -2332,8 +2352,8 @@
                 cont.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; margin-bottom:8px;">
                     <div><strong style="color:var(--txt-main); font-size:0.95rem;">${l.nombre}</strong><br><small style="color:var(--txt-muted);">Jornadas jugadas: ${(l.jornadas || []).length}</small></div>
                     <div style="display:flex; gap:6px;">
-                        <button class="btn btn-sm btn-green" onclick="abrirLigaDetalle('${l.id}')">Entrar</button>
-                        <button class="btn btn-sm btn-danger" onclick="eliminarLiga('${l.id}')">🗑</button>
+                        <button type="button" class="btn btn-sm btn-green" onclick="abrirLigaDetalle('${l.id}')">Entrar</button>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="eliminarLiga('${l.id}')">🗑</button>
                     </div>
                 </div>`;
             });
@@ -2545,7 +2565,7 @@
                 const desc = modoSeleccionado === 'teams' ? `${(j.parejas || []).length} parejas participantes` : `${j.convocados.length} jugadores convocados`;
                 cont.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; margin-bottom:8px;">
                     <div><strong style="color:var(--txt-main); font-size:0.9rem;">${j.nombre}</strong><br><small style="color:var(--txt-muted);">${desc}</small></div>
-                    <button class="btn btn-sm btn-green" onclick="cargarJornadaEnVivo('${j.id}')">Entrar</button>
+                    <button type="button" class="btn btn-sm btn-green" onclick="cargarJornadaEnVivo('${j.id}')">Entrar</button>
                 </div>`;
             });
         }
@@ -2874,7 +2894,7 @@
 
                 if (jornadaActiva.rounds) {
                     jornadaActiva.rounds.forEach(r => {
-                        (r.matches || []).forEach(m => {
+                        r.matches.forEach(m => {
                             const esJugado = m.jugado || (parseInt(m.score1) > 0 || parseInt(m.score2) > 0);
                             if (esJugado) {
                                 const s1 = parseInt(m.score1) || 0;
@@ -2913,7 +2933,7 @@
 
                 if (jornadaActiva.rounds) {
                     jornadaActiva.rounds.forEach(r => {
-                        (r.matches || []).forEach(m => {
+                        r.matches.forEach(m => {
                             const esJugado = m.jugado || (parseInt(m.score1) > 0 || parseInt(m.score2) > 0);
                             if (esJugado) {
                                 const s1 = parseInt(m.score1) || 0;
@@ -3001,7 +3021,7 @@
                     <div>
                         <strong style="color:var(--txt-main); font-size:0.95rem;">${p}</strong>
                         <div style="font-size:0.72rem; color:var(--txt-muted); margin-top:2px;">Jornada: <strong style="color:var(--padel-volt); font-size:0.8rem;">${totalJornada} pts</strong></div>
-                        <button class="caguama-badge" style="margin-top:4px;" onclick="modificarCaguamaJugador('${p}', 1, ${n})" title="Toca para +1">🍺 ${cags}</button>
+                        <button type="button" class="caguama-badge" style="margin-top:4px;" onclick="modificarCaguamaJugador('${p}', 1, ${n})" title="Toca para +1">🍺 ${cags}</button>
                     </div>
                     <div class="score-ctrl">
                         <button type="button" class="score-btn" onclick="modificarPuntosPozo(${n}, '${p}', -1)">−</button>

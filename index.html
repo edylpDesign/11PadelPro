@@ -561,6 +561,9 @@
         .server-ball-icon { color: var(--padel-volt); font-size: 0.8rem; margin-right: 4px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
     </style>
+<!-- FIREBASE AUTH & CORE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -603,6 +606,10 @@
                 </a>
             </div>
             <!-- BOTÓN CANDADO ADMIN -->
+            <!-- BOTÓN PERFIL / LOGIN -->
+            <button type="button" class="btn-gear-admin" id="btnPerfilUsuarioTop" onclick="abrirModalPerfilOAcceso()" title="Mi Perfil / Acceso" style="color:var(--padel-volt);">
+                <i class="fas fa-user-circle"></i>
+            </button>
             <button type="button" class="btn-gear-admin" onclick="solicitarAccesoAdmin()" title="Acceso Administrador">
                 <i class="fas fa-lock"></i>
             </button>
@@ -1292,6 +1299,70 @@
         </div>
     </div>
 
+    <!-- MODAL DE ACCESO / PERFIL CON CELULAR 10 DÍGITOS -->
+    <div id="modalAuthUsuario" class="modal" onclick="closeModalOnBackdrop(event, 'modalAuthUsuario')">
+        <div class="modal-content" style="max-width:380px; text-align:center;">
+            <button type="button" class="modal-close-icon" onclick="closeModal('modalAuthUsuario')">×</button>
+            
+            <!-- VISTA: SESIÓN INICIADA (PERFIL) -->
+            <div id="authViewLogueado" class="hidden">
+                <div style="font-size:2.5rem; color:var(--padel-volt); margin-bottom:8px;"><i class="fas fa-id-card"></i></div>
+                <h3 style="color:var(--txt-main); margin-bottom:4px;" id="perfilNombreTxt">Mi Perfil</h3>
+                <p style="font-size:0.75rem; color:var(--txt-muted); margin-bottom:12px;" id="perfilCorreoTxt"></p>
+                
+                <div style="background:var(--bg-card-subtle); border:1px solid var(--border-glow); border-radius:12px; padding:12px; text-align:left; margin-bottom:14px;">
+                    <label style="font-size:0.7rem; color:var(--txt-dim); font-weight:800; text-transform:uppercase;">ID de Jugador (Celular 10 dígitos):</label>
+                    <div style="display:flex; gap:6px; margin-top:4px;">
+                        <input type="tel" id="perfilTelefonoInput" maxlength="10" placeholder="Ej. 4491234567" style="margin:0; font-weight:800; letter-spacing:1px; color:var(--padel-volt);">
+                        <button type="button" class="btn btn-green btn-sm" onclick="guardarTelefonoPerfil()">Guardar</button>
+                    </div>
+                    <small style="font-size:0.65rem; color:var(--txt-dim); display:block; margin-top:4px;">🔒 Este número vincula tus partidos y estadísticas personales.</small>
+                </div>
+
+                <button type="button" class="btn btn-danger btn-sm" style="width:100%; padding:10px;" onclick="cerrarSesionUsuario()">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+
+            <!-- VISTA: INICIAR SESIÓN O REGISTRO -->
+            <div id="authViewFormulario">
+                <div style="font-size:2.2rem; color:var(--padel-volt); margin-bottom:6px;"><i class="fas fa-user-lock"></i></div>
+                <h3 style="color:var(--txt-main); margin-bottom:4px;" id="authTituloForm">Acceso a 11Padel</h3>
+                <p style="font-size:0.75rem; color:var(--txt-muted); margin-bottom:14px;">Ingresa para consultar tus partidos, historial y retas.</p>
+
+                <!-- BOTÓN GOOGLE -->
+                <button type="button" class="btn btn-dark" style="width:100%; padding:11px; margin-bottom:12px; font-weight:800; border:1px solid rgba(255,255,255,0.15);" onclick="iniciarSesionConGoogle()">
+                    <i class="fab fa-google" style="color:#ea4335;"></i> Continuar con Google
+                </button>
+
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <hr style="flex:1; border:0; border-top:1px solid var(--border-glow);">
+                    <span style="font-size:0.7rem; color:var(--txt-dim); font-weight:800;">O CON CORREO</span>
+                    <hr style="flex:1; border:0; border-top:1px solid var(--border-glow);">
+                </div>
+
+                <div style="text-align:left; display:flex; flex-direction:column; gap:8px;">
+                    <div>
+                        <label style="font-size:0.7rem; color:var(--txt-dim);">Correo Electrónico:</label>
+                        <input type="email" id="authEmailInput" placeholder="tu@correo.com">
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem; color:var(--txt-dim);">Contraseña:</label>
+                        <input type="password" id="authPassInput" placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                    <a href="javascript:void(0)" onclick="recuperarPasswordCorreo()" style="font-size:0.7rem; color:var(--padel-blue-glow); text-decoration:none;">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <div style="display:flex; gap:8px; margin-top:14px;">
+                    <button type="button" class="btn btn-dark btn-sm" style="flex:1;" onclick="registrarConCorreo()">Crear Cuenta</button>
+                    <button type="button" class="btn btn-green btn-sm" style="flex:1;" onclick="iniciarSesionConCorreo()">Entrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="toast" class="toast">Notificación</div>
 
     <script>
@@ -3679,6 +3750,149 @@
             if (event.target && event.target.id === modalId) closeModal(modalId);
         }
 
+        // ==========================================
+        // MÓDULO DE AUTENTICACIÓN FIREBASE
+        // ==========================================
+        const firebaseConfig = {
+          apiKey: "AIzaSyA-x62LGZKHJcSY3ry0ZimP6vIAwSniU-4",
+          authDomain: "padel-pro-4c4d7.firebaseapp.com",
+          databaseURL: "https://padel-pro-4c4d7-default-rtdb.firebaseio.com",
+          projectId: "padel-pro-4c4d7",
+          storageBucket: "padel-pro-4c4d7.firebasestorage.app",
+          messagingSenderId: "764384530544",
+          appId: "1:764384530544:web:c146696d3bbda2534ee4b5"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        let usuarioActivo = null;
+
+        auth.onAuthStateChanged(async (user) => {
+            usuarioActivo = user;
+            const btnTop = document.getElementById("btnPerfilUsuarioTop");
+            if (user) {
+                if (btnTop) btnTop.style.color = "var(--padel-volt)";
+                const telGuardado = await obtenerTelefonoDeUsuario(user.uid);
+                if (!telGuardado) {
+                    abrirModalPerfilOAcceso();
+                }
+            } else {
+                if (btnTop) btnTop.style.color = "var(--txt-muted)";
+            }
+        });
+
+        function abrirModalPerfilOAcceso() {
+            const modal = document.getElementById("modalAuthUsuario");
+            const viewLog = document.getElementById("authViewLogueado");
+            const viewForm = document.getElementById("authViewFormulario");
+            if (!modal) return;
+
+            if (usuarioActivo) {
+                viewLog.classList.remove("hidden");
+                viewForm.classList.add("hidden");
+                document.getElementById("perfilNombreTxt").textContent = usuarioActivo.displayName || "Jugador 11Padel";
+                document.getElementById("perfilCorreoTxt").textContent = usuarioActivo.email || "";
+                obtenerTelefonoDeUsuario(usuarioActivo.uid).then(tel => {
+                    document.getElementById("perfilTelefonoInput").value = tel || "";
+                });
+            } else {
+                viewLog.classList.add("hidden");
+                viewForm.classList.remove("hidden");
+            }
+            modal.classList.add("active");
+        }
+
+        async function iniciarSesionConGoogle() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await auth.signInWithPopup(provider);
+                closeModal("modalAuthUsuario");
+                showToast("¡Sesión iniciada con Google!");
+            } catch (err) {
+                showToast(err.message, "error");
+            }
+        }
+
+        async function iniciarSesionConCorreo() {
+            const email = document.getElementById("authEmailInput").value.trim();
+            const pass = document.getElementById("authPassInput").value.trim();
+            if (!email || !pass) return showToast("Ingresa correo y contraseña", "error");
+
+            try {
+                await auth.signInWithEmailAndPassword(email, pass);
+                closeModal("modalAuthUsuario");
+                showToast("¡Bienvenido!");
+            } catch (err) {
+                showToast("Credenciales inválidas o error de acceso", "error");
+            }
+        }
+
+        async function registrarConCorreo() {
+            const email = document.getElementById("authEmailInput").value.trim();
+            const pass = document.getElementById("authPassInput").value.trim();
+            if (!email || !pass) return showToast("Ingresa correo y contraseña", "error");
+            if (pass.length < 6) return showToast("Contraseña mínima de 6 caracteres", "error");
+
+            try {
+                await auth.createUserWithEmailAndPassword(email, pass);
+                showToast("¡Cuenta creada con éxito!");
+                abrirModalPerfilOAcceso();
+            } catch (err) {
+                showToast(err.message, "error");
+            }
+        }
+
+        async function recuperarPasswordCorreo() {
+            const email = document.getElementById("authEmailInput").value.trim();
+            if (!email) return showToast("Escribe tu correo en el campo de arriba", "error");
+
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showToast("Se envió el correo para restablecer tu contraseña");
+            } catch (err) {
+                showToast("No se pudo enviar el correo de recuperación", "error");
+            }
+        }
+
+        async function cerrarSesionUsuario() {
+            await auth.signOut();
+            closeModal("modalAuthUsuario");
+            showToast("Sesión cerrada");
+        }
+
+        async function guardarTelefonoPerfil() {
+            if (!usuarioActivo) return;
+            const tel = document.getElementById("perfilTelefonoInput").value.trim().replace(/\D/g, '');
+            if (tel.length !== 10) return showToast("El número debe ser de 10 dígitos", "error");
+
+            try {
+                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios/${usuarioActivo.uid}.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        telefono: tel,
+                        nombre: usuarioActivo.displayName || "Jugador",
+                        email: usuarioActivo.email || ""
+                    })
+                });
+                showToast("¡Número de 10 dígitos vinculado!");
+                closeModal("modalAuthUsuario");
+            } catch (err) {
+                showToast("Error al guardar número", "error");
+            }
+        }
+
+        async function obtenerTelefonoDeUsuario(uid) {
+            try {
+                const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios/${uid}/telefono.json`);
+                if (res.ok) {
+                    return await res.json();
+                }
+            } catch (e) {}
+            return null;
+        }
         document.addEventListener("DOMContentLoaded", () => {
             aplicarEnlaces();
             sincronizarEnlacesDesdeLaNube();

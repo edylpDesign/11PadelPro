@@ -1319,6 +1319,26 @@
                     <small style="font-size:0.65rem; color:var(--txt-dim); display:block; margin-top:4px;">🔒 Este número vincula tus partidos y estadísticas personales.</small>
                 </div>
 
+                <!-- TARJETA RESUMEN ESTADÍSTICAS DEL USUARIO -->
+            <div id="perfilStatsBox" style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:10px; margin-bottom:14px; text-align:left;">
+                <span style="font-size:0.68rem; font-weight:800; color:var(--padel-volt); text-transform:uppercase; display:block; margin-bottom:6px;">
+                    <i class="fas fa-chart-line"></i> Mis Estadísticas Personales
+                </span>
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; text-align:center;">
+                    <div style="background:var(--bg-card-subtle); padding:6px; border-radius:8px; border:1px solid var(--border-glow);">
+                        <small style="font-size:0.6rem; color:var(--txt-dim); font-weight:700; display:block;">PJ</small>
+                        <strong id="statPjTxt" style="font-size:0.95rem; color:var(--txt-main);">0</strong>
+                    </div>
+                    <div style="background:var(--bg-card-subtle); padding:6px; border-radius:8px; border:1px solid var(--border-glow);">
+                        <small style="font-size:0.6rem; color:var(--txt-dim); font-weight:700; display:block;">VICTORIAS</small>
+                        <strong id="statPgTxt" style="font-size:0.95rem; color:var(--padel-volt);">0</strong>
+                    </div>
+                    <div style="background:var(--bg-card-subtle); padding:6px; border-radius:8px; border:1px solid var(--border-glow);">
+                        <small style="font-size:0.6rem; color:var(--txt-dim); font-weight:700; display:block;">CAGUAMAS</small>
+                        <strong id="statCagsTxt" style="font-size:0.95rem; color:var(--padel-orange);">0</strong>
+                    </div>
+                </div>
+            </div>
                 <button type="button" class="btn btn-danger btn-sm" style="width:100%; padding:10px;" onclick="cerrarSesionUsuario()">
                     <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                 </button>
@@ -3783,7 +3803,7 @@
             }
         });
 
-        function abrirModalPerfilOAcceso() {
+        async function abrirModalPerfilOAcceso() {
             const modal = document.getElementById("modalAuthUsuario");
             const viewLog = document.getElementById("authViewLogueado");
             const viewForm = document.getElementById("authViewFormulario");
@@ -3794,14 +3814,39 @@
                 viewForm.classList.add("hidden");
                 document.getElementById("perfilNombreTxt").textContent = usuarioActivo.displayName || "Jugador 11Padel";
                 document.getElementById("perfilCorreoTxt").textContent = usuarioActivo.email || "";
-                obtenerTelefonoDeUsuario(usuarioActivo.uid).then(tel => {
-                    document.getElementById("perfilTelefonoInput").value = tel || "";
-                });
+                
+                const tel = await obtenerTelefonoDeUsuario(usuarioActivo.uid);
+                document.getElementById("perfilTelefonoInput").value = tel || "";
+
+                // Auto-cargar celular en el formulario de Retas si está vacío
+                const inputRetaWa = document.getElementById("inputRetaWhatsapp");
+                if (inputRetaWa && !inputRetaWa.value && tel) {
+                    inputRetaWa.value = tel;
+                }
+
+                // Cargar estadísticas en tiempo real vinculadas al número
+                if (tel) {
+                    cargarEstadisticasPersonales(tel);
+                }
             } else {
                 viewLog.classList.add("hidden");
                 viewForm.classList.remove("hidden");
             }
             modal.classList.add("active");
+        }
+
+        async function cargarEstadisticasPersonales(telefono) {
+            try {
+                const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/stats/${telefono}.json`);
+                if (res.ok) {
+                    const data = await res.json() || { pj: 0, pg: 0, cags: 0 };
+                    document.getElementById("statPjTxt").textContent = data.pj || 0;
+                    document.getElementById("statPgTxt").textContent = data.pg || 0;
+                    document.getElementById("statCagsTxt").textContent = data.cags || 0;
+                }
+            } catch (e) {
+                console.warn("No se pudieron cargar estadísticas", e);
+            }
         }
 
         async function iniciarSesionConGoogle() {

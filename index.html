@@ -5744,7 +5744,7 @@
             }
         });
 
-        // DESCARGA Y SINCRONIZACIÓN AUTOMÁTICA EN TIEMPO REAL (TABLET <-> CELULAR)
+        // DESCARGA Y SINCRONIZACIÓN AUTOMÁTICA EN TIEMPO REAL (TABLET <-> CELULAR <-> PC)
         async function sincronizarDatosGlobalesDesdeNube() {
             try {
                 if (!usuarioActivo) return;
@@ -5761,29 +5761,51 @@
                     }
                 }
 
-                // 2. Descargar todos los torneos donde eres Administrador / Creador para poder editarlos
+                // 2. Descargar todos los torneos creados por este usuario para edición total
                 const resTorneos = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/torneos_cloud.json`);
                 if (resTorneos.ok) {
                     const cloudTorneos = await resTorneos.json();
                     if (cloudTorneos) {
                         const localData = getUserData();
+                        let huboCambios = false;
+
                         Object.values(cloudTorneos).forEach(torneoNube => {
                             if (!torneoNube || !torneoNube.id) return;
                             
-                            // Si el torneo fue creado por este usuario, asegurar que se integre localmente
+                            // Si eres el creador o administrador
                             if (torneoNube.creadorUid === uid || !torneoNube.creadorUid) {
+                                huboCambios = true;
                                 const mergeLista = (lista) => {
+                                    if (!lista) return;
                                     const idx = lista.findIndex(x => x.id === torneoNube.id);
                                     if (idx !== -1) lista[idx] = torneoNube;
                                     else lista.unshift(torneoNube);
                                 };
 
-                                if (torneoNube.convocados && torneoNube.rondas) mergeLista(localData.ligasPozo);
-                                else if (torneoNube.parejas) mergeLista(localData.ligasTeams);
-                                else mergeLista(localData.ligasAmericano);
+                                // Asegurar que existan los arrays en la memoria local
+                                if (!localData.ligasPozo) localData.ligasPozo = [];
+                                if (!localData.ligasTeams) localData.ligasTeams = [];
+                                if (!localData.ligasAmericano) localData.ligasAmericano = [];
+
+                                // Asignar al modo correspondiente
+                                if (torneoNube.convocados || torneoNube.rondas || torneoNube.modo === 'pozo') {
+                                    mergeLista(localData.ligasPozo);
+                                } else if (torneoNube.parejas || torneoNube.modo === 'teams') {
+                                    mergeLista(localData.ligasTeams);
+                                } else {
+                                    mergeLista(localData.ligasAmericano);
+                                }
                             }
                         });
-                        saveUserData(localData);
+
+                        if (huboCambios) {
+                            saveUserData(localData);
+                            // Refrescar la vista si el usuario está en la sección de ligas/pozos
+                            if (typeof renderLigas === 'function') renderLigas();
+                            if (typeof renderListaLigas === 'function') renderListaLigas();
+                            if (typeof renderTorneosGuardados === 'function') renderTorneosGuardados();
+                            if (typeof renderizarLigasPozo === 'function') renderizarLigasPozo();
+                        }
                     }
                 }
             } catch (err) {
@@ -6133,15 +6155,20 @@
             ranking.forEach((item, idx) => {
                 const esPodio = idx < 3;
                 const medalla = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `${idx + 1}º`));
-                // Identificación unívoca del usuario activo (no por puntos, sino por teléfono / nombre)
+                // Identificación unívoca del usuario en cualquier dispositivo
                 const dData = getUserData();
-                const miJugadorObj = (dData.jugadores || []).find(j => {
+                const miGoogleNombre = (usuarioActivo && usuarioActivo.displayName) ? usuarioActivo.displayName.toLowerCase().trim() : "";
+                
+                // Buscar coincidencia por teléfono en el padrón
+                const miJugadorPorTel = (dData.jugadores || []).find(j => {
                     const norm = normalizarJugador(j);
-                    return norm.telefono === usuarioTelefonoActual;
+                    return usuarioTelefonoActual && norm.telefono && norm.telefono.trim() === usuarioTelefonoActual.trim();
                 });
-                const miNombre = miJugadorObj ? (miJugadorObj.nombre || miJugadorObj).toLowerCase().trim() : "";
-                const esTuFila = miNombre && item.nombre.toLowerCase().trim() === miNombre;
+                const nombrePorTel = miJugadorPorTel ? (normalizarJugador(miJugadorPorTel).nombre || "").toLowerCase().trim() : "";
 
+                const nomItem = (item.nombre || "").toLowerCase().trim();
+                const esTuFila = (nombrePorTel && nomItem === nombrePorTel) || 
+                                 (miGoogleNombre && (nomItem === miGoogleNombre || miGoogleNombre.includes(nomItem) || nomItem.includes(miGoogleNombre)));
                 html += `
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.03); ${esTuFila ? 'background:rgba(0,230,118,0.12);' : ''}">
                         <td style="padding:8px 10px; text-align:center; font-weight:800; color:${esPodio ? 'var(--padel-volt)' : 'var(--txt-muted)'};">${medalla}</td>

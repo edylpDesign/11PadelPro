@@ -4243,8 +4243,24 @@
 
                 const torneoId = dataLiga.id || ("LIG_" + Date.now().toString(36));
                 dataLiga.id = torneoId;
+                
+                // Asignar autoría del creador administrador
+                if (usuarioActivo) {
+                    dataLiga.creadorUid = usuarioActivo.uid;
+                    dataLiga.creadorEmail = usuarioActivo.email || "";
+                }
+
                 const dData = getUserData();
                 const padron = dData.jugadores || [];
+
+                // Respaldar automáticamente el Padrón de Jugadores del creador en la nube
+                if (usuarioActivo && padron.length > 0) {
+                    fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios_directorio/${usuarioActivo.uid}.json`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(padron)
+                    }).catch(e => console.warn("Error respaldando padrón:", e));
+                }
 
                 // Mapa de normalización: nombre minúsculas -> teléfono
                 const telMap = {};
@@ -5731,7 +5747,21 @@
         // DESCARGA Y SINCRONIZACIÓN AUTOMÁTICA EN TIEMPO REAL (TABLET <-> CELULAR)
         async function sincronizarDatosGlobalesDesdeNube() {
             try {
-                // 1. Descargar torneos y ligas subidas a la nube
+                if (!usuarioActivo) return;
+                const uid = usuarioActivo.uid;
+
+                // 1. Sincronizar Padrón / Directorio de Jugadores personal del creador
+                const resJugadores = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios_directorio/${uid}.json`);
+                if (resJugadores.ok) {
+                    const cloudJugadores = await resJugadores.json();
+                    if (cloudJugadores && Array.isArray(cloudJugadores) && cloudJugadores.length > 0) {
+                        const localData = getUserData();
+                        localData.jugadores = cloudJugadores;
+                        saveUserData(localData);
+                    }
+                }
+
+                // 2. Descargar todos los torneos donde eres Administrador / Creador para poder editarlos
                 const resTorneos = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/torneos_cloud.json`);
                 if (resTorneos.ok) {
                     const cloudTorneos = await resTorneos.json();
@@ -5740,22 +5770,24 @@
                         Object.values(cloudTorneos).forEach(torneoNube => {
                             if (!torneoNube || !torneoNube.id) return;
                             
-                            // Integrar a la categoría correspondiente
-                            const mergeLista = (lista) => {
-                                const idx = lista.findIndex(x => x.id === torneoNube.id);
-                                if (idx !== -1) lista[idx] = torneoNube;
-                                else lista.unshift(torneoNube);
-                            };
+                            // Si el torneo fue creado por este usuario, asegurar que se integre localmente
+                            if (torneoNube.creadorUid === uid || !torneoNube.creadorUid) {
+                                const mergeLista = (lista) => {
+                                    const idx = lista.findIndex(x => x.id === torneoNube.id);
+                                    if (idx !== -1) lista[idx] = torneoNube;
+                                    else lista.unshift(torneoNube);
+                                };
 
-                            if (torneoNube.convocados && torneoNube.rondas) mergeLista(localData.ligasPozo);
-                            else if (torneoNube.parejas) mergeLista(localData.ligasTeams);
-                            else mergeLista(localData.ligasAmericano);
+                                if (torneoNube.convocados && torneoNube.rondas) mergeLista(localData.ligasPozo);
+                                else if (torneoNube.parejas) mergeLista(localData.ligasTeams);
+                                else mergeLista(localData.ligasAmericano);
+                            }
                         });
                         saveUserData(localData);
                     }
                 }
             } catch (err) {
-                console.warn("Sincronización en segundo plano completada con advertencias:", err);
+                console.warn("Sincronización en segundo plano con advertencias:", err);
             }
         }
         async function abrirModalPerfilOAcceso() {
@@ -6101,7 +6133,14 @@
             ranking.forEach((item, idx) => {
                 const esPodio = idx < 3;
                 const medalla = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `${idx + 1}º`));
-                const esTuFila = p.marcador.includes(`${item.puntos} Pts`) || p.marcador.includes(`${item.puntos} Puntos`);
+                // Identificación unívoca del usuario activo (no por puntos, sino por teléfono / nombre)
+                const dData = getUserData();
+                const miJugadorObj = (dData.jugadores || []).find(j => {
+                    const norm = normalizarJugador(j);
+                    return norm.telefono === usuarioTelefonoActual;
+                });
+                const miNombre = miJugadorObj ? (miJugadorObj.nombre || miJugadorObj).toLowerCase().trim() : "";
+                const esTuFila = miNombre && item.nombre.toLowerCase().trim() === miNombre;
 
                 html += `
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.03); ${esTuFila ? 'background:rgba(0,230,118,0.12);' : ''}">

@@ -5826,7 +5826,13 @@
             modal.classList.add("active");
 
             const inputTel = document.getElementById("perfilTelefonoInput");
-            const tel = inputTel ? inputTel.value.trim() : "";
+            let tel = inputTel ? inputTel.value.trim() : "";
+
+            // Auto-recuperar número si no se abrió el modal de perfil antes
+            if ((!tel || tel.length !== 10) && usuarioActivo) {
+                tel = await obtenerTelefonoDeUsuario(usuarioActivo.uid) || "";
+                if (inputTel && tel) inputTel.value = tel;
+            }
 
             if (!tel || tel.length !== 10) {
                 cont.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.75rem; color:var(--padel-orange);"><i class="fas fa-exclamation-circle fa-2x" style="margin-bottom:8px; display:block;"></i>Vincula tu número de 10 dígitos en tu perfil para consultar tus juegos.</div>`;

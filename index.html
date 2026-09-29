@@ -4105,6 +4105,11 @@
             document.getElementById("tituloModoLigas").textContent = titulo;
             renderLigasDelModo();
             actualizarTituloPestañaActiva(titulo, 'viewLigasModo', m);
+
+            // Refresco instantáneo desde la nube al ingresar al modo
+            if (usuarioActivo) {
+                sincronizarDatosGlobalesDesdeNube();
+            }
         }
 
         function backToHubModos() {
@@ -4244,6 +4249,16 @@
                 const torneoId = dataLiga.id || ("LIG_" + Date.now().toString(36));
                 dataLiga.id = torneoId;
                 
+                // Detectar y fijar el modo real de juego en la raíz del torneo
+                const primerJornada = (dataLiga.jornadas && dataLiga.jornadas[0]) || {};
+                if (dataLiga.parejas || primerJornada.parejas || modoSeleccionado === 'teams') {
+                    dataLiga.modo = 'teams';
+                } else if (primerJornada.rondas || modoSeleccionado === 'pozo') {
+                    dataLiga.modo = 'pozo';
+                } else {
+                    dataLiga.modo = 'americano';
+                }
+
                 // Asignar autoría del creador administrador
                 if (usuarioActivo) {
                     dataLiga.creadorUid = usuarioActivo.uid;
@@ -5758,6 +5773,7 @@
                         const localData = getUserData();
                         localData.jugadores = cloudJugadores;
                         saveUserData(localData);
+                        if (typeof renderPadron === 'function') renderPadron();
                     }
                 }
 
@@ -5771,9 +5787,6 @@
                         if (!localData.ligasTeams) localData.ligasTeams = [];
                         if (!localData.ligasAmericano) localData.ligasAmericano = [];
 
-                        // Array para ligas globales oficiales si tu app las usa
-                        let ligasOficialesLocal = JSON.parse(localStorage.getItem("ligasOficiales") || "[]");
-
                         Object.values(cloudTorneos).forEach(torneoNube => {
                             if (!torneoNube || !torneoNube.id) return;
                             
@@ -5785,30 +5798,27 @@
                                     else arr.unshift(torneoNube);
                                 };
 
-                                // Guardar en getUserData()
-                                if (torneoNube.convocados || torneoNube.rondas || torneoNube.modo === 'pozo') {
+                                // Clasificación estricta analizando tanto .modo como sus jornadas internas
+                                const j0 = (torneoNube.jornadas && torneoNube.jornadas[0]) || {};
+                                const esPozo = torneoNube.modo === 'pozo' || j0.rondas !== undefined;
+                                const esTeams = torneoNube.modo === 'teams' || torneoNube.parejas !== undefined || j0.parejas !== undefined;
+
+                                if (esPozo) {
                                     fusionar(localData.ligasPozo);
-                                } else if (torneoNube.parejas || torneoNube.modo === 'teams') {
+                                } else if (esTeams) {
                                     fusionar(localData.ligasTeams);
                                 } else {
                                     fusionar(localData.ligasAmericano);
                                 }
-
-                                // Guardar también en el array general de ligas
-                                fusionar(ligasOficialesLocal);
                             }
                         });
 
                         saveUserData(localData);
-                        localStorage.setItem("ligasOficiales", JSON.stringify(ligasOficialesLocal));
 
-                        // Disparar renderizado en todas las posibles vistas
-                        if (typeof renderLigas === 'function') renderLigas();
-                        if (typeof renderListaLigas === 'function') renderListaLigas();
-                        if (typeof renderTorneosGuardados === 'function') renderTorneosGuardados();
-                        if (typeof renderizarLigasPozo === 'function') renderizarLigasPozo();
-                        if (typeof renderDashboardLigas === 'function') renderDashboardLigas();
-                        if (typeof renderizarMenuModos === 'function') renderizarMenuModos();
+                        // Si estás en la pantalla de lista de ligas, redibujar inmediatamente
+                        if (typeof renderLigasDelModo === 'function' && modoSeleccionado) {
+                            renderLigasDelModo();
+                        }
                     }
                 }
             } catch (err) {

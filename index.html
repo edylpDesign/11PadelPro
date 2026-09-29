@@ -584,10 +584,10 @@
         </div>
         <div class="splash-bottom-actions">
             <div style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:280px; margin:0 auto;">
-          <button type="button" class="btn-splash-enter" style="width:100%; padding:14px; font-size:1rem; font-weight:800;" onclick="abrirModalPerfilOAcceso()">
+          <button type="button" class="btn-splash-enter" style="width:100%; padding:14px; font-size:1rem; font-weight:800; cursor:pointer;" onclick="iniciarSesionDesdeSplash()">
             <i class="fas fa-user-check"></i> INICIAR SESIÓN / REGISTRO
           </button>
-          <button type="button" class="btn btn-dark btn-sm" style="width:100%; padding:10px; border:1px solid var(--border-glow); font-weight:700; color:var(--txt-muted);" onclick="entrarAppPrincipal()">
+          <button type="button" class="btn btn-dark btn-sm" style="width:100%; padding:10px; border:1px solid var(--border-glow); font-weight:700; color:var(--txt-muted); cursor:pointer;" onclick="entrarComoInvitadoSplash()">
             Continuar como Invitado <i class="fas fa-arrow-right"></i>
           </button>
         </div>
@@ -1467,6 +1467,16 @@
                 splash.classList.add("hide-splash");
                 setTimeout(() => { splash.style.display = "none"; }, 400);
             }
+        }
+        function entrarComoInvitadoSplash() {
+            entrarAppPrincipal();
+        }
+
+        function iniciarSesionDesdeSplash() {
+            entrarAppPrincipal();
+            setTimeout(() => {
+                abrirModalPerfilOAcceso();
+            }, 300);
         }
 
         function compartirAppConAmigos() {
@@ -3849,14 +3859,28 @@
         auth.onAuthStateChanged(async (user) => {
             usuarioActivo = user;
             const btnTop = document.getElementById("btnPerfilUsuarioTop");
+            const secDashboard = document.getElementById("sectionPerfilStatsApp");
+
             if (user) {
                 if (btnTop) btnTop.style.color = "var(--padel-volt)";
+                
+                if (secDashboard) {
+                    secDashboard.style.display = "block";
+                    const nomb = document.getElementById("dashNombreJugador");
+                    const telBld = document.getElementById("dashTelJugador");
+                    if (nomb) nomb.textContent = user.displayName || "Jugador 11Padel";
+                    if (telBld) telBld.textContent = user.email || "";
+                }
+
                 const telGuardado = await obtenerTelefonoDeUsuario(user.uid);
                 if (telGuardado) {
+                    const telBld = document.getElementById("dashTelJugador");
+                    if (telBld) telBld.textContent = "WhatsApp: " + telGuardado;
                     cargarEstadisticasPersonales(telGuardado);
                 }
             } else {
                 if (btnTop) btnTop.style.color = "var(--txt-muted)";
+                if (secDashboard) secDashboard.style.display = "none";
             }
         });
 

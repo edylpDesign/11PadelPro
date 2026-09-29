@@ -5750,7 +5750,7 @@
                 if (!usuarioActivo) return;
                 const uid = usuarioActivo.uid;
 
-                // 1. Sincronizar Padrón / Directorio de Jugadores personal del creador
+                // 1. Sincronizar Directorio / Padrón personal
                 const resJugadores = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios_directorio/${uid}.json`);
                 if (resJugadores.ok) {
                     const cloudJugadores = await resJugadores.json();
@@ -5761,51 +5761,54 @@
                     }
                 }
 
-                // 2. Descargar todos los torneos creados por este usuario para edición total
+                // 2. Descargar todos los torneos guardados en la nube
                 const resTorneos = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/torneos_cloud.json`);
                 if (resTorneos.ok) {
                     const cloudTorneos = await resTorneos.json();
                     if (cloudTorneos) {
                         const localData = getUserData();
-                        let huboCambios = false;
+                        if (!localData.ligasPozo) localData.ligasPozo = [];
+                        if (!localData.ligasTeams) localData.ligasTeams = [];
+                        if (!localData.ligasAmericano) localData.ligasAmericano = [];
+
+                        // Array para ligas globales oficiales si tu app las usa
+                        let ligasOficialesLocal = JSON.parse(localStorage.getItem("ligasOficiales") || "[]");
 
                         Object.values(cloudTorneos).forEach(torneoNube => {
                             if (!torneoNube || !torneoNube.id) return;
                             
-                            // Si eres el creador o administrador
+                            // Si eres el creador o no tiene creador asignado
                             if (torneoNube.creadorUid === uid || !torneoNube.creadorUid) {
-                                huboCambios = true;
-                                const mergeLista = (lista) => {
-                                    if (!lista) return;
-                                    const idx = lista.findIndex(x => x.id === torneoNube.id);
-                                    if (idx !== -1) lista[idx] = torneoNube;
-                                    else lista.unshift(torneoNube);
+                                const fusionar = (arr) => {
+                                    const idx = arr.findIndex(x => x.id === torneoNube.id);
+                                    if (idx !== -1) arr[idx] = torneoNube;
+                                    else arr.unshift(torneoNube);
                                 };
 
-                                // Asegurar que existan los arrays en la memoria local
-                                if (!localData.ligasPozo) localData.ligasPozo = [];
-                                if (!localData.ligasTeams) localData.ligasTeams = [];
-                                if (!localData.ligasAmericano) localData.ligasAmericano = [];
-
-                                // Asignar al modo correspondiente
+                                // Guardar en getUserData()
                                 if (torneoNube.convocados || torneoNube.rondas || torneoNube.modo === 'pozo') {
-                                    mergeLista(localData.ligasPozo);
+                                    fusionar(localData.ligasPozo);
                                 } else if (torneoNube.parejas || torneoNube.modo === 'teams') {
-                                    mergeLista(localData.ligasTeams);
+                                    fusionar(localData.ligasTeams);
                                 } else {
-                                    mergeLista(localData.ligasAmericano);
+                                    fusionar(localData.ligasAmericano);
                                 }
+
+                                // Guardar también en el array general de ligas
+                                fusionar(ligasOficialesLocal);
                             }
                         });
 
-                        if (huboCambios) {
-                            saveUserData(localData);
-                            // Refrescar la vista si el usuario está en la sección de ligas/pozos
-                            if (typeof renderLigas === 'function') renderLigas();
-                            if (typeof renderListaLigas === 'function') renderListaLigas();
-                            if (typeof renderTorneosGuardados === 'function') renderTorneosGuardados();
-                            if (typeof renderizarLigasPozo === 'function') renderizarLigasPozo();
-                        }
+                        saveUserData(localData);
+                        localStorage.setItem("ligasOficiales", JSON.stringify(ligasOficialesLocal));
+
+                        // Disparar renderizado en todas las posibles vistas
+                        if (typeof renderLigas === 'function') renderLigas();
+                        if (typeof renderListaLigas === 'function') renderListaLigas();
+                        if (typeof renderTorneosGuardados === 'function') renderTorneosGuardados();
+                        if (typeof renderizarLigasPozo === 'function') renderizarLigasPozo();
+                        if (typeof renderDashboardLigas === 'function') renderDashboardLigas();
+                        if (typeof renderizarMenuModos === 'function') renderizarMenuModos();
                     }
                 }
             } catch (err) {
@@ -6247,12 +6250,26 @@
                         </thead>
                         <tbody>`;
 
+            const dData = getUserData();
+            const miGoogleNombre = (usuarioActivo && usuarioActivo.displayName) ? usuarioActivo.displayName.toLowerCase().trim() : "";
+            const miJugadorPorTel = (dData.jugadores || []).find(j => {
+                const norm = normalizarJugador(j);
+                return usuarioTelefonoActual && norm.telefono && norm.telefono.trim() === usuarioTelefonoActual.trim();
+            });
+            const nombrePorTel = miJugadorPorTel ? (normalizarJugador(miJugadorPorTel).nombre || "").toLowerCase().trim() : "";
+
             rankingGeneral.forEach((item, idx) => {
                 const medalla = idx === 0 ? '👑 1º' : `${idx + 1}º`;
+                const nomItem = (item.nombre || "").toLowerCase().trim();
+                const esTuFila = (nombrePorTel && nomItem === nombrePorTel) || 
+                                 (miGoogleNombre && (nomItem === miGoogleNombre || miGoogleNombre.includes(nomItem) || nomItem.includes(miGoogleNombre)));
+
                 html += `
-                    <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.03); ${esTuFila ? 'background:rgba(0,230,118,0.12);' : ''}">
                         <td style="padding:8px 10px; text-align:center; font-weight:800; color:${idx === 0 ? 'var(--padel-volt)' : 'var(--txt-muted)'};">${medalla}</td>
-                        <td style="padding:8px 10px; color:var(--txt-main); font-weight:600;">${item.nombre}</td>
+                        <td style="padding:8px 10px; color:${esTuFila ? 'var(--padel-volt)' : 'var(--txt-main)'}; font-weight:${esTuFila ? '800' : '600'};">
+                            ${item.nombre} ${esTuFila ? '<span style="font-size:0.6rem; background:var(--padel-volt); color:#000; padding:1px 4px; border-radius:4px; font-weight:900;">TÚ</span>' : ''}
+                        </td>
                         <td style="padding:8px 10px; text-align:center; color:var(--padel-orange); font-weight:700;">${item.caguamas ? item.caguamas + ' 🍺' : '-'}</td>
                         <td style="padding:8px 10px; text-align:right; font-weight:900; color:var(--padel-volt); font-size:0.85rem;">${item.puntos}</td>
                     </tr>`;

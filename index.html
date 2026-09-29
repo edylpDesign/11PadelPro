@@ -2885,22 +2885,63 @@
                     class="fas fa-cloud-download-alt"></i> Descargar al Celular</button>
         </div>
     </div>
-    <!-- MODAL HISTORIAL DE JUEGOS PARTICIPADOS (SOLO LECTURA) -->
+    <!-- MODAL HISTORIAL DE JUEGOS PARTICIPADOS (FILTROS DINÁMICOS & PROFESIONAL) -->
     <div id="modalHistorialUsuario" class="modal" onclick="closeModalOnBackdrop(event, 'modalHistorialUsuario')">
-        <div class="modal-content"
-            style="max-width:440px; text-align:left; max-height:85vh; display:flex; flex-direction:column;">
-            <div
-                style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-glow); padding-bottom:8px; margin-bottom:12px;">
-                <h3 style="font-size:0.95rem; margin:0; color:var(--padel-volt);"><i class="fas fa-history"></i> Mis
-                    Participaciones</h3>
-                <button type="button" class="modal-close-icon"
-                    onclick="closeModal('modalHistorialUsuario')">&times;</button>
+        <div class="modal-content" style="max-width:520px; text-align:left; max-height:88vh; display:flex; flex-direction:column; padding:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-glow); padding-bottom:10px; margin-bottom:12px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="width:32px; height:32px; border-radius:8px; background:rgba(0,230,118,0.15); display:flex; align-items:center; justify-content:center; color:var(--padel-volt); font-size:1rem;">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size:0.95rem; margin:0; color:var(--txt-main); font-weight:800;">Historial Deportivo</h3>
+                        <small style="font-size:0.68rem; color:var(--txt-muted);">Partidos, ligas y estadísticas auditadas</small>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-icon" onclick="closeModal('modalHistorialUsuario')">&times;</button>
             </div>
-            <p style="font-size:0.72rem; color:var(--txt-muted); margin-bottom:10px;">
-                Consulta las retas, pozos y jornadas donde estás registrado. Modo solo lectura.
-            </p>
-            <div id="historialListaPartidos"
-                style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; max-height:55vh;">
+
+            <!-- BARRA DE FILTROS PROFESIONAL -->
+            <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:10px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                    <div>
+                        <label style="font-size:0.62rem; color:var(--txt-dim); font-weight:800; text-transform:uppercase;">Modo de Juego:</label>
+                        <select id="filtroHistorialModo" onchange="aplicarFiltrosHistorialUI()" style="margin-top:2px; padding:6px 8px; font-size:0.75rem;">
+                            <option value="TODOS">Todos los Modos</option>
+                            <option value="POZO">Pozo Pro</option>
+                            <option value="8LOCO">8 Loco / Americano</option>
+                            <option value="TEAMS">Americano Teams</option>
+                            <option value="PARTIDO_PRO">Partido Pro (Oficial)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.62rem; color:var(--txt-dim); font-weight:800; text-transform:uppercase;">Torneo / Liga:</label>
+                        <select id="filtroHistorialTorneo" onchange="aplicarFiltrosHistorialUI()" style="margin-top:2px; padding:6px 8px; font-size:0.75rem;">
+                            <option value="TODOS">Todas las Ligas</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                    <div>
+                        <label style="font-size:0.62rem; color:var(--txt-dim); font-weight:800; text-transform:uppercase;">Jornada / Fecha:</label>
+                        <input type="date" id="filtroHistorialFecha" onchange="aplicarFiltrosHistorialUI()" style="margin-top:2px; padding:5px 8px; font-size:0.75rem; color-scheme:dark;">
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
+                        <button type="button" class="btn btn-sm btn-dark" style="width:100%; padding:6px; font-size:0.72rem; border:1px solid var(--border-glow);" onclick="limpiarFiltrosHistorialUI()">
+                            <i class="fas fa-undo"></i> Restablecer
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTADOR RESUMEN DE FILTRADO -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:0 2px;">
+                <span style="font-size:0.7rem; color:var(--txt-muted); font-weight:700;">Participaciones: <strong id="historialTotalContador" style="color:var(--padel-volt);">0</strong></span>
+                <span id="historialIndicadorModo" style="font-size:0.65rem; color:var(--txt-dim); text-transform:uppercase; font-weight:800;"></span>
+            </div>
+
+            <!-- CONTENEDOR DE PARTIDOS DINÁMICOS -->
+            <div id="historialListaPartidos" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; max-height:48vh; padding-right:2px;">
                 <!-- Se llena dinámicamente -->
             </div>
         </div>
@@ -4170,119 +4211,187 @@
                 showToast("Liga finalizada oficialmente");
             }
         }
-        // MOTOR DE SINCRONIZACIÓN Y CÓDIGOS INTERNOS PARA LIGAS Y TORNEOS
+        // ==========================================================
+        // MOTOR DE SINCRONIZACIÓN UNIVERSAL EN NUBE (TODOS LOS MODOS)
+        // ==========================================================
         async function sincronizarTorneoActualANube() {
             try {
-                // 1. Obtener la liga activa cargada en memoria
                 let dataLiga = (typeof ligaActiva !== 'undefined' && ligaActiva) ? ligaActiva : null;
-                if (!dataLiga) {
-                    dataLiga = JSON.parse(localStorage.getItem("ligaActiva") || "null");
-                }
+                if (!dataLiga) dataLiga = JSON.parse(localStorage.getItem("ligaActiva") || "null");
 
                 if (!dataLiga) {
-                    alert("No se encontró ninguna liga activa para sincronizar.");
+                    alert("No hay ningún torneo o liga abierta en pantalla para sincronizar.");
                     return;
                 }
 
-                // Generar o conservar ID interno de control
                 const torneoId = dataLiga.id || ("LIG_" + Date.now().toString(36));
                 dataLiga.id = torneoId;
+                const dData = getUserData();
+                const padron = dData.jugadores || [];
 
-                // 2. Subir estructura completa a Firebase para consulta
+                // Mapa de normalización: nombre minúsculas -> teléfono
+                const telMap = {};
+                padron.forEach(j => {
+                    const norm = normalizarJugador(j);
+                    if (norm.nombre && norm.telefono && norm.telefono.length === 10) {
+                        telMap[norm.nombre.toLowerCase()] = norm.telefono;
+                    }
+                });
+
+                // 1. Respaldar estructura de liga en nube
                 await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/torneos_cloud/${torneoId}.json`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(dataLiga)
                 });
 
-                // 3. Procesar partidos y sumar estadísticas por teléfono
                 const resumenStats = {};
                 const jornadas = dataLiga.jornadas || [];
-                const jugadores = dataLiga.jugadores || [];
+                const modoActual = (typeof modoSeleccionado !== 'undefined' && modoSeleccionado) ? modoSeleccionado : (dataLiga.parejas ? 'teams' : (dataLiga.rondas ? 'pozo' : 'americano'));
 
-                jornadas.forEach((jornada, jIdx) => {
-                    const partidos = jornada.partidos || [];
-                    partidos.forEach((p, pIdx) => {
-                        const matchId = `${torneoId}_J${jIdx + 1}_M${pIdx + 1}`;
+                for (let jIdx = 0; jIdx < jornadas.length; jIdx++) {
+                    const jornada = jornadas[jIdx];
+                    const nombreJornada = jornada.nombre || `Jornada ${jIdx + 1}`;
+                    const fechaRegistro = jornada.fecha || new Date().toISOString().split("T")[0];
 
-                        // Localizar jugadores involucrados
-                        const j1 = jugadores.find(j => (j.id && j.id === p.j1Id) || (j.nombre && j.nombre === p.j1));
-                        const j2 = jugadores.find(j => (j.id && j.id === p.j2Id) || (j.nombre && j.nombre === p.j2));
-                        const j3 = jugadores.find(j => (j.id && j.id === p.j3Id) || (j.nombre && j.nombre === p.j3));
-                        const j4 = jugadores.find(j => (j.id && j.id === p.j4Id) || (j.nombre && j.nombre === p.j4));
+                    // MODO A: POZO PRO (Puntos directos por ronda acumulativa)
+                    if (jornada.rondas && Array.isArray(jornada.rondas)) {
+                        for (const nombreJugador of (jornada.convocados || [])) {
+                            const tel = telMap[nombreJugador.toLowerCase()];
+                            if (tel) {
+                                if (!resumenStats[tel]) resumenStats[tel] = { pj: 0, pg: 0, cags: 0 };
+                                resumenStats[tel].pj += 1;
 
-                        const tels = [];
-                        [j1, j2, j3, j4].forEach(j => {
-                            if (j && j.telefono && j.telefono.toString().trim().length === 10) {
-                                const cleanTel = j.telefono.toString().trim();
-                                tels.push(cleanTel);
-                                if (!resumenStats[cleanTel]) resumenStats[cleanTel] = { pj: 0, pg: 0, cags: 0 };
-                            }
-                        });
+                                let ptsTotal = 0;
+                                jornada.rondas.forEach(r => { ptsTotal += (parseInt(r[nombreJugador]) || 0); });
+                                const cags = (jornada.caguamas && jornada.caguamas[nombreJugador]) ? parseInt(jornada.caguamas[nombreJugador]) : 0;
+                                resumenStats[tel].cags += cags;
 
-                        // Si el partido está registrado con resultado
-                        if (p.jugado || (p.score1 !== undefined && p.score1 !== null && p.score1 !== "")) {
-                            const s1 = parseInt(p.score1) || 0;
-                            const s2 = parseInt(p.score2) || 0;
-
-                            tels.forEach(t => resumenStats[t].pj += 1);
-
-                            if (s1 > s2) {
-                                if (j1 && j1.telefono) resumenStats[j1.telefono.toString().trim()].pg += 1;
-                                if (j2 && j2.telefono) resumenStats[j2.telefono.toString().trim()].pg += 1;
-                            } else if (s2 > s1) {
-                                if (j3 && j3.telefono) resumenStats[j3.telefono.toString().trim()].pg += 1;
-                                if (j4 && j4.telefono) resumenStats[j4.telefono.toString().trim()].pg += 1;
-                            }
-
-                            // Subir índice de participación individual en modo consulta
-                            tels.forEach(async (tel) => {
-                                const reg = {
-                                    matchId: matchId,
-                                    torneoId: torneoId,
-                                    torneoNombre: dataLiga.nombre || "Liga Padel",
-                                    jornada: jornada.nombre || `Jornada ${jIdx + 1}`,
-                                    marcador: `${s1} - ${s2}`,
-                                    fecha: p.fecha || new Date().toISOString().split("T")[0]
-                                };
+                                const matchId = `${torneoId}_J${jIdx + 1}_POZO_${nombreJugador.replace(/[^a-zA-Z0-9]/g, '_')}`;
                                 await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/jugadores_partidos/${tel}/${matchId}.json`, {
                                     method: "PUT",
                                     headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify(reg)
+                                    body: JSON.stringify({
+                                        matchId: matchId,
+                                        torneoId: torneoId,
+                                        torneoNombre: dataLiga.nombre || "Pozo Pro",
+                                        modo: "POZO",
+                                        jornada: nombreJornada,
+                                        marcador: `${ptsTotal} Puntos`,
+                                        detalle: `${jornada.rondas.length} rondas disputadas`,
+                                        caguamas: cags,
+                                        fecha: fechaRegistro
+                                    })
                                 });
-                            });
+                            }
                         }
-                    });
-                });
-
-                // 4. Actualizar contadores acumulados en Firebase
-                for (const [tel, st] of Object.entries(resumenStats)) {
-                    const prevRes = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/stats/${tel}.json`);
-                    let prevData = { pj: 0, pg: 0, cags: 0 };
-                    if (prevRes.ok) {
-                        const parsed = await prevRes.json();
-                        if (parsed) prevData = parsed;
                     }
+
+                    // MODO B: 8 LOCO / AMERICANO & TEAMS (Partidos por pistas)
+                    const matches = jornada.rounds ? jornada.rounds.flatMap(r => r.matches || []) : (jornada.partidos || []);
+                    for (let pIdx = 0; pIdx < matches.length; pIdx++) {
+                        const p = matches[pIdx];
+                        const s1 = parseInt(p.score1) || 0;
+                        const s2 = parseInt(p.score2) || 0;
+                        if (p.jugado || s1 > 0 || s2 > 0) {
+                            const matchId = `${torneoId}_J${jIdx + 1}_M${pIdx + 1}`;
+                            const p1Players = p.p1 || [];
+                            const p2Players = p.p2 || [];
+                            const todos = [...p1Players, ...p2Players];
+                            const modoTag = modoActual === 'teams' ? "TEAMS" : "8LOCO";
+
+                            for (const nom of todos) {
+                                const tel = telMap[nom.toLowerCase()];
+                                if (tel) {
+                                    if (!resumenStats[tel]) resumenStats[tel] = { pj: 0, pg: 0, cags: 0 };
+                                    resumenStats[tel].pj += 1;
+
+                                    const gano = (p1Players.includes(nom) && s1 > s2) || (p2Players.includes(nom) && s2 > s1);
+                                    if (gano) resumenStats[tel].pg += 1;
+
+                                    const cags = (jornada.caguamas && jornada.caguamas[nom]) ? parseInt(jornada.caguamas[nom]) : 0;
+                                    resumenStats[tel].cags += cags;
+
+                                    await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/jugadores_partidos/${tel}/${matchId}.json`, {
+                                        method: "PUT",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({
+                                            matchId: matchId,
+                                            torneoId: torneoId,
+                                            torneoNombre: dataLiga.nombre || "Liga Padel",
+                                            modo: modoTag,
+                                            jornada: nombreJornada,
+                                            pareja: (p1Players.includes(nom) ? p1Players : p2Players).join(" & "),
+                                            rivales: (p1Players.includes(nom) ? p2Players : p1Players).join(" & "),
+                                            marcador: `${s1} - ${s2}`,
+                                            resultado: gano ? "VICTORIA" : (s1 === s2 ? "EMPATE" : "DERROTA"),
+                                            caguamas: cags,
+                                            fecha: fechaRegistro
+                                        })
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 2. Sincronizar partidos terminados de "PARTIDO PRO" individual si existen
+                const partidosProTerminados = JSON.parse(localStorage.getItem("11padel_partidos_terminados") || "[]");
+                for (const pPro of partidosProTerminados) {
+                    if (pPro && pPro.id) {
+                        const todosPro = [...(pPro.p1 || []), ...(pPro.p2 || [])];
+                        for (const nom of todosPro) {
+                            const tel = telMap[nom.toLowerCase()];
+                            if (tel) {
+                                if (!resumenStats[tel]) resumenStats[tel] = { pj: 0, pg: 0, cags: 0 };
+                                resumenStats[tel].pj += 1;
+
+                                const gano = (pPro.p1.includes(nom) && pPro.ganador === 1) || (pPro.p2.includes(nom) && pPro.ganador === 2);
+                                if (gano) resumenStats[tel].pg += 1;
+
+                                const mId = `PARTIDO_PRO_${pPro.id}`;
+                                let resScore = `${pPro.sets?.s1?.p1 || 0}-${pPro.sets?.s1?.p2 || 0} | ${pPro.sets?.s2?.p1 || 0}-${pPro.sets?.s2?.p2 || 0}`;
+                                if (pPro.sets?.s3?.p1 || pPro.sets?.s3?.p2) resScore += ` | STB: ${pPro.sets.s3.p1}-${pPro.sets.s3.p2}`;
+
+                                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/jugadores_partidos/${tel}/${mId}.json`, {
+                                    method: "PUT",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                        matchId: mId,
+                                        torneoId: "PARTIDOS_PRO_DIRECTOS",
+                                        torneoNombre: "Reto Partido Pro Oficial",
+                                        modo: "PARTIDO_PRO",
+                                        jornada: "Amistoso / Reto Pro",
+                                        pareja: (pPro.p1.includes(nom) ? pPro.p1 : pPro.p2).join(" & "),
+                                        rivales: (pPro.p1.includes(nom) ? pPro.p2 : pPro.p1).join(" & "),
+                                        marcador: resScore,
+                                        resultado: gano ? "VICTORIA" : "DERROTA",
+                                        caguamas: 0,
+                                        fecha: (pPro.fecha || "").split(",")[0] || new Date().toISOString().split("T")[0]
+                                    })
+                                });
+                            }
+                        }
+                    }
+                }
+
+                // 3. Escribir acumulados globales directos en /stats/{tel}
+                for (const [tel, st] of Object.entries(resumenStats)) {
                     await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/stats/${tel}.json`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            pj: (prevData.pj || 0) + st.pj,
-                            pg: (prevData.pg || 0) + st.pg,
-                            cags: (prevData.cags || 0) + st.cags
-                        })
+                        body: JSON.stringify(st)
                     });
                 }
 
-                alert("¡Liga y partidos sincronizados con éxito en Firebase!");
-
+                showToast("¡Torneo y estadísticas sincronizados en la nube!");
                 const inputTel = document.getElementById("perfilTelefonoInput");
                 if (inputTel && inputTel.value.trim()) {
                     cargarEstadisticasPersonales(inputTel.value.trim());
                 }
             } catch (e) {
-                console.error("Error al sincronizar liga:", e);
-                alert("Error al subir a la nube. Revisa tu conexión.");
+                console.error("Error al sincronizar universal:", e);
+                showToast("Error de conexión al sincronizar", "error");
             }
         }
 
@@ -5703,50 +5812,129 @@
             }
         }
 
+        // ==========================================================
+        // MOTOR DE HISTORIAL PRO CON FILTROS DINÁMICOS
+        // ==========================================================
+        let cacheHistorialPartidos = [];
+
         async function abrirHistorialParticipaciones() {
             const modal = document.getElementById("modalHistorialUsuario");
             const cont = document.getElementById("historialListaPartidos");
             if (!modal || !cont) return;
 
-            cont.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.75rem; color:var(--txt-dim);"><i class="fas fa-spinner fa-spin"></i> Cargando tus juegos...</div>`;
+            cont.innerHTML = `<div style="text-align:center; padding:24px; font-size:0.75rem; color:var(--txt-dim);"><i class="fas fa-spinner fa-spin fa-2x" style="color:var(--padel-volt); margin-bottom:8px; display:block;"></i>Cargando tu historial deportivo...</div>`;
             modal.classList.add("active");
 
-            const tel = document.getElementById("perfilTelefonoInput") ? document.getElementById("perfilTelefonoInput").value.trim() : "";
+            const inputTel = document.getElementById("perfilTelefonoInput");
+            const tel = inputTel ? inputTel.value.trim() : "";
+
+            if (!tel || tel.length !== 10) {
+                cont.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.75rem; color:var(--padel-orange);"><i class="fas fa-exclamation-circle fa-2x" style="margin-bottom:8px; display:block;"></i>Vincula tu número de 10 dígitos en tu perfil para consultar tus juegos.</div>`;
+                return;
+            }
 
             try {
-                const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/retas_v2.json`);
-                let html = "";
+                const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/jugadores_partidos/${tel}.json`);
                 if (res.ok) {
                     const data = await res.json();
-                    if (data) {
-                        Object.entries(data).forEach(([key, reta]) => {
-                            const participa = (reta.jugadores && Object.values(reta.jugadores).some(j => j && (j.tel === tel || (j.nombre && usuarioActivo && j.nombre.toLowerCase().includes(usuarioActivo.displayName?.toLowerCase()))))) || reta.creadorTel === tel;
-
-                            if (participa) {
-                                html += `
-                                    <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; padding:10px;">
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                            <strong style="color:var(--txt-main); font-size:0.78rem;">${reta.club || 'Club'} - ${reta.categoria || 'Cat'}</strong>
-                                            <span style="font-size:0.65rem; background:rgba(0,230,118,0.15); color:var(--padel-volt); padding:2px 6px; border-radius:6px; font-weight:800;">${reta.tipo || 'Reta'}</span>
-                                        </div>
-                                        <div style="font-size:0.68rem; color:var(--txt-muted);">
-                                            <span><i class="far fa-calendar-alt"></i> ${reta.fecha || 'Fecha'}</span> • 
-                                            <span><i class="far fa-clock"></i> ${reta.hora || 'Hora'}</span>
-                                        </div>
-                                    </div>`;
-                            }
-                        });
-                    }
-                }
-
-                if (!html) {
-                    cont.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.75rem; color:var(--txt-muted);">No se encontraron retas o partidos asociados a tu número aún.</div>`;
+                    cacheHistorialPartidos = data ? Object.values(data).reverse() : [];
+                    llenarSelectorTorneosHistorial();
+                    aplicarFiltrosHistorialUI();
                 } else {
-                    cont.innerHTML = html;
+                    cont.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.75rem; color:var(--padel-red);">Error al conectar con la base de datos.</div>`;
                 }
             } catch (err) {
-                cont.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.75rem; color:var(--padel-orange);">Error al consultar historial. Intenta nuevamente.</div>`;
+                console.error("Error al descargar historial:", err);
+                cont.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.75rem; color:var(--padel-red);">Sin conexión a internet.</div>`;
             }
+        }
+
+        function llenarSelectorTorneosHistorial() {
+            const selTorneo = document.getElementById("filtroHistorialTorneo");
+            if (!selTorneo) return;
+            selTorneo.innerHTML = `<option value="TODOS">Todas las Ligas</option>`;
+
+            const torneosUnicos = [...new Set(cacheHistorialPartidos.map(p => p.torneoNombre || "Torneo").filter(Boolean))];
+            torneosUnicos.forEach(tNom => {
+                selTorneo.innerHTML += `<option value="${tNom}">${tNom}</option>`;
+            });
+        }
+
+        function aplicarFiltrosHistorialUI() {
+            const cont = document.getElementById("historialListaPartidos");
+            const contNum = document.getElementById("historialTotalContador");
+            if (!cont) return;
+
+            const fModo = (document.getElementById("filtroHistorialModo")?.value || "TODOS").toUpperCase();
+            const fTorneo = document.getElementById("filtroHistorialTorneo")?.value || "TODOS";
+            const fFecha = document.getElementById("filtroHistorialFecha")?.value || "";
+
+            let filtrados = cacheHistorialPartidos.filter(p => {
+                const matchModo = (fModo === "TODOS") || (p.modo && p.modo.toUpperCase() === fModo);
+                const matchTorneo = (fTorneo === "TODOS") || (p.torneoNombre === fTorneo);
+                const matchFecha = (!fFecha) || (p.fecha && p.fecha.startsWith(fFecha));
+                return matchModo && matchTorneo && matchFecha;
+            });
+
+            if (contNum) contNum.textContent = filtrados.length;
+
+            if (filtrados.length === 0) {
+                cont.innerHTML = `
+                    <div style="text-align:center; padding:30px 10px; color:var(--txt-muted); font-size:0.78rem;">
+                        <i class="fas fa-filter fa-2x" style="color:var(--txt-dim); margin-bottom:8px; display:block;"></i>
+                        No se encontraron juegos con los filtros seleccionados.
+                    </div>`;
+                return;
+            }
+
+            cont.innerHTML = "";
+            filtrados.forEach(p => {
+                let badgeModo = "";
+                if (p.modo === "POZO") badgeModo = `<span style="background:rgba(2,132,199,0.2); color:var(--padel-blue-glow); border:1px solid rgba(56,189,248,0.3); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">POZO</span>`;
+                else if (p.modo === "8LOCO") badgeModo = `<span style="background:rgba(0,230,118,0.15); color:var(--padel-volt); border:1px solid rgba(0,230,118,0.3); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">8 LOCO</span>`;
+                else if (p.modo === "TEAMS") badgeModo = `<span style="background:rgba(168,85,247,0.2); color:#d8b4fe; border:1px solid rgba(168,85,247,0.4); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">TEAMS</span>`;
+                else if (p.modo === "PARTIDO_PRO") badgeModo = `<span style="background:rgba(245,158,11,0.2); color:var(--padel-orange); border:1px solid rgba(245,158,11,0.4); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">PARTIDO PRO</span>`;
+
+                const esVictoria = p.resultado === "VICTORIA";
+                const resultadoBadge = p.resultado ? `<span style="font-size:0.62rem; font-weight:900; color:${esVictoria ? 'var(--padel-volt)' : 'var(--padel-orange)'};">[${p.resultado}]</span>` : '';
+
+                cont.innerHTML += `
+                    <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:10px 12px; display:flex; flex-direction:column; gap:5px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                ${badgeModo}
+                                <strong style="color:var(--txt-main); font-size:0.8rem;">${p.torneoNombre}</strong>
+                            </div>
+                            <small style="color:var(--txt-dim); font-size:0.68rem; font-weight:700;"><i class="fas fa-calendar-day"></i> ${p.fecha}</small>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; margin-top:2px;">
+                            <span style="color:var(--txt-muted);">${p.jornada}</span>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                ${resultadoBadge}
+                                <strong style="color:var(--padel-volt); font-size:0.85rem;">${p.marcador}</strong>
+                            </div>
+                        </div>
+
+                        ${p.rivales ? `
+                            <div style="font-size:0.7rem; color:var(--txt-dim); border-top:1px dashed var(--border-glow); padding-top:4px; margin-top:2px; display:flex; justify-content:space-between;">
+                                <span>Dupla: <strong style="color:var(--txt-main);">${p.pareja}</strong></span>
+                                <span>vs <strong style="color:var(--txt-muted);">${p.rivales}</strong></span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        function limpiarFiltrosHistorialUI() {
+            const m = document.getElementById("filtroHistorialModo");
+            const t = document.getElementById("filtroHistorialTorneo");
+            const f = document.getElementById("filtroHistorialFecha");
+            if (m) m.value = "TODOS";
+            if (t) t.value = "TODOS";
+            if (f) f.value = "";
+            aplicarFiltrosHistorialUI();
         }
 
         async function iniciarSesionConGoogle() {

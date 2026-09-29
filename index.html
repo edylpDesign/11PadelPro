@@ -2885,64 +2885,81 @@
                     class="fas fa-cloud-download-alt"></i> Descargar al Celular</button>
         </div>
     </div>
-    <!-- MODAL HISTORIAL DE JUEGOS PARTICIPADOS (FILTROS DINÁMICOS & PROFESIONAL) -->
+    <!-- MODAL HISTORIAL DEPORTIVO Y TABLAS COMPLETAS -->
     <div id="modalHistorialUsuario" class="modal" onclick="closeModalOnBackdrop(event, 'modalHistorialUsuario')">
-        <div class="modal-content" style="max-width:520px; text-align:left; max-height:88vh; display:flex; flex-direction:column; padding:18px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-glow); padding-bottom:10px; margin-bottom:12px;">
+        <div class="modal-content" style="max-width:580px; text-align:left; max-height:90vh; display:flex; flex-direction:column; padding:16px;">
+            <!-- CABECERA -->
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-glow); padding-bottom:8px; margin-bottom:10px;">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <div style="width:32px; height:32px; border-radius:8px; background:rgba(0,230,118,0.15); display:flex; align-items:center; justify-content:center; color:var(--padel-volt); font-size:1rem;">
-                        <i class="fas fa-history"></i>
-                    </div>
+                    <button id="btnVolverListaHistorial" onclick="regresarAListaHistorial()" style="display:none; background:rgba(255,255,255,0.08); border:none; color:var(--txt-main); width:28px; height:28px; border-radius:6px; cursor:pointer;">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
                     <div>
-                        <h3 style="font-size:0.95rem; margin:0; color:var(--txt-main); font-weight:800;">Historial Deportivo</h3>
-                        <small style="font-size:0.68rem; color:var(--txt-muted);">Partidos, ligas y estadísticas auditadas</small>
+                        <h3 id="historialTituloModal" style="font-size:0.95rem; margin:0; color:var(--txt-main); font-weight:800;">Historial Deportivo</h3>
+                        <small id="historialSubtituloModal" style="font-size:0.65rem; color:var(--txt-muted);">Partidos, ligas y estadísticas auditadas</small>
                     </div>
                 </div>
                 <button type="button" class="modal-close-icon" onclick="closeModal('modalHistorialUsuario')">&times;</button>
             </div>
 
-            <!-- BARRA DE FILTROS PROFESIONAL -->
-            <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:10px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px;">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-                    <div>
-                        <label style="font-size:0.62rem; color:var(--txt-dim); font-weight:800; text-transform:uppercase;">Modo de Juego:</label>
-                        <select id="filtroHistorialModo" onchange="aplicarFiltrosHistorialUI()" style="margin-top:2px; padding:6px 8px; font-size:0.75rem;">
-                            <option value="TODOS">Todos los Modos</option>
-                            <option value="POZO">Pozo Pro</option>
-                            <option value="8LOCO">8 Loco / Americano</option>
-                            <option value="TEAMS">Americano Teams</option>
-                            <option value="PARTIDO_PRO">Partido Pro (Oficial)</option>
-                        </select>
+            <!-- VISTA 1: LISTADO CON FILTROS -->
+            <div id="historialVistaListado" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+                <!-- BARRA DE FILTROS -->
+                <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; padding:8px 10px; margin-bottom:10px; display:flex; flex-direction:column; gap:6px;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                        <div>
+                            <label style="font-size:0.6rem; color:var(--txt-dim); font-weight:800;">MODO:</label>
+                            <select id="filtroHistorialModo" onchange="aplicarFiltrosHistorialUI()" style="margin-top:2px; padding:5px 6px; font-size:0.72rem;">
+                                <option value="TODOS">Todos los Modos</option>
+                                <option value="POZO">Pozo Pro</option>
+                                <option value="8LOCO">8 Loco / Americano</option>
+                                <option value="TEAMS">Americano Teams</option>
+                                <option value="PARTIDO_PRO">Partido Pro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:0.6rem; color:var(--txt-dim); font-weight:800;">LIGA / TORNEO:</label>
+                            <select id="filtroHistorialTorneo" onchange="aplicarFiltrosHistorialUI()" style="margin-top:2px; padding:5px 6px; font-size:0.72rem;">
+                                <option value="TODOS">Todas las Ligas</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label style="font-size:0.62rem; color:var(--txt-dim); font-weight:800; text-transform:uppercase;">Torneo / Liga:</label>
-                        <select id="filtroHistorialTorneo" onchange="aplicarFiltrosHistorialUI()" style="margin-top:2px; padding:6px 8px; font-size:0.75rem;">
-                            <option value="TODOS">Todas las Ligas</option>
-                        </select>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                        <div>
+                            <label style="font-size:0.6rem; color:var(--txt-dim); font-weight:800;">FECHA:</label>
+                            <input type="date" id="filtroHistorialFecha" onchange="aplicarFiltrosHistorialUI()" style="margin-top:2px; padding:4px 6px; font-size:0.72rem; color-scheme:dark;">
+                        </div>
+                        <div style="display:flex; align-items:flex-end;">
+                            <button type="button" class="btn btn-sm btn-dark" style="width:100%; padding:5px; font-size:0.7rem; border:1px solid var(--border-glow);" onclick="limpiarFiltrosHistorialUI()">
+                                <i class="fas fa-undo"></i> Restablecer
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-                    <div>
-                        <label style="font-size:0.62rem; color:var(--txt-dim); font-weight:800; text-transform:uppercase;">Jornada / Fecha:</label>
-                        <input type="date" id="filtroHistorialFecha" onchange="aplicarFiltrosHistorialUI()" style="margin-top:2px; padding:5px 8px; font-size:0.75rem; color-scheme:dark;">
-                    </div>
-                    <div style="display:flex; align-items:flex-end;">
-                        <button type="button" class="btn btn-sm btn-dark" style="width:100%; padding:6px; font-size:0.72rem; border:1px solid var(--border-glow);" onclick="limpiarFiltrosHistorialUI()">
-                            <i class="fas fa-undo"></i> Restablecer
-                        </button>
-                    </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="font-size:0.68rem; color:var(--txt-muted);">Participaciones: <strong id="historialTotalContador" style="color:var(--padel-volt);">0</strong></span>
+                    <span style="font-size:0.62rem; color:var(--txt-dim); font-weight:700;">Toca una tarjeta para ver tabla completa</span>
+                </div>
+
+                <div id="historialListaPartidos" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; max-height:50vh; padding-right:2px;">
                 </div>
             </div>
 
-            <!-- CONTADOR RESUMEN DE FILTRADO -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:0 2px;">
-                <span style="font-size:0.7rem; color:var(--txt-muted); font-weight:700;">Participaciones: <strong id="historialTotalContador" style="color:var(--padel-volt);">0</strong></span>
-                <span id="historialIndicadorModo" style="font-size:0.65rem; color:var(--txt-dim); text-transform:uppercase; font-weight:800;"></span>
-            </div>
+            <!-- VISTA 2: DETALLE Y TABLA DE POSICIONES COMPLETA -->
+            <div id="historialVistaDetalle" style="display:none; flex-direction:column; flex:1; overflow-y:auto; max-height:75vh; gap:10px;">
+                <!-- Pestañas internas del detalle: Jornada vs Acumulado Liga -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; background:#0b1120; padding:4px; border-radius:8px;">
+                    <button id="btnTabDetalleJornada" onclick="cambiarSubTabDetalle('jornada')" class="btn btn-sm" style="background:var(--padel-blue-glow); color:#000; font-weight:800; font-size:0.72rem;">Tabla de la Jornada</button>
+                    <button id="btnTabDetalleLiga" onclick="cambiarSubTabDetalle('liga')" class="btn btn-sm btn-dark" style="font-size:0.72rem;">Tabla General Liga</button>
+                </div>
 
-            <!-- CONTENEDOR DE PARTIDOS DINÁMICOS -->
-            <div id="historialListaPartidos" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; max-height:48vh; padding-right:2px;">
-                <!-- Se llena dinámicamente -->
+                <div id="detalleEstadoLigaBanner" style="padding:6px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; display:flex; justify-content:space-between; align-items:center;">
+                </div>
+
+                <!-- Contenido de tablas -->
+                <div id="detalleTablaContenido">
+                </div>
             </div>
         </div>
     </div>
@@ -5813,26 +5830,31 @@
         }
 
         // ==========================================================
-        // MOTOR DE HISTORIAL PRO CON FILTROS DINÁMICOS
+        // MOTOR DE HISTORIAL PRO CON TABLAS DE POSICIONES COMPLETAS
         // ==========================================================
         let cacheHistorialPartidos = [];
+        let cacheTorneoDetalleActivo = null;
+        let cachePartidoSeleccionado = null;
+        let usuarioTelefonoActual = "";
 
         async function abrirHistorialParticipaciones() {
             const modal = document.getElementById("modalHistorialUsuario");
             const cont = document.getElementById("historialListaPartidos");
             if (!modal || !cont) return;
 
+            regresarAListaHistorial();
             cont.innerHTML = `<div style="text-align:center; padding:24px; font-size:0.75rem; color:var(--txt-dim);"><i class="fas fa-spinner fa-spin fa-2x" style="color:var(--padel-volt); margin-bottom:8px; display:block;"></i>Cargando tu historial deportivo...</div>`;
             modal.classList.add("active");
 
             const inputTel = document.getElementById("perfilTelefonoInput");
             let tel = inputTel ? inputTel.value.trim() : "";
 
-            // Auto-recuperar número si no se abrió el modal de perfil antes
             if ((!tel || tel.length !== 10) && usuarioActivo) {
                 tel = await obtenerTelefonoDeUsuario(usuarioActivo.uid) || "";
                 if (inputTel && tel) inputTel.value = tel;
             }
+
+            usuarioTelefonoActual = tel;
 
             if (!tel || tel.length !== 10) {
                 cont.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.75rem; color:var(--padel-orange);"><i class="fas fa-exclamation-circle fa-2x" style="margin-bottom:8px; display:block;"></i>Vincula tu número de 10 dígitos en tu perfil para consultar tus juegos.</div>`;
@@ -5901,36 +5923,291 @@
                 else if (p.modo === "TEAMS") badgeModo = `<span style="background:rgba(168,85,247,0.2); color:#d8b4fe; border:1px solid rgba(168,85,247,0.4); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">TEAMS</span>`;
                 else if (p.modo === "PARTIDO_PRO") badgeModo = `<span style="background:rgba(245,158,11,0.2); color:var(--padel-orange); border:1px solid rgba(245,158,11,0.4); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">PARTIDO PRO</span>`;
 
-                const esVictoria = p.resultado === "VICTORIA";
-                const resultadoBadge = p.resultado ? `<span style="font-size:0.62rem; font-weight:900; color:${esVictoria ? 'var(--padel-volt)' : 'var(--padel-orange)'};">[${p.resultado}]</span>` : '';
+                const matchIdSafe = encodeURIComponent(p.matchId || "");
 
                 cont.innerHTML += `
-                    <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:10px 12px; display:flex; flex-direction:column; gap:5px;">
+                    <div onclick="verDetalleTorneoPorMatchId('${matchIdSafe}')" style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:12px; cursor:pointer; transition:all 0.2s ease; display:flex; flex-direction:column; gap:6px;" onmouseover="this.style.borderColor='var(--padel-volt)'" onmouseout="this.style.borderColor='var(--border-glow)'">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div style="display:flex; align-items:center; gap:6px;">
                                 ${badgeModo}
-                                <strong style="color:var(--txt-main); font-size:0.8rem;">${p.torneoNombre}</strong>
+                                <strong style="color:var(--txt-main); font-size:0.82rem;">${p.torneoNombre}</strong>
                             </div>
                             <small style="color:var(--txt-dim); font-size:0.68rem; font-weight:700;"><i class="fas fa-calendar-day"></i> ${p.fecha}</small>
                         </div>
 
                         <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; margin-top:2px;">
-                            <span style="color:var(--txt-muted);">${p.jornada}</span>
+                            <span style="color:var(--txt-muted);"><i class="fas fa-layer-group"></i> ${p.jornada}</span>
                             <div style="display:flex; align-items:center; gap:6px;">
-                                ${resultadoBadge}
                                 <strong style="color:var(--padel-volt); font-size:0.85rem;">${p.marcador}</strong>
+                                <span style="font-size:0.65rem; background:rgba(255,255,255,0.06); color:var(--txt-main); padding:2px 6px; border-radius:4px;"><i class="fas fa-chevron-right"></i> Ver Tabla</span>
                             </div>
                         </div>
-
-                        ${p.rivales ? `
-                            <div style="font-size:0.7rem; color:var(--txt-dim); border-top:1px dashed var(--border-glow); padding-top:4px; margin-top:2px; display:flex; justify-content:space-between;">
-                                <span>Dupla: <strong style="color:var(--txt-main);">${p.pareja}</strong></span>
-                                <span>vs <strong style="color:var(--txt-muted);">${p.rivales}</strong></span>
-                            </div>
-                        ` : ''}
                     </div>
                 `;
             });
+        }
+
+        async function verDetalleTorneoPorMatchId(matchIdEncoded) {
+            const matchId = decodeURIComponent(matchIdEncoded);
+            const p = cacheHistorialPartidos.find(x => x.matchId === matchId);
+            if (!p) return;
+
+            cachePartidoSeleccionado = p;
+
+            document.getElementById("historialVistaListado").style.display = "none";
+            document.getElementById("historialVistaDetalle").style.display = "flex";
+            document.getElementById("btnVolverListaHistorial").style.display = "inline-flex";
+
+            document.getElementById("historialTituloModal").textContent = p.torneoNombre;
+            document.getElementById("historialSubtituloModal").textContent = `${p.modo} • ${p.jornada} • ${p.fecha}`;
+
+            const banner = document.getElementById("detalleEstadoLigaBanner");
+            const contTabla = document.getElementById("detalleTablaContenido");
+            contTabla.innerHTML = `<div style="text-align:center; padding:30px; font-size:0.75rem; color:var(--txt-dim);"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Cargando posiciones y estadísticas del torneo...</div>`;
+
+            try {
+                // Descargar el torneo completo de la nube para armar las tablas
+                const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/torneos_cloud/${p.torneoId}.json`);
+                if (res.ok) {
+                    cacheTorneoDetalleActivo = await res.json();
+                } else {
+                    cacheTorneoDetalleActivo = null;
+                }
+            } catch (e) {
+                cacheTorneoDetalleActivo = null;
+            }
+
+            if (!cacheTorneoDetalleActivo) {
+                // Si es un Partido Pro directo o no tiene liga completa guardada
+                banner.style.background = "rgba(245,158,11,0.15)";
+                banner.style.color = "var(--padel-orange)";
+                banner.innerHTML = `<span><i class="fas fa-info-circle"></i> Partido Individual Oficial</span><span>Completado</span>`;
+                contTabla.innerHTML = `
+                    <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; padding:14px; text-align:center;">
+                        <h4 style="color:var(--txt-main); margin-bottom:6px;">${p.torneoNombre}</h4>
+                        <div style="font-size:1.1rem; color:var(--padel-volt); font-weight:900; margin:10px 0;">${p.marcador}</div>
+                        <p style="font-size:0.75rem; color:var(--txt-muted);">Resultado: <strong>${p.resultado || 'Finalizado'}</strong></p>
+                        ${p.rivales ? `<p style="font-size:0.72rem; color:var(--txt-dim);">Dupla: ${p.pareja} vs${p.rivales}</p>` : ''}
+                    </div>`;
+                return;
+            }
+
+            const estaTerminada = cacheTorneoDetalleActivo.terminada || false;
+            banner.style.background = estaTerminada ? "rgba(100,116,139,0.2)" : "rgba(0,230,118,0.15)";
+            banner.style.color = estaTerminada ? "var(--txt-muted)" : "var(--padel-volt)";
+            banner.innerHTML = `
+                <span><i class="fas ${estaTerminada ? 'fa-flag-checkered' : 'fa-play-circle'}"></i> Estado: ${estaTerminada ? 'LIGA FINALIZADA' : 'LIGA EN CURSO (ABIERTA)'}</span>
+                <span>${cacheTorneoDetalleActivo.jornadas ? cacheTorneoDetalleActivo.jornadas.length : 1} Jornadas</span>
+            `;
+
+            cambiarSubTabDetalle('jornada');
+        }
+
+        function cambiarSubTabDetalle(tab) {
+            const btnJ = document.getElementById("btnTabDetalleJornada");
+            const btnL = document.getElementById("btnTabDetalleLiga");
+            const cont = document.getElementById("detalleTablaContenido");
+            if (!cacheTorneoDetalleActivo || !cachePartidoSeleccionado) return;
+
+            if (tab === 'jornada') {
+                btnJ.style.background = "var(--padel-blue-glow)";
+                btnJ.style.color = "#000";
+                btnJ.style.fontWeight = "800";
+                btnL.style.background = "transparent";
+                btnL.style.color = "var(--txt-muted)";
+                btnL.style.fontWeight = "normal";
+                renderTablaPosicionesJornada(cont);
+            } else {
+                btnL.style.background = "var(--padel-blue-glow)";
+                btnL.style.color = "#000";
+                btnL.style.fontWeight = "800";
+                btnJ.style.background = "transparent";
+                btnJ.style.color = "var(--txt-muted)";
+                btnJ.style.fontWeight = "normal";
+                renderTablaPosicionesGeneralLiga(cont);
+            }
+        }
+
+        function renderTablaPosicionesJornada(cont) {
+            const torneo = cacheTorneoDetalleActivo;
+            const p = cachePartidoSeleccionado;
+            const jornadas = torneo.jornadas || [];
+            
+            // Buscar la jornada del partido seleccionado
+            let jornadaObj = jornadas.find(j => (j.nombre || '').trim() === (p.jornada || '').trim());
+            if (!jornadaObj && jornadas.length > 0) jornadaObj = jornadas[0];
+
+            if (!jornadaObj) {
+                cont.innerHTML = `<div style="text-align:center; padding:20px; color:var(--txt-dim); font-size:0.75rem;">No se encontraron datos para esta jornada.</div>`;
+                return;
+            }
+
+            // Calcular tabla de la jornada
+            let ranking = [];
+
+            if (jornadaObj.rondas) {
+                // Pozo Pro: puntos sumados por ronda
+                const convocados = jornadaObj.convocados || [];
+                convocados.forEach(nom => {
+                    let pts = 0;
+                    jornadaObj.rondas.forEach(r => { pts += (parseInt(r[nom]) || 0); });
+                    const cags = (jornadaObj.caguamas && jornadaObj.caguamas[nom]) || 0;
+                    ranking.push({ nombre: nom, puntos: pts, caguamas: cags });
+                });
+            } else if (jornadaObj.partidos || jornadaObj.rounds) {
+                // Americano / Teams: puntos de partidos
+                const matches = jornadaObj.rounds ? jornadaObj.rounds.flatMap(r => r.matches || []) : (jornadaObj.partidos || []);
+                const stats = {};
+                matches.forEach(m => {
+                    const s1 = parseInt(m.score1) || 0;
+                    const s2 = parseInt(m.score2) || 0;
+                    const p1 = m.p1 || [];
+                    const p2 = m.p2 || [];
+                    p1.forEach(n => {
+                        if (!stats[n]) stats[n] = 0;
+                        stats[n] += s1;
+                    });
+                    p2.forEach(n => {
+                        if (!stats[n]) stats[n] = 0;
+                        stats[n] += s2;
+                    });
+                });
+                ranking = Object.keys(stats).map(nom => ({
+                    nombre: nom,
+                    puntos: stats[nom],
+                    caguamas: (jornadaObj.caguamas && jornadaObj.caguamas[nom]) || 0
+                }));
+            }
+
+            // Ordenar de mayor a menor
+            ranking.sort((a, b) => b.puntos - a.puntos);
+
+            let html = `
+                <div style="font-size:0.72rem; font-weight:800; color:var(--txt-dim); margin-bottom:4px; text-transform:uppercase;">
+                    <i class="fas fa-trophy" style="color:var(--padel-volt);"></i> Clasificación: ${jornadaObj.nombre || p.jornada}
+                </div>
+                <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; overflow:hidden;">
+                    <table style="width:100%; border-collapse:collapse; font-size:0.75rem; text-align:left;">
+                        <thead>
+                            <tr style="background:rgba(255,255,255,0.04); color:var(--txt-dim); font-size:0.65rem; border-bottom:1px solid var(--border-glow);">
+                                <th style="padding:8px 10px; width:35px; text-align:center;">#</th>
+                                <th style="padding:8px 10px;">JUGADOR</th>
+                                <th style="padding:8px 10px; text-align:center;">CAGS</th>
+                                <th style="padding:8px 10px; text-align:right;">PTS</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+            ranking.forEach((item, idx) => {
+                const esPodio = idx < 3;
+                const medalla = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `${idx + 1}º`));
+                const esTuFila = p.marcador.includes(`${item.puntos} Pts`) || p.marcador.includes(`${item.puntos} Puntos`);
+
+                html += `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.03); ${esTuFila ? 'background:rgba(0,230,118,0.12);' : ''}">
+                        <td style="padding:8px 10px; text-align:center; font-weight:800; color:${esPodio ? 'var(--padel-volt)' : 'var(--txt-muted)'};">${medalla}</td>
+                        <td style="padding:8px 10px; color:${esTuFila ? 'var(--padel-volt)' : 'var(--txt-main)'}; font-weight:${esTuFila ? '800' : '600'};">
+                            ${item.nombre} ${esTuFila ? '<span style="font-size:0.6rem; background:var(--padel-volt); color:#000; padding:1px 4px; border-radius:4px; font-weight:900;">TÚ</span>' : ''}
+                        </td>
+                        <td style="padding:8px 10px; text-align:center; color:var(--padel-orange); font-weight:700;">${item.caguamas ? item.caguamas + ' 🍺' : '-'}</td>
+                        <td style="padding:8px 10px; text-align:right; font-weight:900; color:var(--txt-main); font-size:0.85rem;">${item.puntos}</td>
+                    </tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+            cont.innerHTML = html;
+        }
+
+        function renderTablaPosicionesGeneralLiga(cont) {
+            const torneo = cacheTorneoDetalleActivo;
+            const p = cachePartidoSeleccionado;
+            const jornadas = torneo.jornadas || [];
+
+            const acumulados = {};
+
+            jornadas.forEach(j => {
+                if (j.rondas) {
+                    (j.convocados || []).forEach(nom => {
+                        if (!acumulados[nom]) acumulados[nom] = { puntos: 0, cags: 0, jg: 0 };
+                        let pts = 0;
+                        j.rondas.forEach(r => { pts += (parseInt(r[nom]) || 0); });
+                        acumulados[nom].puntos += pts;
+                        acumulados[nom].cags += ((j.caguamas && j.caguamas[nom]) || 0);
+                        acumulados[nom].jg += 1;
+                    });
+                } else if (j.partidos || j.rounds) {
+                    const matches = j.rounds ? j.rounds.flatMap(r => r.matches || []) : (j.partidos || []);
+                    matches.forEach(m => {
+                        const s1 = parseInt(m.score1) || 0;
+                        const s2 = parseInt(m.score2) || 0;
+                        (m.p1 || []).forEach(n => {
+                            if (!acumulados[n]) acumulados[n] = { puntos: 0, cags: 0, jg: 0 };
+                            acumulados[n].puntos += s1;
+                        });
+                        (m.p2 || []).forEach(n => {
+                            if (!acumulados[n]) acumulados[n] = { puntos: 0, cags: 0, jg: 0 };
+                            acumulados[n].puntos += s2;
+                        });
+                    });
+                    // Sumar caguamas
+                    if (j.caguamas) {
+                        Object.keys(j.caguamas).forEach(n => {
+                            if (acumulados[n]) acumulados[n].cags += parseInt(j.caguamas[n]) || 0;
+                        });
+                    }
+                }
+            });
+
+            const rankingGeneral = Object.keys(acumulados).map(nom => ({
+                nombre: nom,
+                puntos: acumulados[nom].puntos,
+                caguamas: acumulados[nom].cags,
+                jg: acumulados[nom].jg
+            })).sort((a, b) => b.puntos - a.puntos);
+
+            let html = `
+                <div style="font-size:0.72rem; font-weight:800; color:var(--txt-dim); margin-bottom:4px; text-transform:uppercase;">
+                    <i class="fas fa-chart-line" style="color:var(--padel-blue-glow);"></i> Tabla Acumulada de Toda la Liga (${jornadas.length} Jornadas)
+                </div>
+                <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; overflow:hidden;">
+                    <table style="width:100%; border-collapse:collapse; font-size:0.75rem; text-align:left;">
+                        <thead>
+                            <tr style="background:rgba(255,255,255,0.04); color:var(--txt-dim); font-size:0.65rem; border-bottom:1px solid var(--border-glow);">
+                                <th style="padding:8px 10px; width:35px; text-align:center;">POS</th>
+                                <th style="padding:8px 10px;">JUGADOR</th>
+                                <th style="padding:8px 10px; text-align:center;">CAGS</th>
+                                <th style="padding:8px 10px; text-align:right;">PTS TOTALES</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+            rankingGeneral.forEach((item, idx) => {
+                const medalla = idx === 0 ? '👑 1º' : `${idx + 1}º`;
+                html += `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+                        <td style="padding:8px 10px; text-align:center; font-weight:800; color:${idx === 0 ? 'var(--padel-volt)' : 'var(--txt-muted)'};">${medalla}</td>
+                        <td style="padding:8px 10px; color:var(--txt-main); font-weight:600;">${item.nombre}</td>
+                        <td style="padding:8px 10px; text-align:center; color:var(--padel-orange); font-weight:700;">${item.caguamas ? item.caguamas + ' 🍺' : '-'}</td>
+                        <td style="padding:8px 10px; text-align:right; font-weight:900; color:var(--padel-volt); font-size:0.85rem;">${item.puntos}</td>
+                    </tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+            cont.innerHTML = html;
+        }
+
+        function regresarAListaHistorial() {
+            const vListado = document.getElementById("historialVistaListado");
+            const vDetalle = document.getElementById("historialVistaDetalle");
+            const btnBack = document.getElementById("btnVolverListaHistorial");
+            const tit = document.getElementById("historialTituloModal");
+            const sub = document.getElementById("historialSubtituloModal");
+
+            if (vListado) vListado.style.display = "flex";
+            if (vDetalle) vDetalle.style.display = "none";
+            if (btnBack) btnBack.style.display = "none";
+            if (tit) tit.textContent = "Historial Deportivo";
+            if (sub) sub.textContent = "Partidos, ligas y estadísticas auditadas";
         }
 
         function limpiarFiltrosHistorialUI() {
@@ -5942,7 +6219,6 @@
             if (f) f.value = "";
             aplicarFiltrosHistorialUI();
         }
-
         async function iniciarSesionConGoogle() {
             try {
                 const provider = new firebase.auth.GoogleAuthProvider();

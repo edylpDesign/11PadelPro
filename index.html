@@ -3046,11 +3046,12 @@
 
         function iniciarSesionDesdeSplash() {
             entrarAppPrincipal();
-            setTimeout(() => {
-                abrirModalPerfilOAcceso();
-            }, 300);
+            if (!usuarioActivo) {
+                setTimeout(() => {
+                    abrirModalPerfilOAcceso();
+                }, 300);
+            }
         }
-
         function compartirAppConAmigos() {
             const mensaje = `🎾 ¡Llegó 11Padel Point Pro! 🎾\nLa app oficial para organizar y seguir en vivo nuestras retas y torneos de pádel en Aguascalientes:\n\n🔥 Modos incluidos:\n* 8 Loco / Americano (parejas rotativas y descansos automáticos)\n* Pozo / Rey de la Pista (puntuación individual en vivo)\n📊 Tablas de posiciones, marcadores en tiempo real y contador de 🍺.\n\n📲 Pruébala gratis aquí:\n👉 https://bit.ly/11PadelPro\n\n¿Cómo instalarla en tu celular (sin Play Store ni App Store)?\n🤖 Android (Chrome):\n1. Abre el enlace en Chrome.\n2. Toca los 3 puntos (⋮) arriba a la derecha.\n3. Selecciona "Instalar aplicación" o "Agregar a la pantalla principal".\n\n🍎 iPhone (Safari):\n1. Abre el enlace en Safari.\n2. Toca el botón central de Compartir (cuadro con la flecha hacia arriba).\n3. Elige "Agregar a pantalla de inicio" (+).\n\n¡Se abrirá a pantalla completa como cualquier app nativa! 🏆`;
             abrirEnlaceWhatsApp(mensaje);
@@ -5601,59 +5602,30 @@
             }
         });
 
-        // GUARDAR CELULAR VINCULADO AL USUARIO GOOGLE DE FORMA PERMANENTE
-        async function guardarTelefonoPerfil() {
-            const input = document.getElementById("perfilTelefonoInput");
-            const tel = input ? input.value.trim() : "";
-            if (!/^\d{10}$/.test(tel)) {
-                alert("Ingresa un número válido de 10 dígitos");
-                return;
-            }
-            if (!usuarioActivo) {
-                alert("Debes iniciar sesión con Google primero");
-                return;
-            }
-
-            try {
-                // Asociar UID con el celular en Firebase
-                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios_perfil/${usuarioActivo.uid}.json`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        nombre: usuarioActivo.displayName || "",
-                        email: usuarioActivo.email || "",
-                        telefono: tel
-                    })
-                });
-
-                closeModal('modalAuthUsuario');
-                cargarEstadisticasPersonales(tel);
-                showToast("¡Teléfono vinculado permanentemente!");
-            } catch (e) {
-                console.error("Error al guardar teléfono:", e);
-                alert("Error al vincular. Revisa tu conexión.");
-            }
-        }
-
-        // DESCARGA Y SINCRONIZACIÓN AUTOMÁTICA EN TIEMPO REAL
+        // DESCARGA Y SINCRONIZACIÓN AUTOMÁTICA EN TIEMPO REAL (TABLET <-> CELULAR)
         async function sincronizarDatosGlobalesDesdeNube() {
             try {
-                // 1. Sincronizar Directorio de Jugadores
-                const resJ = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/directorio_jugadores.json`);
-                if (resJ.ok) {
-                    const jugadoresCloud = await resJ.json();
-                    if (jugadoresCloud && Array.isArray(jugadoresCloud)) {
-                        localStorage.setItem("padel_jugadores_pro", JSON.stringify(jugadoresCloud));
-                    }
-                }
+                // 1. Descargar torneos y ligas subidas a la nube
+                const resTorneos = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/torneos_cloud.json`);
+                if (resTorneos.ok) {
+                    const cloudTorneos = await resTorneos.json();
+                    if (cloudTorneos) {
+                        const localData = getUserData();
+                        Object.values(cloudTorneos).forEach(torneoNube => {
+                            if (!torneoNube || !torneoNube.id) return;
+                            
+                            // Integrar a la categoría correspondiente
+                            const mergeLista = (lista) => {
+                                const idx = lista.findIndex(x => x.id === torneoNube.id);
+                                if (idx !== -1) lista[idx] = torneoNube;
+                                else lista.unshift(torneoNube);
+                            };
 
-                // 2. Sincronizar Ligas Oficiales
-                const resL = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/ligas_globales.json`);
-                if (resL.ok) {
-                    const ligasCloud = await resL.json();
-                    if (ligasCloud) {
-                        const listaLigas = Object.values(ligasCloud);
-                        localStorage.setItem("ligasOficiales", JSON.stringify(listaLigas));
+                            if (torneoNube.convocados && torneoNube.rondas) mergeLista(localData.ligasPozo);
+                            else if (torneoNube.parejas) mergeLista(localData.ligasTeams);
+                            else mergeLista(localData.ligasAmericano);
+                        });
+                        saveUserData(localData);
                     }
                 }
             } catch (err) {
@@ -5988,9 +5960,10 @@
 
         async function obtenerTelefonoDeUsuario(uid) {
             try {
-                const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios/${uid}/telefono.json`);
+                const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios_perfil/${uid}/telefono.json`);
                 if (res.ok) {
-                    return await res.json();
+                    const data = await res.json();
+                    return data ? data.toString() : null;
                 }
             } catch (e) { }
             return null;

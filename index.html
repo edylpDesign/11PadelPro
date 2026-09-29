@@ -583,9 +583,14 @@
             <p style="font-size:0.75rem; color:var(--txt-muted); margin-top:8px;">Circuito & Torneos Oficiales Aguascalientes</p>
         </div>
         <div class="splash-bottom-actions">
-            <button class="btn-splash-enter" onclick="entrarAppPrincipal()">
-                ENTRAR A LA APP <i class="fas fa-arrow-right"></i>
-            </button>
+            <div style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:280px; margin:0 auto;">
+          <button type="button" class="btn-splash-enter" style="width:100%; padding:14px; font-size:1rem; font-weight:800;" onclick="abrirModalPerfilOAcceso()">
+            <i class="fas fa-user-check"></i> INICIAR SESIÓN / REGISTRO
+          </button>
+          <button type="button" class="btn btn-dark btn-sm" style="width:100%; padding:10px; border:1px solid var(--border-glow); font-weight:700; color:var(--txt-muted);" onclick="entrarAppPrincipal()">
+            Continuar como Invitado <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
         </div>
     </div>
 
@@ -679,6 +684,44 @@
                 <div class="retas-list-container" id="retasListContainer"></div>
             </div>
 
+            <!-- PANEL DE PERFIL Y ESTADÍSTICAS DEL JUGADOR (NATIVO) -->
+        <div id="sectionPerfilStatsApp" class="retas-hub-card" style="display:none; margin-bottom:14px; background:linear-gradient(135deg, #0b1120 0%, #151d30 100%); border:1.5px solid rgba(0, 230, 118, 0.4); border-radius:18px; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="width:34px; height:34px; border-radius:50%; background:rgba(0, 230, 118, 0.15); display:flex; align-items:center; justify-content:center; color:var(--padel-volt); font-size:1rem;">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div>
+                        <div id="dashNombreJugador" style="font-size:0.88rem; font-weight:900; color:var(--txt-main);">Mi Perfil</div>
+                        <div id="dashTelJugador" style="font-size:0.7rem; color:var(--txt-muted); font-family:monospace;">Sin vincular</div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-dark" style="border:1px solid var(--border-glow); font-size:0.7rem; padding:4px 8px; border-radius:8px;" onclick="abrirModalPerfilOAcceso()">
+                    <i class="fas fa-cog"></i> Ajustes
+                </button>
+            </div>
+
+            <!-- CUADRICULA DE ESTADISTICAS -->
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; text-align:center; margin-bottom:12px;">
+                <div style="background:var(--bg-card-subtle); padding:8px 4px; border-radius:10px; border:1px solid var(--border-glow);">
+                    <small style="font-size:0.6rem; color:var(--txt-dim); font-weight:800; display:block;">PJ</small>
+                    <strong id="dashStatPj" style="font-size:1.1rem; color:var(--txt-main);">0</strong>
+                </div>
+                <div style="background:var(--bg-card-subtle); padding:8px 4px; border-radius:10px; border:1px solid var(--border-glow);">
+                    <small style="font-size:0.6rem; color:var(--txt-dim); font-weight:800; display:block;">VICTORIAS</small>
+                    <strong id="dashStatPg" style="font-size:1.1rem; color:var(--padel-volt);">0</strong>
+                </div>
+                <div style="background:var(--bg-card-subtle); padding:8px 4px; border-radius:10px; border:1px solid var(--border-glow);">
+                    <small style="font-size:0.6rem; color:var(--txt-dim); font-weight:800; display:block;">CAGUAMAS</small>
+                    <strong id="dashStatCags" style="font-size:1.1rem; color:var(--padel-orange);">0</strong>
+                </div>
+            </div>
+
+            <!-- ACCESO A HISTORIAL (SOLO LECTURA) -->
+            <button type="button" class="btn btn-dark btn-sm" style="width:100%; border:1px dashed var(--padel-volt); color:var(--padel-volt); font-weight:800; padding:9px; border-radius:10px; font-size:0.75rem;" onclick="abrirHistorialParticipaciones()">
+                <i class="fas fa-history"></i> Mis Partidos, Pozos y Ligas (Solo Lectura)
+            </button>
+        </div>
             <div class="section-title">Modos de Juego Disponibles</div>
             <div class="modes-grid-duo">
                 <div class="mode-hero-card" onclick="entrarModo('americano')">
@@ -1298,7 +1341,21 @@
             <button type="button" class="btn-lightbox-download" onclick="descargarFotoActiva()"><i class="fas fa-cloud-download-alt"></i> Descargar al Celular</button>
         </div>
     </div>
-
+<!-- MODAL HISTORIAL DE JUEGOS PARTICIPADOS (SOLO LECTURA) -->
+    <div id="modalHistorialUsuario" class="modal" onclick="closeModalOnBackdrop(event, 'modalHistorialUsuario')">
+        <div class="modal-content" style="max-width:440px; text-align:left; max-height:85vh; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-glow); padding-bottom:8px; margin-bottom:12px;">
+                <h3 style="font-size:0.95rem; margin:0; color:var(--padel-volt);"><i class="fas fa-history"></i> Mis Participaciones</h3>
+                <button type="button" class="modal-close-icon" onclick="closeModal('modalHistorialUsuario')">&times;</button>
+            </div>
+            <p style="font-size:0.72rem; color:var(--txt-muted); margin-bottom:10px;">
+                Consulta las retas, pozos y jornadas donde estás registrado. Modo solo lectura.
+            </p>
+            <div id="historialListaPartidos" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; max-height:55vh;">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
     <!-- MODAL DE ACCESO / PERFIL CON CELULAR 10 DÍGITOS -->
     <div id="modalAuthUsuario" class="modal" onclick="closeModalOnBackdrop(event, 'modalAuthUsuario')">
         <div class="modal-content" style="max-width:380px; text-align:center;">
@@ -3795,8 +3852,8 @@
             if (user) {
                 if (btnTop) btnTop.style.color = "var(--padel-volt)";
                 const telGuardado = await obtenerTelefonoDeUsuario(user.uid);
-                if (!telGuardado) {
-                    abrirModalPerfilOAcceso();
+                if (telGuardado) {
+                    cargarEstadisticasPersonales(telGuardado);
                 }
             } else {
                 if (btnTop) btnTop.style.color = "var(--txt-muted)";
@@ -3837,15 +3894,86 @@
 
         async function cargarEstadisticasPersonales(telefono) {
             try {
+                // Mostrar contenedor nativo en el Hub principal
+                const secDashboard = document.getElementById("sectionPerfilStatsApp");
+                if (secDashboard) {
+                    secDashboard.style.display = "block";
+                    if (usuarioActivo) {
+                        const nomb = document.getElementById("dashNombreJugador");
+                        const telBld = document.getElementById("dashTelJugador");
+                        if (nomb) nomb.textContent = usuarioActivo.displayName || "Jugador 11Padel";
+                        if (telBld) telBld.textContent = "ID: " + telefono;
+                    }
+                }
+
                 const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/stats/${telefono}.json`);
                 if (res.ok) {
                     const data = await res.json() || { pj: 0, pg: 0, cags: 0 };
-                    document.getElementById("statPjTxt").textContent = data.pj || 0;
-                    document.getElementById("statPgTxt").textContent = data.pg || 0;
-                    document.getElementById("statCagsTxt").textContent = data.cags || 0;
+                    
+                    // Actualizar modal
+                    const mPj = document.getElementById("statPjTxt");
+                    const mPg = document.getElementById("statPgTxt");
+                    const mCags = document.getElementById("statCagsTxt");
+                    if (mPj) mPj.textContent = data.pj || 0;
+                    if (mPg) mPg.textContent = data.pg || 0;
+                    if (mCags) mCags.textContent = data.cags || 0;
+
+                    // Actualizar panel fijo nativo
+                    const dPj = document.getElementById("dashStatPj");
+                    const dPg = document.getElementById("dashStatPg");
+                    const dCags = document.getElementById("dashStatCags");
+                    if (dPj) dPj.textContent = data.pj || 0;
+                    if (dPg) dPg.textContent = data.pg || 0;
+                    if (dCags) dCags.textContent = data.cags || 0;
                 }
             } catch (e) {
                 console.warn("No se pudieron cargar estadísticas", e);
+            }
+        }
+
+        async function abrirHistorialParticipaciones() {
+            const modal = document.getElementById("modalHistorialUsuario");
+            const cont = document.getElementById("historialListaPartidos");
+            if (!modal || !cont) return;
+
+            cont.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.75rem; color:var(--txt-dim);"><i class="fas fa-spinner fa-spin"></i> Cargando tus juegos...</div>`;
+            modal.classList.add("active");
+
+            const tel = document.getElementById("perfilTelefonoInput") ? document.getElementById("perfilTelefonoInput").value.trim() : "";
+
+            try {
+                const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/retas_v2.json`);
+                let html = "";
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data) {
+                        Object.entries(data).forEach(([key, reta]) => {
+                            const participa = (reta.jugadores && Object.values(reta.jugadores).some(j => j && (j.tel === tel || (j.nombre && usuarioActivo && j.nombre.toLowerCase().includes(usuarioActivo.displayName?.toLowerCase()))))) || reta.creadorTel === tel;
+                            
+                            if (participa) {
+                                html += `
+                                    <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; padding:10px;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                            <strong style="color:var(--txt-main); font-size:0.78rem;">${reta.club || 'Club'} - ${reta.categoria || 'Cat'}</strong>
+                                            <span style="font-size:0.65rem; background:rgba(0,230,118,0.15); color:var(--padel-volt); padding:2px 6px; border-radius:6px; font-weight:800;">${reta.tipo || 'Reta'}</span>
+                                        </div>
+                                        <div style="font-size:0.68rem; color:var(--txt-muted);">
+                                            <span><i class="far fa-calendar-alt"></i> ${reta.fecha || 'Fecha'}</span> • 
+                                            <span><i class="far fa-clock"></i> ${reta.hora || 'Hora'}</span>
+                                        </div>
+                                    </div>`;
+                            }
+                        });
+                    }
+                }
+
+                if (!html) {
+                    cont.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.75rem; color:var(--txt-muted);">No se encontraron retas o partidos asociados a tu número aún.</div>`;
+                } else {
+                    cont.innerHTML = html;
+                }
+            } catch (err) {
+                cont.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.75rem; color:var(--padel-orange);">Error al consultar historial. Intenta nuevamente.</div>`;
             }
         }
 

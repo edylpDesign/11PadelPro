@@ -4345,50 +4345,60 @@
                         }
                     }
 
-                    // MODO B: 8 LOCO / AMERICANO & TEAMS (Partidos por pistas)
+                    // MODO B: 8 LOCO / AMERICANO & TEAMS (Consolidado por Jornada)
                     const matches = jornada.rounds ? jornada.rounds.flatMap(r => r.matches || []) : (jornada.partidos || []);
-                    for (let pIdx = 0; pIdx < matches.length; pIdx++) {
-                        const p = matches[pIdx];
-                        const s1 = parseInt(p.score1) || 0;
-                        const s2 = parseInt(p.score2) || 0;
-                        if (p.jugado || s1 > 0 || s2 > 0) {
-                            const matchId = `${torneoId}_J${jIdx + 1}_M${pIdx + 1}`;
-                            const p1Players = p.p1 || [];
-                            const p2Players = p.p2 || [];
-                            const todos = [...p1Players, ...p2Players];
-                            const modoTag = modoActual === 'teams' ? "TEAMS" : "8LOCO";
+                    const jornadaJugadoresStats = {};
+                    const modoTag = modoActual === 'teams' ? "TEAMS" : "8LOCO";
 
-                            for (const nom of todos) {
-                                const tel = telMap[nom.toLowerCase()];
-                                if (tel) {
-                                    if (!resumenStats[tel]) resumenStats[tel] = { pj: 0, pg: 0, cags: 0 };
-                                    resumenStats[tel].pj += 1;
+                    // Acumular partidos y puntos reales de cada jugador en la jornada
+                    matches.forEach(m => {
+                        const s1 = parseInt(m.score1) || 0;
+                        const s2 = parseInt(m.score2) || 0;
+                        if (m.jugado || s1 > 0 || s2 > 0) {
+                            (m.p1 || []).forEach(nom => {
+                                if (!nom || nom === "BYE") return;
+                                if (!jornadaJugadoresStats[nom]) jornadaJugadoresStats[nom] = { pts: 0, pj: 0, pg: 0 };
+                                jornadaJugadoresStats[nom].pts += s1;
+                                jornadaJugadoresStats[nom].pj += 1;
+                                if (s1 > s2) jornadaJugadoresStats[nom].pg += 1;
+                            });
+                            (m.p2 || []).forEach(nom => {
+                                if (!nom || nom === "BYE") return;
+                                if (!jornadaJugadoresStats[nom]) jornadaJugadoresStats[nom] = { pts: 0, pj: 0, pg: 0 };
+                                jornadaJugadoresStats[nom].pts += s2;
+                                jornadaJugadoresStats[nom].pj += 1;
+                                if (s2 > s1) jornadaJugadoresStats[nom].pg += 1;
+                            });
+                        }
+                    });
 
-                                    const gano = (p1Players.includes(nom) && s1 > s2) || (p2Players.includes(nom) && s2 > s1);
-                                    if (gano) resumenStats[tel].pg += 1;
+                    // Generar 1 registro único consolidado por jugador para esta jornada
+                    for (const [nom, dat] of Object.entries(jornadaJugadoresStats)) {
+                        const tel = telMap[nom.toLowerCase()];
+                        if (tel) {
+                            if (!resumenStats[tel]) resumenStats[tel] = { pj: 0, pg: 0, cags: 0 };
+                            resumenStats[tel].pj += dat.pj;
+                            resumenStats[tel].pg += dat.pg;
 
-                                    const cags = (jornada.caguamas && jornada.caguamas[nom]) ? parseInt(jornada.caguamas[nom]) : 0;
-                                    resumenStats[tel].cags += cags;
+                            const cags = (jornada.caguamas && jornada.caguamas[nom]) ? parseInt(jornada.caguamas[nom]) : 0;
+                            resumenStats[tel].cags += cags;
 
-                                    await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/jugadores_partidos/${tel}/${matchId}.json`, {
-                                        method: "PUT",
-                                        headers: { "Content-Type": "application/json" },
-                                        body: JSON.stringify({
-                                            matchId: matchId,
-                                            torneoId: torneoId,
-                                            torneoNombre: dataLiga.nombre || "Liga Padel",
-                                            modo: modoTag,
-                                            jornada: nombreJornada,
-                                            pareja: (p1Players.includes(nom) ? p1Players : p2Players).join(" & "),
-                                            rivales: (p1Players.includes(nom) ? p2Players : p1Players).join(" & "),
-                                            marcador: `${s1} - ${s2}`,
-                                            resultado: gano ? "VICTORIA" : (s1 === s2 ? "EMPATE" : "DERROTA"),
-                                            caguamas: cags,
-                                            fecha: fechaRegistro
-                                        })
-                                    });
-                                }
-                            }
+                            const matchId = `${torneoId}_J${jIdx + 1}_8LOCO_${nom.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                            await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/jugadores_partidos/${tel}/${matchId}.json`, {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    matchId: matchId,
+                                    torneoId: torneoId,
+                                    torneoNombre: dataLiga.nombre || "8 Loco",
+                                    modo: modoTag,
+                                    jornada: nombreJornada,
+                                    marcador: `${dat.pts} Puntos`,
+                                    detalle: `${dat.pj} partidos jugados (${dat.pg} victorias)`,
+                                    caguamas: cags,
+                                    fecha: fechaRegistro
+                                })
+                            });
                         }
                     }
                 }

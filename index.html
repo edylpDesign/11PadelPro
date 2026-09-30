@@ -2065,11 +2065,21 @@
                     </div>
                 </div>
 
-                <!-- ACCESO A HISTORIAL (SOLO LECTURA) -->
-                <button type="button" class="btn btn-dark btn-sm"
-                    style="width:100%; border:1px dashed var(--padel-volt); color:var(--padel-volt); font-weight:800; padding:9px; border-radius:10px; font-size:0.75rem;"
+                <!-- ACCESO A HISTORIAL (SOLO LECTURA) - DESTACADO VIP -->
+                <button type="button" class="btn"
+                    style="width:100%; padding:14px 18px; border:none; border-radius:14px; background:linear-gradient(135deg, #00e676 0%, #00b0ff 50%, #0284c7 100%); color:#080d1a; font-size:0.88rem; font-weight:900; letter-spacing:0.6px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 6px 20px rgba(0, 230, 118, 0.4), inset 0 1px 0 rgba(255,255,255,0.4); text-transform:uppercase; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s;"
+                    onmousedown="this.style.transform='scale(0.97)'"
+                    onmouseup="this.style.transform='scale(1)'"
                     onclick="abrirHistorialParticipaciones()">
-                    <i class="fas fa-history"></i> Mis Partidos, Pozos y Ligas (Solo Lectura)
+                    <span style="display:flex; align-items:center; gap:10px;">
+                        <span style="background:rgba(8, 13, 26, 0.2); width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+                            <i class="fas fa-trophy"></i>
+                        </span>
+                        <span>Mis Partidos, Pozos y Ligas</span>
+                    </span>
+                    <span style="background:#080d1a; color:#00e676; padding:4px 10px; border-radius:8px; font-size:0.68rem; font-weight:900; letter-spacing:0.5px;">
+                        VER TODO <i class="fas fa-arrow-right" style="margin-left:2px;"></i>
+                    </span>
                 </button>
             </div>
             <div class="section-title">Modos de Juego Disponibles</div>
@@ -5594,29 +5604,36 @@
                             (r.matches || []).forEach(m => {
                                 const s1 = parseInt(m.score1) || 0;
                                 const s2 = parseInt(m.score2) || 0;
-                                const t1Name = (m.p1 || []).join(' & ');
-                                const t2Name = (m.p2 || []).join(' & ');
-                                if (t1Name && t2Name) {
-                                    stats[t1Name] = stats[t1Name] || { pj: 0, pg: 0, pts: 0, diff: 0, cags: 0 };
-                                    stats[t2Name] = stats[t2Name] || { pj: 0, pg: 0, pts: 0, diff: 0, cags: 0 };
-                                    stats[t1Name].pj++; stats[t2Name].pj++;
-                                    stats[t1Name].diff += (s1 - s2); stats[t2Name].diff += (s2 - s1);
-                                    stats[t1Name].pts += s1; stats[t2Name].pts += s2;
-                                    if (s1 > s2) stats[t1Name].pg++; else if (s2 > s1) stats[t2Name].pg++;
+                                const esJugado = m.jugado || (s1 > 0 || s2 > 0);
+                                if (esJugado) {
+                                    const t1Name = (m.p1 || []).join(' & ');
+                                    const t2Name = (m.p2 || []).join(' & ');
+                                    if (t1Name && t2Name) {
+                                        stats[t1Name] = stats[t1Name] || { pj: 0, pg: 0, pts: 0, diff: 0, cags: 0 };
+                                        stats[t2Name] = stats[t2Name] || { pj: 0, pg: 0, pts: 0, diff: 0, cags: 0 };
+                                        stats[t1Name].pj++; stats[t2Name].pj++;
+                                        stats[t1Name].diff += (s1 - s2); stats[t2Name].diff += (s2 - s1);
+                                        stats[t1Name].pts += s1; stats[t2Name].pts += s2;
+                                        if (s1 > s2) stats[t1Name].pg++; else if (s2 > s1) stats[t2Name].pg++;
+                                    }
                                 }
                             });
                         });
                     }
                 });
+                // Orden por Puntos Totales > Diferencia de Puntos > Partidos Ganados
                 const sorted = Object.entries(stats).sort((a, b) => {
-                    if (b[1].pg !== a[1].pg) return b[1].pg - a[1].pg;
-                    return b[1].diff - a[1].diff;
+                    if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
+                    if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
+                    return b[1].pg - a[1].pg;
                 });
                 sorted.forEach(([team, dat], idx) => {
                     const med = idx === 0 ? '🥇 ' : (idx === 1 ? '🥈 ' : (idx === 2 ? '🥉 ' : ''));
-                    txt += `${idx + 1}. ${med}*${team}* - *${dat.pts} Pts* (PJ:${dat.pj} | PG:${dat.pg} | Diff:${dat.diff > 0 ? '+' + dat.diff : dat.diff})\n`;
+                    const difTxt = dat.diff > 0 ? `+${dat.diff}` : `${dat.diff}`;
+                    txt += `${idx + 1}. ${med}*${team}* - *${dat.pts} Pts* (Dif: ${difTxt} | PJ: ${dat.pj} | PG: ${dat.pg} | 🍺 ${dat.cags})\n`;
                 });
             } else {
+                // MODO 8 LOCO / AMERICANO INDIVIDUAL
                 const stats = {};
                 ligaActiva.jornadas.forEach(j => {
                     if (j.rounds) {
@@ -5624,16 +5641,25 @@
                             (r.matches || []).forEach(m => {
                                 const s1 = parseInt(m.score1) || 0;
                                 const s2 = parseInt(m.score2) || 0;
-                                (m.p1 || []).forEach(p => {
-                                    stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
-                                    stats[p].pj++; stats[p].diff += (s1 - s2);
-                                    if (s1 > s2) { stats[p].w++; stats[p].pts += 3; }
-                                });
-                                (m.p2 || []).forEach(p => {
-                                    stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
-                                    stats[p].pj++; stats[p].diff += (s2 - s1);
-                                    if (s2 > s1) { stats[p].w++; stats[p].pts += 3; }
-                                });
+                                const esJugado = m.jugado || (s1 > 0 || s2 > 0);
+                                if (esJugado) {
+                                    (m.p1 || []).forEach(p => {
+                                        if (!p || p === "BYE") return;
+                                        stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
+                                        stats[p].pj++;
+                                        stats[p].pts += s1;
+                                        stats[p].diff += (s1 - s2);
+                                        if (s1 > s2) stats[p].w++;
+                                    });
+                                    (m.p2 || []).forEach(p => {
+                                        if (!p || p === "BYE") return;
+                                        stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
+                                        stats[p].pj++;
+                                        stats[p].pts += s2;
+                                        stats[p].diff += (s2 - s1);
+                                        if (s2 > s1) stats[p].w++;
+                                    });
+                                }
                             });
                         });
                     }
@@ -5644,13 +5670,18 @@
                         });
                     }
                 });
+
+                // Orden por Puntos Sumados > Diferencia de Puntos > Victorias
                 const sorted = Object.entries(stats).sort((a, b) => {
                     if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
-                    return b[1].diff - a[1].diff;
+                    if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
+                    return b[1].w - a[1].w;
                 });
+
                 sorted.forEach(([p, dat], idx) => {
                     const med = idx === 0 ? '🥇 ' : (idx === 1 ? '🥈 ' : (idx === 2 ? '🥉 ' : ''));
-                    txt += `${idx + 1}. ${med}*${p}* - *${dat.pts} Pts* (PJ:${dat.pj} | W:${dat.w} | Diff:${dat.diff > 0 ? '+' + dat.diff : dat.diff} | 🍺 ${dat.cags})\n`;
+                    const difTxt = dat.diff > 0 ? `+${dat.diff}` : `${dat.diff}`;
+                    txt += `${idx + 1}. ${med}*${p}* - *${dat.pts} Pts* (Dif: ${difTxt} | PJ: ${dat.pj} | W: ${dat.w} | 🍺 ${dat.cags})\n`;
                 });
             }
             txt += obtenerPieWhatsApp();

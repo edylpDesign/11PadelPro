@@ -4497,20 +4497,28 @@
                             (r.matches || []).forEach(m => {
                                 const s1 = parseInt(m.score1) || 0;
                                 const s2 = parseInt(m.score2) || 0;
-                                const t1Name = (m.p1 || []).join(' & ');
-                                const t2Name = (m.p2 || []).join(' & ');
-                                if (t1Name && t2Name) {
-                                    stats[t1Name] = stats[t1Name] || { pj: 0, pg: 0, pts: 0, diff: 0, cags: 0 };
-                                    stats[t2Name] = stats[t2Name] || { pj: 0, pg: 0, pts: 0, diff: 0, cags: 0 };
-                                    stats[t1Name].pj++; stats[t2Name].pj++;
-                                    stats[t1Name].diff += (s1 - s2); stats[t2Name].diff += (s2 - s1);
-                                    stats[t1Name].pts += s1; stats[t2Name].pts += s2;
-                                    if (s1 > s2) stats[t1Name].pg++; else if (s2 > s1) stats[t2Name].pg++;
+                                const esJugado = m.jugado || (s1 > 0 || s2 > 0);
+                                if (esJugado) {
+                                    (m.p1 || []).forEach(p => {
+                                        if (!p || p === "BYE") return;
+                                        stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
+                                        stats[p].pj++;
+                                        stats[p].pts += s1; // Puntos reales anotados
+                                        stats[p].diff += (s1 - s2);
+                                        if (s1 > s2) stats[p].w++;
+                                    });
+                                    (m.p2 || []).forEach(p => {
+                                        if (!p || p === "BYE") return;
+                                        stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
+                                        stats[p].pj++;
+                                        stats[p].pts += s2; // Puntos reales anotados
+                                        stats[p].diff += (s2 - s1);
+                                        if (s2 > s1) stats[p].w++;
+                                    });
                                 }
                             });
                         });
                     }
-                });
                 const sorted = Object.entries(stats).sort((a, b) => {
                     if (b[1].pg !== a[1].pg) return b[1].pg - a[1].pg;
                     return b[1].diff - a[1].diff;
@@ -4719,6 +4727,8 @@
 
         function generarRondas8Loco(players) {
             const n = players.length;
+
+            // CASO ESPECÍFICO: 6 JUGADORES
             if (n === 6) {
                 const [A, B, C, D, E, F] = players;
                 return [
@@ -4731,6 +4741,65 @@
                 ];
             }
 
+            // CASO ESPECÍFICO: 9 JUGADORES (2 pistas completas, 1 descanso por ronda rotativo)
+            if (n === 9) {
+                const r = [];
+                for (let round = 0; round < 9; round++) {
+                    const descansan = [players[round]]; // Descansa 1 por ronda
+                    const activos = players.filter((_, idx) => idx !== round); // Los otros 8 juegan
+                    // Pista 1 y Pista 2 balanceadas
+                    r.push({
+                        matches: [
+                            { p1: [activos[0], activos[1]], p2: [activos[2], activos[3]], score1: 0, score2: 0, jugado: false },
+                            { p1: [activos[4], activos[5]], p2: [activos[6], activos[7]], score1: 0, score2: 0, jugado: false }
+                        ],
+                        descansan: descansan
+                    });
+                }
+                return r;
+            }
+
+            // CASO GENERAL (8, 12, 16 o cualquier cantidad)
+            let pool = [...players];
+            const isOdd = (n % 2 !== 0);
+            if (isOdd) pool.push("BYE");
+
+            const totalRondas = isOdd ? n : (n - 1);
+            const numPistas = Math.floor(n / 4);
+            const r = [];
+            let rotation = [...pool];
+
+            for (let round = 0; round < totalRondas; round++) {
+                const parejasRonda = [];
+                const descansan = [];
+                for (let i = 0; i < rotation.length / 2; i++) {
+                    const pA = rotation[i];
+                    const pB = rotation[rotation.length - 1 - i];
+                    if (pA === "BYE") descansan.push(pB);
+                    else if (pB === "BYE") descansan.push(pA);
+                    else parejasRonda.push([pA, pB]);
+                }
+
+                const matches = [];
+                let courtCount = 0;
+                for (let p = 0; p + 1 < parejasRonda.length && courtCount < numPistas; p += 2) {
+                    matches.push({ p1: parejasRonda[p], p2: parejasRonda[p + 1], score1: 0, score2: 0, jugado: false });
+                    courtCount++;
+                }
+
+                for (let p = numPistas * 2; p < parejasRonda.length; p++) {
+                    descansan.push(parejasRonda[p][0]);
+                    descansan.push(parejasRonda[p][1]);
+                }
+
+                r.push({ matches, descansan: descansan.filter(x => x !== "BYE") });
+                const fixed = rotation[0];
+                const rest = rotation.slice(1);
+                rest.unshift(rest.pop());
+                rotation = [fixed, ...rest];
+            }
+            return r;
+        }
             let pool = [...players];
             const isOdd = (n % 2 !== 0);
             if (isOdd) pool.push("BYE");
@@ -4937,19 +5006,25 @@
                 if (jornadaActiva.rounds) {
                     jornadaActiva.rounds.forEach(r => {
                         r.matches.forEach(m => {
-                            const esJugado = m.jugado || (parseInt(m.score1) > 0 || parseInt(m.score2) > 0);
+                            const s1 = parseInt(m.score1) || 0;
+                            const s2 = parseInt(m.score2) || 0;
+                            const esJugado = m.jugado || (s1 > 0 || s2 > 0);
                             if (esJugado) {
-                                const s1 = parseInt(m.score1) || 0;
-                                const s2 = parseInt(m.score2) || 0;
-                                m.p1.forEach(p => {
-                                    stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
-                                    stats[p].pj++; stats[p].diff += (s1 - s2);
-                                    if (s1 > s2) { stats[p].w++; stats[p].pts += 3; }
+                                (m.p1 || []).forEach(p => {
+                                    if (!p || p === "BYE") return;
+                                    stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: (jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0 };
+                                    stats[p].pj++;
+                                    stats[p].pts += s1;
+                                    stats[p].diff += (s1 - s2);
+                                    if (s1 > s2) stats[p].w++;
                                 });
-                                m.p2.forEach(p => {
-                                    stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
-                                    stats[p].pj++; stats[p].diff += (s2 - s1);
-                                    if (s2 > s1) { stats[p].w++; stats[p].pts += 3; }
+                                (m.p2 || []).forEach(p => {
+                                    if (!p || p === "BYE") return;
+                                    stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: (jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0 };
+                                    stats[p].pj++;
+                                    stats[p].pts += s2;
+                                    stats[p].diff += (s2 - s1);
+                                    if (s2 > s1) stats[p].w++;
                                 });
                             }
                         });

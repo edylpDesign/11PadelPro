@@ -2601,7 +2601,12 @@
             <i class="fab fa-whatsapp"></i>
         </div>
 
-        <footer>Desarrollado por <strong>EdyLPDSng</strong> • 11Padel Point Pro© 2026</footer>
+        <footer>
+            <div>Desarrollado por <strong>EdyLPDSng</strong> • 11Padel Point Pro© 2026</div>
+            <div style="font-size:0.68rem; color:var(--txt-dim); margin-top:4px;">
+                Reportes o sugerencias: <a href="mailto:11padelpoint.pro@gmail.com" style="color:var(--padel-volt); text-decoration:none; font-weight:700;">11padelpoint.pro@gmail.com</a>
+            </div>
+        </footer>
     </div>
 
     <!-- MODAL CREAR LIGA -->
@@ -6668,7 +6673,87 @@
             } catch (e) { }
             return null;
         }
+        // ==========================================================
+        // GESTIÓN INTELIGENTE DEL BOTÓN ATRÁS (MÓVILES / GESTOS)
+        // ==========================================================
+        function registrarPasoEnHistorialNavegacion() {
+            window.history.pushState({ appStep: true }, "");
+        }
+
+        function manejarRetrocesoNativo() {
+            // 1. Cerrar Lightbox si está abierto
+            const modalLightbox = document.getElementById("lightboxModal");
+            if (modalLightbox && modalLightbox.classList.contains("active")) {
+                cerrarLightboxForzado();
+                registrarPasoEnHistorialNavegacion();
+                return;
+            }
+
+            // 2. Si está en el Detalle del Historial Deportivo, regresar a la lista de ligas del historial
+            const vistaDetalleHistorial = document.getElementById("historialVistaDetalle");
+            if (vistaDetalleHistorial && vistaDetalleHistorial.style.display === "flex") {
+                regresarAListaHistorial();
+                registrarPasoEnHistorialNavegacion();
+                return;
+            }
+
+            // 3. Cerrar cualquier otro Modal activo
+            const modalesAbiertos = document.querySelectorAll(".modal.active");
+            if (modalesAbiertos.length > 0) {
+                modalesAbiertos.forEach(m => m.classList.remove("active"));
+                registrarPasoEnHistorialNavegacion();
+                return;
+            }
+
+            // 4. Si el Panel Admin está abierto, cerrarlo
+            const viewAdmin = document.getElementById("viewAdmin");
+            if (viewAdmin && !viewAdmin.classList.contains("hidden")) {
+                cerrarPanelAdmin();
+                registrarPasoEnHistorialNavegacion();
+                return;
+            }
+
+            // 5. Si está dentro de una Jornada en Vivo (Pozo o 8 Loco), volver al detalle de la liga
+            const viewPozoLive = document.getElementById("viewJornadaPozoVivo");
+            const view8LocoLive = document.getElementById("viewJornada8LocoVivo");
+            if ((viewPozoLive && !viewPozoLive.classList.contains("hidden")) ||
+                (view8LocoLive && !view8LocoLive.classList.contains("hidden"))) {
+                backToLigaDetalle();
+                registrarPasoEnHistorialNavegacion();
+                return;
+            }
+
+            // 6. Si está en el Detalle de la Liga, volver a la lista de ligas
+            const viewLigaDetalle = document.getElementById("viewLigaDetalle");
+            if (viewLigaDetalle && !viewLigaDetalle.classList.contains("hidden")) {
+                backToLigasModo();
+                registrarPasoEnHistorialNavegacion();
+                return;
+            }
+
+            // 7. Si está en la lista de Ligas, Padrón o Partido Pro, volver al Menú Principal (Hub)
+            const viewLigas = document.getElementById("viewLigasModo");
+            const viewPadron = document.getElementById("viewPadron");
+            const viewPartido = document.getElementById("viewPartidoVivo");
+            if ((viewLigas && !viewLigas.classList.contains("hidden")) ||
+                (viewPadron && !viewPadron.classList.contains("hidden")) ||
+                (viewPartido && !viewPartido.classList.contains("hidden"))) {
+                backToHubModos();
+                registrarPasoEnHistorialNavegacion();
+                return;
+            }
+
+            // 8. Si ya está en la pantalla principal (viewHubModos), permite salir normalmente
+        }
+
+        window.addEventListener("popstate", () => {
+            manejarRetrocesoNativo();
+        });
+
         document.addEventListener("DOMContentLoaded", () => {
+            // Empujar el primer estado al historial para atrapar el botón Atrás
+            registrarPasoEnHistorialNavegacion();
+
             aplicarEnlaces();
             sincronizarEnlacesDesdeLaNube();
             iniciarAutoScrollCarruseles();

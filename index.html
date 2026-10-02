@@ -4420,6 +4420,7 @@
         }
 
         let ligaActiva = null;
+        let ligaActiva = null;
         function abrirLigaDetalle(id) {
             const d = getUserData();
             let l = [];
@@ -4430,22 +4431,38 @@
             ligaActiva = l.find(x => x.id === id);
             if (!ligaActiva) return;
 
-            document.getElementById("viewHubModos").classList.add("hidden");
-            document.getElementById("viewLigasModo").classList.add("hidden");
-            document.getElementById("globalFloatingWaBtn").classList.add("hidden");
-            document.getElementById("viewLigaDetalle").classList.remove("hidden");
+            // 1. Ocultar todas las demás vistas
+            ocultarTodasLasVistas();
+
+            // 2. Mostrar contenedor de detalle de liga con prioridad
+            const vDetalle = document.getElementById("viewLigaDetalle");
+            if (vDetalle) {
+                vDetalle.classList.remove("hidden");
+                vDetalle.style.setProperty("display", "block", "important");
+            }
+
             document.getElementById("ligaDetalleNombre").textContent = ligaActiva.nombre;
             renderTablaGeneralLiga();
             renderListaJornadasLiga();
-            actualizarTituloPestañaActiva(ligaActiva.nombre, 'viewLigaDetalle', modoSeleccionado, ligaActiva.id);
+            
+            if (typeof actualizarTituloPestañaActiva === 'function') {
+                actualizarTituloPestañaActiva(ligaActiva.nombre, 'viewLigaDetalle', modoSeleccionado, ligaActiva.id);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function backToLigasModo() {
-            document.getElementById("viewLigaDetalle").classList.add("hidden");
-            document.getElementById("globalFloatingWaBtn").classList.add("hidden");
-            document.getElementById("viewLigasModo").classList.remove("hidden");
+            ocultarTodasLasVistas();
+            const vLigas = document.getElementById("viewLigasModo");
+            if (vLigas) {
+                vLigas.classList.remove("hidden");
+                vLigas.style.setProperty("display", "block", "important");
+            }
             renderLigasDelModo();
-            actualizarTituloPestañaActiva('Ligas', 'viewLigasModo', modoSeleccionado);
+            if (typeof actualizarTituloPestañaActiva === 'function') {
+                actualizarTituloPestañaActiva('Ligas', 'viewLigasModo', modoSeleccionado);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function switchLigaTab(t) {
@@ -5072,37 +5089,49 @@
         }
 
         let jornadaActiva = null;
+        let jornadaActiva = null;
         function cargarJornadaEnVivo(id) {
             jornadaActiva = (ligaActiva.jornadas || []).find(x => x.id === id);
             if (!jornadaActiva) return;
 
-            document.getElementById("viewLigaDetalle").classList.add("hidden");
-            document.getElementById("globalFloatingWaBtn").classList.remove("hidden");
+            ocultarTodasLasVistas();
+
+            const waBtn = document.getElementById("globalFloatingWaBtn");
+            if (waBtn) waBtn.classList.remove("hidden");
 
             if (modoSeleccionado === 'pozo') {
-                document.getElementById("viewJornadaPozoVivo").classList.remove("hidden");
+                const vPozo = document.getElementById("viewJornadaPozoVivo");
+                if (vPozo) {
+                    vPozo.classList.remove("hidden");
+                    vPozo.style.setProperty("display", "block", "important");
+                }
                 document.getElementById("pozoLiveTitulo").textContent = jornadaActiva.nombre;
                 switchLiveTab('pozo', 'pistas');
                 renderPozoNav();
                 showPozoRound(jornadaActiva.rondaActual || 1);
-                actualizarTituloPestañaActiva(`👑 ${jornadaActiva.nombre}`, 'viewJornadaPozoVivo', modoSeleccionado, ligaActiva.id, jornadaActiva.id);
+                if (typeof actualizarTituloPestañaActiva === 'function') {
+                    actualizarTituloPestañaActiva(`👑 ${jornadaActiva.nombre}`, 'viewJornadaPozoVivo', modoSeleccionado, ligaActiva.id, jornadaActiva.id);
+                }
             } else {
-                document.getElementById("viewJornada8LocoVivo").classList.remove("hidden");
+                const v8Loco = document.getElementById("viewJornada8LocoVivo");
+                if (v8Loco) {
+                    v8Loco.classList.remove("hidden");
+                    v8Loco.style.setProperty("display", "block", "important");
+                }
                 const pref = modoSeleccionado === 'teams' ? '👥' : '🎾';
                 document.getElementById("amLiveTitulo").textContent = modoSeleccionado === 'teams' ? `${jornadaActiva.nombre} (Teams)` : jornadaActiva.nombre;
                 switchLiveTab('8loco', 'pistas');
                 render8LocoNav();
                 show8LocoRound(jornadaActiva.currentRound || 1);
-                actualizarTituloPestañaActiva(`${pref} ${jornadaActiva.nombre}`, 'viewJornada8LocoVivo', modoSeleccionado, ligaActiva.id, jornadaActiva.id);
+                if (typeof actualizarTituloPestañaActiva === 'function') {
+                    actualizarTituloPestañaActiva(`${pref} ${jornadaActiva.nombre}`, 'viewJornada8LocoVivo', modoSeleccionado, ligaActiva.id, jornadaActiva.id);
+                }
             }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function backToLigaDetalle() {
             saveLigaActiva();
-            document.getElementById("viewJornadaPozoVivo").classList.add("hidden");
-            document.getElementById("viewJornada8LocoVivo").classList.add("hidden");
-            document.getElementById("globalFloatingWaBtn").classList.add("hidden");
-            document.getElementById("viewLigaDetalle").classList.remove("hidden");
             abrirLigaDetalle(ligaActiva.id);
         }
 

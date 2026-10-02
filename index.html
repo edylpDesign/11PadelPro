@@ -6172,25 +6172,46 @@
             }
         }
 
-        function renderTablaPosicionesJornada(cont) {
+        function renderTablaPosicionesJornada(cont, jornadaIndexForzada = null) {
             const torneo = cacheTorneoDetalleActivo;
             const p = cachePartidoSeleccionado;
-            const jornadas = torneo.jornadas || [];
-            
-            // Buscar la jornada del partido seleccionado
-            let jornadaObj = jornadas.find(j => (j.nombre || '').trim() === (p.jornada || '').trim());
-            if (!jornadaObj && jornadas.length > 0) jornadaObj = jornadas[0];
+            const jornadas = (torneo && torneo.jornadas) || [];
 
-            if (!jornadaObj) {
-                cont.innerHTML = `<div style="text-align:center; padding:20px; color:var(--txt-dim); font-size:0.75rem;">No se encontraron datos para esta jornada.</div>`;
+            if (!jornadas.length) {
+                cont.innerHTML = `<div style="text-align:center; padding:20px; color:var(--txt-dim); font-size:0.75rem;">No se encontraron jornadas registradas en este torneo.</div>`;
                 return;
             }
 
-            // Calcular tabla de la jornada
+            // Determinar qué jornada mostrar
+            let jIdx = 0;
+            if (jornadaIndexForzada !== null && jornadaIndexForzada >= 0 && jornadaIndexForzada < jornadas.length) {
+                jIdx = jornadaIndexForzada;
+            } else {
+                // Por defecto, buscar la jornada asociada al partido seleccionado
+                const idxMatch = jornadas.findIndex(j => (j.nombre || '').trim() === (p.jornada || '').trim());
+                jIdx = idxMatch !== -1 ? idxMatch : 0;
+            }
+
+            const jornadaObj = jornadas[jIdx];
+
+            // 1. Selector de Jornadas
+            let selectorJornadasHtml = `
+                <div style="margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; gap:8px; background:#0b1120; padding:6px 10px; border-radius:8px; border:1px solid var(--border-glow);">
+                    <label style="font-size:0.7rem; font-weight:800; color:var(--txt-muted);"><i class="fas fa-calendar-alt" style="color:var(--padel-volt);"></i> Seleccionar Jornada:</label>
+                    <select id="selectorJornadasDetalleHistorial" onchange="cambiarJornadaDetalleHistorial(this.value)" style="margin:0; width:auto; padding:4px 8px; font-size:0.75rem; background:var(--bg-card-subtle); color:var(--txt-main); font-weight:800; border-radius:6px; border:1px solid var(--border-glow);">`;
+            
+            jornadas.forEach((j, index) => {
+                const esSelected = index === jIdx ? "selected" : "";
+                selectorJornadasHtml += `<option value="${index}" ${esSelected}>${j.nombre || `Jornada ${index + 1}`}</option>`;
+            });
+
+            selectorJornadasHtml += `</select></div>`;
+
+            // 2. Calcular clasificación de la jornada seleccionada
             let ranking = [];
 
             if (jornadaObj.rondas) {
-                // Pozo Pro: puntos sumados por ronda
+                // Modo Pozo Pro
                 const convocados = jornadaObj.convocados || [];
                 convocados.forEach(nom => {
                     let pts = 0;
@@ -6199,19 +6220,19 @@
                     ranking.push({ nombre: nom, puntos: pts, caguamas: cags });
                 });
             } else if (jornadaObj.partidos || jornadaObj.rounds) {
-                // Americano / Teams: puntos de partidos
+                // Modo 8 Loco / Teams
                 const matches = jornadaObj.rounds ? jornadaObj.rounds.flatMap(r => r.matches || []) : (jornadaObj.partidos || []);
                 const stats = {};
                 matches.forEach(m => {
                     const s1 = parseInt(m.score1) || 0;
                     const s2 = parseInt(m.score2) || 0;
-                    const p1 = m.p1 || [];
-                    const p2 = m.p2 || [];
-                    p1.forEach(n => {
+                    (m.p1 || []).forEach(n => {
+                        if (!n || n === "BYE") return;
                         if (!stats[n]) stats[n] = 0;
                         stats[n] += s1;
                     });
-                    p2.forEach(n => {
+                    (m.p2 || []).forEach(n => {
+                        if (!n || n === "BYE") return;
                         if (!stats[n]) stats[n] = 0;
                         stats[n] += s2;
                     });
@@ -6223,12 +6244,13 @@
                 }));
             }
 
-            // Ordenar de mayor a menor
+            // Ordenar de mayor a menor puntuación
             ranking.sort((a, b) => b.puntos - a.puntos);
 
-            let html = `
+            let html = selectorJornadasHtml;
+            html += `
                 <div style="font-size:0.72rem; font-weight:800; color:var(--txt-dim); margin-bottom:4px; text-transform:uppercase;">
-                    <i class="fas fa-trophy" style="color:var(--padel-volt);"></i> Clasificación: ${jornadaObj.nombre || p.jornada}
+                    <i class="fas fa-trophy" style="color:var(--padel-volt);"></i> Clasificación: ${jornadaObj.nombre || `Jornada ${jIdx + 1}`}
                 </div>
                 <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; overflow:hidden;">
                     <table style="width:100%; border-collapse:collapse; font-size:0.75rem; text-align:left;">
@@ -6242,23 +6264,21 @@
                         </thead>
                         <tbody>`;
 
+            const dData = getUserData();
+            const miGoogleNombre = (usuarioActivo && usuarioActivo.displayName) ? usuarioActivo.displayName.toLowerCase().trim() : "";
+            const miJugadorPorTel = (dData.jugadores || []).find(j => {
+                const norm = normalizarJugador(j);
+                return usuarioTelefonoActual && norm.telefono && norm.telefono.trim() === usuarioTelefonoActual.trim();
+            });
+            const nombrePorTel = miJugadorPorTel ? (normalizarJugador(miJugadorPorTel).nombre || "").toLowerCase().trim() : "";
+
             ranking.forEach((item, idx) => {
                 const esPodio = idx < 3;
                 const medalla = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `${idx + 1}º`));
-                // Identificación unívoca del usuario en cualquier dispositivo
-                const dData = getUserData();
-                const miGoogleNombre = (usuarioActivo && usuarioActivo.displayName) ? usuarioActivo.displayName.toLowerCase().trim() : "";
-                
-                // Buscar coincidencia por teléfono en el padrón
-                const miJugadorPorTel = (dData.jugadores || []).find(j => {
-                    const norm = normalizarJugador(j);
-                    return usuarioTelefonoActual && norm.telefono && norm.telefono.trim() === usuarioTelefonoActual.trim();
-                });
-                const nombrePorTel = miJugadorPorTel ? (normalizarJugador(miJugadorPorTel).nombre || "").toLowerCase().trim() : "";
-
                 const nomItem = (item.nombre || "").toLowerCase().trim();
                 const esTuFila = (nombrePorTel && nomItem === nombrePorTel) || 
                                  (miGoogleNombre && (nomItem === miGoogleNombre || miGoogleNombre.includes(nomItem) || nomItem.includes(miGoogleNombre)));
+
                 html += `
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.03); ${esTuFila ? 'background:rgba(0,230,118,0.12);' : ''}">
                         <td style="padding:8px 10px; text-align:center; font-weight:800; color:${esPodio ? 'var(--padel-volt)' : 'var(--txt-muted)'};">${medalla}</td>
@@ -6272,6 +6292,14 @@
 
             html += `</tbody></table></div>`;
             cont.innerHTML = html;
+        }
+
+        // Función auxiliar para refrescar al cambiar el selector
+        function cambiarJornadaDetalleHistorial(indice) {
+            const cont = document.getElementById("detalleTablaContenido");
+            if (cont) {
+                renderTablaPosicionesJornada(cont, parseInt(indice));
+            }
         }
 
         function renderTablaPosicionesGeneralLiga(cont) {

@@ -1862,6 +1862,90 @@
                 opacity: 1;
             }
         }
+        /* ==========================================================
+           BOTTOM NAVIGATION BAR (ESTILO MODERNO FLOTANTE)
+           ========================================================== */
+        .bottom-nav-container {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 480px;
+            height: 64px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 12px;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            background: none;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 6px 12px;
+            transition: all 0.25s ease;
+            position: relative;
+            text-decoration: none;
+        }
+
+        .bottom-nav-item i, 
+        .bottom-nav-item span.nav-custom-icon {
+            font-size: 1.25rem;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .bottom-nav-item span.nav-custom-icon {
+            font-weight: 900;
+            font-size: 0.95rem;
+            letter-spacing: -0.5px;
+        }
+
+        .bottom-nav-item.active {
+            color: #ffffff;
+        }
+
+        .bottom-nav-item.active i,
+        .bottom-nav-item.active span.nav-custom-icon {
+            color: var(--padel-volt, #00e676);
+            transform: translateY(-2px);
+        }
+
+        /* Indicador de punto bajo el icono activo */
+        .bottom-nav-item .active-dot {
+            width: 4px;
+            height: 4px;
+            background-color: var(--padel-volt, #00e676);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.25s ease;
+        }
+
+        .bottom-nav-item.active .active-dot {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Espacio para que el contenido no quede tapado por la barra */
+        body {
+            padding-bottom: 90px !important;
+        }
     </style>
     <!-- FIREBASE AUTH & CORE SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -6910,8 +6994,22 @@
         }
 
         async function adminEliminarSolicitud(id) {
-            await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/solicitudes_organizadores/${id}.json`, { method: "DELETE" });
-            adminCargarLicencias();
+            try {
+                const encodedId = encodeURIComponent(id);
+                const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/solicitudes_organizadores/${encodedId}.json`, { 
+                    method: "DELETE" 
+                });
+                if (res.ok) {
+                    showToast("Solicitud eliminada");
+                } else {
+                    showToast("No se pudo eliminar", "error");
+                }
+            } catch (err) {
+                console.error("Error eliminando solicitud:", err);
+                showToast("Error de conexión", "error");
+            }
+            // Recargar la lista una vez confirmado el borrado
+            await adminCargarLicencias();
         }
         // ==========================================================
         // GESTIÓN INTELIGENTE DEL BOTÓN ATRÁS (MÓVILES / GESTOS)
@@ -6999,7 +7097,81 @@
             iniciarAutoScrollCarruseles();
             renderTabsBar();
         });
+        // ==========================================================
+        // CONTROLADOR DE PANTALLAS (BOTTOM NAVIGATION BAR)
+        // ==========================================================
+        function cambiarSeccionApp(seccion, btnEl) {
+            // Actualizar estado activo en la barra inferior
+            document.querySelectorAll('.bottom-nav-item').forEach(btn => btn.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+
+            // Cerrar cualquier modal abierto
+            document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+
+            switch (seccion) {
+                case 'inicio':
+                    if (typeof mostrarHub === 'function') mostrarHub();
+                    break;
+
+                case 'partidos':
+                    if (typeof mostrarVistaLigas === 'function') {
+                        mostrarVistaLigas();
+                    } else if (typeof mostrarHub === 'function') {
+                        mostrarHub();
+                    }
+                    break;
+
+                case 'torneos':
+                    if (typeof mostrarVistaTorneos === 'function') {
+                        mostrarVistaTorneos();
+                    } else {
+                        showToast("Módulo de Torneos Oficiales en preparación", "info");
+                    }
+                    break;
+
+                case 'comunidad':
+                    if (typeof switchTabNoticias === 'function') {
+                        switchTabNoticias();
+                    } else {
+                        showToast("Explorador y Comunidad", "info");
+                    }
+                    break;
+
+                case 'perfil':
+                    if (typeof abrirModalPerfilOAcceso === 'function') {
+                        abrirModalPerfilOAcceso();
+                    }
+                    break;
+            }
+        }
     </script>
+    <!-- BARRA DE NAVEGACIÓN INFERIOR FLOTANTE -->
+    <nav class="bottom-nav-container" id="bottomNavBar">
+        <button type="button" class="bottom-nav-item active" onclick="cambiarSeccionApp('inicio', this)" aria-label="Inicio">
+            <i class="fas fa-home"></i>
+            <span class="active-dot"></span>
+        </button>
+
+        <button type="button" class="bottom-nav-item" onclick="cambiarSeccionApp('partidos', this)" aria-label="Partidos y Ligas">
+            <i class="fas fa-baseball-ball"></i>
+            <span class="active-dot"></span>
+        </button>
+
+        <button type="button" class="bottom-nav-item" onclick="cambiarSeccionApp('torneos', this)" aria-label="Torneos Oficiales">
+            <span class="nav-custom-icon">15-15</span>
+            <span class="active-dot"></span>
+        </button>
+
+        <button type="button" class="bottom-nav-item" onclick="cambiarSeccionApp('comunidad', this)" aria-label="Comunidad y Noticias">
+            <i class="fas fa-search"></i>
+            <span class="active-dot"></span>
+        </button>
+
+        <button type="button" class="bottom-nav-item" onclick="cambiarSeccionApp('perfil', this)" aria-label="Mi Perfil">
+            <i class="far fa-user"></i>
+            <span class="active-dot"></span>
+        </button>
+    </nav>
 </body>
 
 </html>

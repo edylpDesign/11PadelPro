@@ -4254,11 +4254,25 @@
         let modoSeleccionado = null;
         function entrarModo(m) {
             modoSeleccionado = m;
+            
+            // 1. Ocultar todas las pantallas maestras de la barra
             ocultarSeccionesPrincipales();
             
+            // 2. Ocultar subpantallas previas
+            const subVistas = ['viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
+            subVistas.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+
+            // 3. Mostrar la vista de ligas del modo
             const vLigas = document.getElementById("viewLigasModo");
-            if (vLigas) vLigas.classList.remove("hidden");
+            if (vLigas) {
+                vLigas.classList.remove("hidden");
+                vLigas.style.display = "block";
+            }
             
+            // 4. Asignar título correspondiente
             let titulo = "Ligas";
             if (m === 'americano') titulo = "Ligas: 8 Loco";
             else if (m === 'pozo') titulo = "Ligas: Pozo";
@@ -4267,7 +4281,9 @@
             const titEl = document.getElementById("tituloModoLigas");
             if (titEl) titEl.textContent = titulo;
             
+            // 5. Cargar la lista de ligas creadas
             renderLigasDelModo();
+            
             if (typeof actualizarTituloPestañaActiva === 'function') {
                 actualizarTituloPestañaActiva(titulo, 'viewLigasModo', m);
             }
@@ -4275,28 +4291,43 @@
             if (typeof usuarioActivo !== 'undefined' && usuarioActivo) {
                 sincronizarDatosGlobalesDesdeNube();
             }
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function backToHubModos() {
+            // 1. Ocultar todas las subpantallas abiertas
             const subVistas = ['viewLigasModo', 'viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
             subVistas.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.classList.add('hidden');
+                if (el) {
+                    el.classList.add('hidden');
+                    el.style.display = 'none';
+                }
             });
+
             const waFloat = document.getElementById('globalFloatingWaBtn');
             if (waFloat) waFloat.classList.add('hidden');
 
-            // Volver a mostrar la pestaña activa de la barra
+            // 2. Comprobar en qué botón de la barra estábamos para regresar al lugar correcto
             const btnActivo = document.querySelector('.bottom-nav-item.active');
             if (btnActivo && btnActivo.getAttribute('onclick')?.includes('explorar')) {
+                // Si veníamos de la Lupa (Padrón de jugadores), volver a Explorar
                 const exp = document.getElementById('tabSectionExplorar');
-                if (exp) exp.classList.remove('hidden');
+                if (exp) {
+                    exp.classList.remove('hidden');
+                    exp.style.display = 'block';
+                }
                 if (typeof renderRetasAbiertas === 'function') renderRetasAbiertas();
             } else {
+                // Si veníamos de la Pelota, volver al menú de Modos de Juego
                 const jug = document.getElementById('tabSectionJugar');
-                if (jug) jug.classList.remove('hidden');
+                if (jug) {
+                    jug.classList.remove('hidden');
+                    jug.style.display = 'block';
+                }
             }
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 

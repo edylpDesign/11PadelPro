@@ -3299,7 +3299,7 @@
             const nuevaPestaña = {
                 id: nuevoId,
                 titulo: 'Menú ' + (pestañasApp.length + 1),
-                vista: 'viewHubModos',
+                vista: 'tabSectionHome',
                 modo: null,
                 ligaId: null,
                 jornadaId: null
@@ -3323,15 +3323,28 @@
         }
 
         function ocultarTodasLasVistas() {
-            document.getElementById("viewHubModos").classList.add("hidden");
-            document.getElementById("viewLigasModo").classList.add("hidden");
-            document.getElementById("viewPadron").classList.add("hidden");
-            document.getElementById("viewLigaDetalle").classList.add("hidden");
-            document.getElementById("viewPartidoVivo").classList.add("hidden");
-            document.getElementById("viewJornadaPozoVivo").classList.add("hidden");
-            document.getElementById("viewJornada8LocoVivo").classList.add("hidden");
-            document.getElementById("viewAdmin").classList.add("hidden");
-            document.getElementById("globalFloatingWaBtn").classList.add("hidden");
+            // 1. Ocultar las 5 pestañas de la barra inferior
+            const tabs = ['tabSectionHome', 'tabSectionJugar', 'tabSectionTorneoOficial', 'tabSectionExplorar', 'tabSectionPerfil'];
+            tabs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add("hidden");
+                    el.style.display = "none";
+                }
+            });
+
+            // 2. Ocultar todas las subvistas
+            const subvistas = ['viewLigasModo', 'viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
+            subvistas.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add("hidden");
+                    el.style.display = "none";
+                }
+            });
+
+            const waBtn = document.getElementById("globalFloatingWaBtn");
+            if (waBtn) waBtn.classList.add("hidden");
         }
 
         function seleccionarPestañaNavegador(tabId) {
@@ -3343,7 +3356,8 @@
 
             modoSeleccionado = tabObj.modo;
             if (tabObj.vista === 'viewPartidoVivo') {
-                document.getElementById("viewPartidoVivo").classList.remove("hidden");
+                const vPart = document.getElementById("viewPartidoVivo");
+                if (vPart) { vPart.classList.remove("hidden"); vPart.style.display = "block"; }
                 actualizarTableroPartido();
             } else if (tabObj.vista === 'viewJornadaPozoVivo' && tabObj.jornadaId) {
                 const d = getUserData();
@@ -3361,7 +3375,14 @@
             } else if (tabObj.vista === 'viewPadron') {
                 abrirPadronJugadores();
             } else {
-                document.getElementById("viewHubModos").classList.remove("hidden");
+                // Si vuelve a la vista de inicio, activa la pestaña Home
+                const h = document.getElementById("tabSectionHome");
+                if (h) { h.classList.remove("hidden"); h.style.display = "block"; }
+                const navHome = document.querySelector(".bottom-nav-item[onclick*='inicio']");
+                if (navHome) {
+                    document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+                    navHome.classList.add('active');
+                }
             }
 
             renderTabsBar();
@@ -4255,29 +4276,17 @@
         function entrarModo(m) {
             modoSeleccionado = m;
             
-            // Oculta las pestañas de la barra inferior (Home, Jugar, etc.)
-            if (typeof ocultarSeccionesPrincipales === 'function') {
-                ocultarSeccionesPrincipales();
-            }
+            // 1. Limpia cualquier pantalla abierta previa
+            ocultarTodasLasVistas();
             
-            // Oculta otras pantallas secundarias
-            const subVistas = ['viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
-            subVistas.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.classList.add('hidden');
-                    el.style.setProperty("display", "none", "important");
-                }
-            });
-
-            // Fuerza la vista de ligas a mostrarse en pantalla completa
+            // 2. Muestra el contenedor de Ligas
             const vLigas = document.getElementById("viewLigasModo");
             if (vLigas) {
                 vLigas.classList.remove("hidden");
-                vLigas.style.setProperty("display", "block", "important");
+                vLigas.style.display = "block";
             }
             
-            // Cambia el título según el modo tocado
+            // 3. Define el título según el modo presionado
             let titulo = "Ligas";
             if (m === 'americano') titulo = "Ligas: 8 Loco";
             else if (m === 'pozo') titulo = "Ligas: Pozo";
@@ -4286,7 +4295,7 @@
             const titEl = document.getElementById("tituloModoLigas");
             if (titEl) titEl.textContent = titulo;
             
-            // Dibuja la lista de ligas guardadas
+            // 4. Renderiza la lista de torneos/ligas de ese modo
             renderLigasDelModo();
             
             if (typeof actualizarTituloPestañaActiva === 'function') {
@@ -4337,18 +4346,14 @@
         }
 
         function abrirPadronJugadores() {
-            if (typeof ocultarSeccionesPrincipales === 'function') {
-                ocultarSeccionesPrincipales();
-            }
+            ocultarTodasLasVistas();
             const vPadron = document.getElementById("viewPadron");
             if (vPadron) {
                 vPadron.classList.remove("hidden");
-                vPadron.style.setProperty("display", "block", "important");
+                vPadron.style.display = "block";
             }
-            if (typeof renderPadron === 'function') renderPadron();
-            if (typeof actualizarTituloPestañaActiva === 'function') {
-                actualizarTituloPestañaActiva('Padrón', 'viewPadron');
-            }
+            renderPadron();
+            actualizarTituloPestañaActiva('Padrón', 'viewPadron');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 

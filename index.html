@@ -4243,39 +4243,72 @@
         }
 
         let modoSeleccionado = null;
+        function ocultarSeccionesPrincipales() {
+            const tabs = ['tabSectionHome', 'tabSectionJugar', 'tabSectionTorneoOficial', 'tabSectionExplorar', 'tabSectionPerfil'];
+            tabs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+        }
+
+        let modoSeleccionado = null;
         function entrarModo(m) {
             modoSeleccionado = m;
-            document.getElementById("viewHubModos").classList.add("hidden");
-            document.getElementById("viewLigasModo").classList.remove("hidden");
+            ocultarSeccionesPrincipales();
+            
+            const vLigas = document.getElementById("viewLigasModo");
+            if (vLigas) vLigas.classList.remove("hidden");
+            
             let titulo = "Ligas";
             if (m === 'americano') titulo = "Ligas: 8 Loco";
             else if (m === 'pozo') titulo = "Ligas: Pozo";
             else if (m === 'teams') titulo = "Ligas: Teams";
-            document.getElementById("tituloModoLigas").textContent = titulo;
+            
+            const titEl = document.getElementById("tituloModoLigas");
+            if (titEl) titEl.textContent = titulo;
+            
             renderLigasDelModo();
-            actualizarTituloPestañaActiva(titulo, 'viewLigasModo', m);
+            if (typeof actualizarTituloPestañaActiva === 'function') {
+                actualizarTituloPestañaActiva(titulo, 'viewLigasModo', m);
+            }
 
-            // Refresco instantáneo desde la nube al ingresar al modo
-            if (usuarioActivo) {
+            if (typeof usuarioActivo !== 'undefined' && usuarioActivo) {
                 sincronizarDatosGlobalesDesdeNube();
             }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function backToHubModos() {
-            document.getElementById("viewLigasModo").classList.add("hidden");
-            document.getElementById("viewPadron").classList.add("hidden");
-            document.getElementById("viewPartidoVivo").classList.add("hidden");
-            document.getElementById("globalFloatingWaBtn").classList.add("hidden");
-            document.getElementById("viewHubModos").classList.remove("hidden");
-            actualizarTituloPestañaActiva('Menú Principal', 'viewHubModos', null);
-            renderRetasAbiertas();
+            const subVistas = ['viewLigasModo', 'viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
+            subVistas.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            const waFloat = document.getElementById('globalFloatingWaBtn');
+            if (waFloat) waFloat.classList.add('hidden');
+
+            // Volver a mostrar la pestaña activa de la barra
+            const btnActivo = document.querySelector('.bottom-nav-item.active');
+            if (btnActivo && btnActivo.getAttribute('onclick')?.includes('explorar')) {
+                const exp = document.getElementById('tabSectionExplorar');
+                if (exp) exp.classList.remove('hidden');
+                if (typeof renderRetasAbiertas === 'function') renderRetasAbiertas();
+            } else {
+                const jug = document.getElementById('tabSectionJugar');
+                if (jug) jug.classList.remove('hidden');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function abrirPadronJugadores() {
-            document.getElementById("viewHubModos").classList.add("hidden");
-            document.getElementById("viewPadron").classList.remove("hidden");
-            renderPadron();
-            actualizarTituloPestañaActiva('Padrón', 'viewPadron');
+            ocultarSeccionesPrincipales();
+            const vPadron = document.getElementById("viewPadron");
+            if (vPadron) vPadron.classList.remove("hidden");
+            if (typeof renderPadron === 'function') renderPadron();
+            if (typeof actualizarTituloPestañaActiva === 'function') {
+                actualizarTituloPestañaActiva('Padrón', 'viewPadron');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function renderLigasDelModo() {

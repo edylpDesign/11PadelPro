@@ -3243,6 +3243,14 @@
                 splash.classList.add("hide-splash");
                 setTimeout(() => { splash.style.display = "none"; }, 400);
             }
+
+            // Asegurar que la pantalla de inicio esté visible y activa
+            if (typeof cambiarSeccionApp === 'function') {
+                cambiarSeccionApp('inicio');
+            } else {
+                const home = document.getElementById('tabSectionHome');
+                if (home) home.classList.remove('hidden');
+            }
         }
         function entrarComoInvitadoSplash() {
             entrarAppPrincipal();

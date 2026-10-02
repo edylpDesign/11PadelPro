@@ -6041,6 +6041,7 @@
             const fTorneo = document.getElementById("filtroHistorialTorneo")?.value || "TODOS";
             const fFecha = document.getElementById("filtroHistorialFecha")?.value || "";
 
+            // 1. Filtrar registros individuales
             let filtrados = cacheHistorialPartidos.filter(p => {
                 const matchModo = (fModo === "TODOS") || (p.modo && p.modo.toUpperCase() === fModo);
                 const matchTorneo = (fTorneo === "TODOS") || (p.torneoNombre === fTorneo);
@@ -6048,42 +6049,73 @@
                 return matchModo && matchTorneo && matchFecha;
             });
 
-            if (contNum) contNum.textContent = filtrados.length;
+            // 2. AGRUPAR POR LIGA / TORNEO (1 tarjeta por liga única)
+            const ligasMap = {};
+            filtrados.forEach(p => {
+                const idClave = p.torneoId || p.torneoNombre;
+                if (!ligasMap[idClave]) {
+                    ligasMap[idClave] = {
+                        torneoId: p.torneoId,
+                        torneoNombre: p.torneoNombre,
+                        modo: p.modo,
+                        fechaMasReciente: p.fecha,
+                        jornadasSet: new Set(),
+                        puntosTotales: 0,
+                        caguamasTotales: 0,
+                        matchIdEjemplo: p.matchId
+                    };
+                }
 
-            if (filtrados.length === 0) {
+                // Sumar puntos de la jornada
+                const pts = parseInt(p.marcador) || 0;
+                ligasMap[idClave].puntosTotales += pts;
+                ligasMap[idClave].caguamasTotales += (parseInt(p.caguamas) || 0);
+                if (p.jornada) ligasMap[idClave].jornadasSet.add(p.jornada);
+                if (p.fecha && p.fecha > ligasMap[idClave].fechaMasReciente) {
+                    ligasMap[idClave].fechaMasReciente = p.fecha;
+                }
+            });
+
+            const listaLigasUnicas = Object.values(ligasMap);
+
+            if (contNum) contNum.textContent = listaLigasUnicas.length;
+
+            if (listaLigasUnicas.length === 0) {
                 cont.innerHTML = `
                     <div style="text-align:center; padding:30px 10px; color:var(--txt-muted); font-size:0.78rem;">
                         <i class="fas fa-filter fa-2x" style="color:var(--txt-dim); margin-bottom:8px; display:block;"></i>
-                        No se encontraron juegos con los filtros seleccionados.
+                        No se encontraron ligas con los filtros seleccionados.
                     </div>`;
                 return;
             }
 
             cont.innerHTML = "";
-            filtrados.forEach(p => {
+            listaLigasUnicas.forEach(l => {
                 let badgeModo = "";
-                if (p.modo === "POZO") badgeModo = `<span style="background:rgba(2,132,199,0.2); color:var(--padel-blue-glow); border:1px solid rgba(56,189,248,0.3); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">POZO</span>`;
-                else if (p.modo === "8LOCO") badgeModo = `<span style="background:rgba(0,230,118,0.15); color:var(--padel-volt); border:1px solid rgba(0,230,118,0.3); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">8 LOCO</span>`;
-                else if (p.modo === "TEAMS") badgeModo = `<span style="background:rgba(168,85,247,0.2); color:#d8b4fe; border:1px solid rgba(168,85,247,0.4); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">TEAMS</span>`;
-                else if (p.modo === "PARTIDO_PRO") badgeModo = `<span style="background:rgba(245,158,11,0.2); color:var(--padel-orange); border:1px solid rgba(245,158,11,0.4); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">PARTIDO PRO</span>`;
+                if (l.modo === "POZO") badgeModo = `<span style="background:rgba(2,132,199,0.2); color:var(--padel-blue-glow); border:1px solid rgba(56,189,248,0.3); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">POZO</span>`;
+                else if (l.modo === "8LOCO") badgeModo = `<span style="background:rgba(0,230,118,0.15); color:var(--padel-volt); border:1px solid rgba(0,230,118,0.3); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">8 LOCO</span>`;
+                else if (l.modo === "TEAMS") badgeModo = `<span style="background:rgba(168,85,247,0.2); color:#d8b4fe; border:1px solid rgba(168,85,247,0.4); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">TEAMS</span>`;
+                else if (l.modo === "PARTIDO_PRO") badgeModo = `<span style="background:rgba(245,158,11,0.2); color:var(--padel-orange); border:1px solid rgba(245,158,11,0.4); padding:2px 6px; border-radius:6px; font-size:0.62rem; font-weight:800;">PARTIDO PRO</span>`;
 
-                const matchIdSafe = encodeURIComponent(p.matchId || "");
+                const cantJornadas = l.jornadasSet.size;
+                const textoJornadas = cantJornadas > 0 ? `${cantJornadas} ${cantJornadas === 1 ? 'Jornada' : 'Jornadas'}` : '1 Partido';
+                const matchIdSafe = encodeURIComponent(l.matchIdEjemplo || "");
 
                 cont.innerHTML += `
                     <div onclick="verDetalleTorneoPorMatchId('${matchIdSafe}')" style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:12px; cursor:pointer; transition:all 0.2s ease; display:flex; flex-direction:column; gap:6px;" onmouseover="this.style.borderColor='var(--padel-volt)'" onmouseout="this.style.borderColor='var(--border-glow)'">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div style="display:flex; align-items:center; gap:6px;">
                                 ${badgeModo}
-                                <strong style="color:var(--txt-main); font-size:0.82rem;">${p.torneoNombre}</strong>
+                                <strong style="color:var(--txt-main); font-size:0.85rem;">${l.torneoNombre}</strong>
                             </div>
-                            <small style="color:var(--txt-dim); font-size:0.68rem; font-weight:700;"><i class="fas fa-calendar-day"></i> ${p.fecha}</small>
+                            <small style="color:var(--txt-dim); font-size:0.68rem; font-weight:700;"><i class="fas fa-calendar-day"></i> ${l.fechaMasReciente}</small>
                         </div>
 
                         <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; margin-top:2px;">
-                            <span style="color:var(--txt-muted);"><i class="fas fa-layer-group"></i> ${p.jornada}</span>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <strong style="color:var(--padel-volt); font-size:0.85rem;">${p.marcador}</strong>
-                                <span style="font-size:0.65rem; background:rgba(255,255,255,0.06); color:var(--txt-main); padding:2px 6px; border-radius:4px;"><i class="fas fa-chevron-right"></i> Ver Tabla</span>
+                            <span style="color:var(--txt-muted);"><i class="fas fa-layer-group"></i> ${textoJornadas}</span>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <strong style="color:var(--padel-volt); font-size:0.85rem;">${l.puntosTotales} Pts Acumulados</strong>
+                                <span style="font-size:0.65rem; background:rgba(255,255,255,0.06); color:var(--txt-main); padding:2px 6px; border-radius:4px;"><i class="fas fa-chevron-right"></i> Entrar a Liga</span>
                             </div>
                         </div>
                     </div>
@@ -6144,7 +6176,7 @@
                 <span>${cacheTorneoDetalleActivo.jornadas ? cacheTorneoDetalleActivo.jornadas.length : 1} Jornadas</span>
             `;
 
-            cambiarSubTabDetalle('jornada');
+            cambiarSubTabDetalle('liga');
         }
 
         function cambiarSubTabDetalle(tab) {

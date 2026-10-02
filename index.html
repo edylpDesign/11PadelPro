@@ -6760,21 +6760,8 @@
             return false;
         }
 
-        const abrirModalCrearLigaOriginal = abrirModalCrearLiga;
-        abrirModalCrearLiga = async function() {
-            if (!usuarioActivo && sesionAdminHash !== MASTER_PIN_HASH) {
-                abrirModalPerfilOAcceso();
-                showToast("Inicia sesión para crear una liga", "error");
-                return;
-            }
-
-            const tienePermiso = await verificarPermisoOrganizador();
-            if (tienePermiso) {
-                abrirModalCrearLigaOriginal();
-            } else {
-                document.getElementById("modalLicenciaRequerida").classList.add("active");
-            }
-        };
+        
+        
 
         async function solicitarLicenciaOrganizadorWhatsApp() {
             if (!usuarioActivo) {

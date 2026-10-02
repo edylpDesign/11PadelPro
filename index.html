@@ -4250,15 +4250,7 @@
             cerrarPanelAdmin();
         }
 
-        let modoSeleccionado = null;
-        function ocultarSeccionesPrincipales() {
-            const tabs = ['tabSectionHome', 'tabSectionJugar', 'tabSectionTorneoOficial', 'tabSectionExplorar', 'tabSectionPerfil'];
-            tabs.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('hidden');
-            });
-        }
-
+        
         let modoSeleccionado = null;
         function entrarModo(m) {
             modoSeleccionado = m;

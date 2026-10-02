@@ -2466,6 +2466,10 @@
                     onclick="switchAdminSubTab('whatsapp')">
                     <i class="fab fa-whatsapp"></i> WhatsApp
                 </button>
+                <button type="button" class="admin-tab-btn" id="btnAdminTabLicencias"
+                    onclick="switchAdminSubTab('licencias')">
+                    <i class="fas fa-crown"></i> Licencias
+                </button>
             </div>
 
             <div id="adminTabContentBanners">
@@ -2589,6 +2593,30 @@
                         📢 Tu mensaje personalizado aparecerá aquí</div>
                 </div>
             </div>
+            <div id="adminTabContentLicencias" class="hidden">
+                <h4 style="color:var(--padel-volt); font-size:0.85rem; margin-bottom:6px;">
+                    <i class="fas fa-user-shield"></i> Gestión de Licencias de Organizador
+                </h4>
+                <p style="font-size:0.72rem; color:var(--txt-muted); margin-bottom:12px;">
+                    Autoriza a usuarios para que puedan crear y gestionar sus propios torneos y ligas.
+                </p>
+
+                <!-- ACTIVACIÓN MANUAL POR TELÉFONO O CORREO -->
+                <div style="background:var(--bg-card-subtle); padding:12px; border-radius:12px; border:1px solid var(--border-glow); margin-bottom:14px;">
+                    <label style="font-size:0.72rem; font-weight:800; color:var(--txt-muted);">Activar licencia manualmente (Teléfono 10 dígitos o Correo):</label>
+                    <div style="display:flex; gap:6px; margin-top:6px;">
+                        <input type="text" id="adminInputLicenciaId" placeholder="Ej. 4491234567 o correo@gmail.com" style="margin:0;">
+                        <button type="button" class="btn btn-green btn-sm" onclick="adminActivarLicenciaManual()">Activar</button>
+                    </div>
+                </div>
+
+                <div style="font-size:0.78rem; font-weight:800; color:var(--padel-orange); margin-bottom:8px;">
+                    <i class="fas fa-clock"></i> Solicitudes Pendientes / Licencias Activas:
+                </div>
+                <div id="adminListaLicenciasContainer" style="display:flex; flex-direction:column; gap:8px; max-height:260px; overflow-y:auto;">
+                    <p style="color:var(--txt-dim); font-size:0.75rem; text-align:center;">Cargando solicitudes...</p>
+                </div>
+            </div>
 
             <button class="btn btn-green" style="width:100%; margin-top:18px; padding:12px;"
                 onclick="guardarEnlacesEnFirebase()">
@@ -2607,6 +2635,34 @@
                 Reportes o sugerencias: <a href="mailto:11padelpoint.pro@gmail.com" style="color:var(--padel-volt); text-decoration:none; font-weight:700;">11padelpoint.pro@gmail.com</a>
             </div>
         </footer>
+    </div>
+    <!-- MODAL BLOQUEO / SOLICITAR LICENCIA DE ORGANIZADOR -->
+    <div id="modalLicenciaRequerida" class="modal" onclick="closeModalOnBackdrop(event, 'modalLicenciaRequerida')">
+        <div class="modal-content" style="max-width:390px; text-align:center; padding:24px;">
+            <button type="button" class="modal-close-icon" onclick="closeModal('modalLicenciaRequerida')">×</button>
+            <div style="font-size:2.4rem; color:var(--padel-orange); margin-bottom:8px;">
+                <i class="fas fa-crown"></i>
+            </div>
+            <h3 style="color:var(--txt-main); margin-bottom:6px; font-weight:900;">Función Pro • Organizador</h3>
+            <p style="font-size:0.78rem; color:var(--txt-muted); line-height:1.4; margin-bottom:14px;">
+                La creación, gestión de ligas y sincronización en la nube requiere una <strong>Licencia Activa de Organizador</strong>.
+            </p>
+            
+            <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:12px; text-align:left; font-size:0.75rem; color:var(--txt-main); margin-bottom:16px;">
+                <div style="margin-bottom:6px;"><i class="fas fa-check" style="color:var(--padel-volt); margin-right:6px;"></i> Creación de ligas ilimitadas (8 Loco, Pozo y Teams).</div>
+                <div style="margin-bottom:6px;"><i class="fas fa-check" style="color:var(--padel-volt); margin-right:6px;"></i> Sincronización en vivo entre múltiples dispositivos.</div>
+                <div><i class="fas fa-check" style="color:var(--padel-volt); margin-right:6px;"></i> Tablas oficiales auditadas e historial de jugadores.</div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button type="button" class="btn btn-green" style="width:100%; padding:12px; font-weight:900;" onclick="solicitarLicenciaOrganizadorWhatsApp()">
+                    <i class="fab fa-whatsapp"></i> Solicitar Activación / Licencia
+                </button>
+                <button type="button" class="btn btn-dark btn-sm" onclick="closeModal('modalLicenciaRequerida')">
+                    Volver
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL CREAR LIGA -->
@@ -3537,7 +3593,7 @@
         }
 
         function switchAdminSubTab(tabName) {
-            const tabs = ['banners', 'torneos', 'news', 'community', 'whatsapp'];
+            const tabs = ['banners', 'torneos', 'news', 'community', 'whatsapp', 'licencias'];
             const target = tabName.toLowerCase();
             tabs.forEach(t => {
                 const btn = document.getElementById(`btnAdminTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
@@ -3551,6 +3607,9 @@
             if (target === 'whatsapp') {
                 const msgInput = document.getElementById("adminWaCustomMsg");
                 if (msgInput) { msgInput.value = appConfig.waCustomMsg || ""; actualizarPreviewWhatsApp(msgInput.value); }
+            }
+            if (target === 'licencias') {
+                adminCargarLicencias();
             }
         }
 
@@ -6672,6 +6731,200 @@
                 }
             } catch (e) { }
             return null;
+        }
+        // ==========================================================
+        // SISTEMA DE MONETIZACIÓN Y LICENCIAS DE ORGANIZADOR
+        // ==========================================================
+        async function verificarPermisoOrganizador() {
+            if (sesionAdminHash === MASTER_PIN_HASH) return true;
+            if (!usuarioActivo) return false;
+
+            try {
+                const resUid = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/organizadores_autorizados/${usuarioActivo.uid}.json`);
+                if (resUid.ok) {
+                    const dataUid = await resUid.json();
+                    if (dataUid && dataUid.activo) return true;
+                }
+
+                const miTel = document.getElementById("perfilTelefonoInput")?.value.trim();
+                if (miTel && miTel.length === 10) {
+                    const resTel = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/organizadores_autorizados/${miTel}.json`);
+                    if (resTel.ok) {
+                        const dataTel = await resTel.json();
+                        if (dataTel && dataTel.activo) return true;
+                    }
+                }
+            } catch (e) {
+                console.warn("Error validando licencia:", e);
+            }
+            return false;
+        }
+
+        const abrirModalCrearLigaOriginal = abrirModalCrearLiga;
+        abrirModalCrearLiga = async function() {
+            if (!usuarioActivo && sesionAdminHash !== MASTER_PIN_HASH) {
+                abrirModalPerfilOAcceso();
+                showToast("Inicia sesión para crear una liga", "error");
+                return;
+            }
+
+            const tienePermiso = await verificarPermisoOrganizador();
+            if (tienePermiso) {
+                abrirModalCrearLigaOriginal();
+            } else {
+                document.getElementById("modalLicenciaRequerida").classList.add("active");
+            }
+        };
+
+        async function solicitarLicenciaOrganizadorWhatsApp() {
+            if (!usuarioActivo) {
+                closeModal("modalLicenciaRequerida");
+                abrirModalPerfilOAcceso();
+                return;
+            }
+
+            const miTel = document.getElementById("perfilTelefonoInput")?.value.trim() || "Sin registrar";
+            const miEmail = usuarioActivo.email || "Sin correo";
+            const miNombre = usuarioActivo.displayName || "Organizador";
+
+            const solData = {
+                uid: usuarioActivo.uid,
+                nombre: miNombre,
+                email: miEmail,
+                telefono: miTel,
+                fecha: new Date().toISOString().split("T")[0],
+                timestamp: Date.now()
+            };
+
+            fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/solicitudes_organizadores/${usuarioActivo.uid}.json`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(solData)
+            }).catch(() => {});
+
+            const mensaje = encodeURIComponent(
+                `¡Hola! Me interesa activar la Licencia de Organizador en 11Padel Pro.\n\n` +
+                `👤 Nombre: ${miNombre}\n` +
+                `📧 Correo: ${miEmail}\n` +
+                `📱 Teléfono: ${miTel}\n\n` +
+                `¿Cuáles son las opciones de activación y costo?`
+            );
+
+            const miWhatsAppAdmin = "524497698270"; // Pon tu número real con lada 52
+            const url = `https://wa.me/${miWhatsAppAdmin}?text=${mensaje}`;
+            window.open(url, "_blank");
+            closeModal("modalLicenciaRequerida");
+        }
+
+        async function adminCargarLicencias() {
+            const cont = document.getElementById("adminListaLicenciasContainer");
+            if (!cont) return;
+            cont.innerHTML = "<p style='color:var(--txt-dim); font-size:0.75rem; text-align:center;'>Cargando licencias...</p>";
+
+            try {
+                const [resSol, resAut] = await Promise.all([
+                    fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/solicitudes_organizadores.json`),
+                    fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/organizadores_autorizados.json`)
+                ]);
+
+                const solicitudes = (await resSol.json()) || {};
+                const autorizados = (await resAut.json()) || {};
+
+                cont.innerHTML = "";
+
+                if (Object.keys(solicitudes).length === 0 && Object.keys(autorizados).length === 0) {
+                    cont.innerHTML = "<p style='color:var(--txt-dim); font-size:0.75rem; text-align:center;'>No hay solicitudes ni licencias activas.</p>";
+                    return;
+                }
+
+                for (const [id, s] of Object.entries(solicitudes)) {
+                    cont.innerHTML += `
+                        <div style="background:#0b1120; border:1px solid rgba(245,158,11,0.4); border-radius:10px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <strong style="color:var(--txt-main); font-size:0.8rem;">${s.nombre || id}</strong>
+                                <div style="font-size:0.68rem; color:var(--txt-muted);">Tel: ${s.telefono || 'N/A'} • ${s.email || ''}</div>
+                                <span style="font-size:0.6rem; color:var(--padel-orange); font-weight:800;">SOLICITUD PENDIENTE</span>
+                            </div>
+                            <div style="display:flex; gap:4px;">
+                                <button type="button" class="btn btn-green btn-sm" onclick="adminAutorizarLicencia('${s.uid || id}', '${s.telefono || ''}', '${s.email || ''}')">Aprobar</button>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="adminEliminarSolicitud('${id}')">✕</button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                for (const [id, a] of Object.entries(autorizados)) {
+                    if (!a.activo) continue;
+                    cont.innerHTML += `
+                        <div style="background:#0b1120; border:1px solid rgba(0,230,118,0.3); border-radius:10px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <strong style="color:var(--padel-volt); font-size:0.8rem;">${a.email || id}</strong>
+                                <div style="font-size:0.68rem; color:var(--txt-muted);">Tel: ${a.telefono || 'ID directo'}</div>
+                                <span style="font-size:0.6rem; color:var(--padel-volt); font-weight:800;">LICENCIA ACTIVA</span>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="adminRevocarLicencia('${id}')">Revocar</button>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                cont.innerHTML = "<p style='color:var(--padel-red); font-size:0.75rem; text-align:center;'>Error al cargar licencias.</p>";
+            }
+        }
+
+        async function adminAutorizarLicencia(id, tel, email) {
+            try {
+                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/organizadores_autorizados/${id}.json`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ activo: true, telefono: tel, email: email, fechaActivacion: Date.now() })
+                });
+
+                if (tel && tel.length === 10) {
+                    await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/organizadores_autorizados/${tel}.json`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ activo: true, email: email, fechaActivacion: Date.now() })
+                    });
+                }
+
+                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/solicitudes_organizadores/${id}.json`, { method: "DELETE" });
+                showToast("Licencia activada con éxito");
+                adminCargarLicencias();
+            } catch (e) {
+                showToast("Error al activar licencia", "error");
+            }
+        }
+
+        async function adminActivarLicenciaManual() {
+            const input = document.getElementById("adminInputLicenciaId");
+            const val = input ? input.value.trim().replace(/\D/g, '') : "";
+            if (!val) return showToast("Ingresa el teléfono de 10 dígitos", "error");
+
+            try {
+                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/organizadores_autorizados/${val}.json`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ activo: true, telefono: val, fechaActivacion: Date.now() })
+                });
+                input.value = "";
+                showToast(`Licencia activada para ${val}`);
+                adminCargarLicencias();
+            } catch (e) {
+                showToast("Error al guardar", "error");
+            }
+        }
+
+        async function adminRevocarLicencia(id) {
+            if (confirm(`¿Revocar la licencia a ${id}? Ya no podrá crear ligas.`)) {
+                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/organizadores_autorizados/${id}.json`, { method: "DELETE" });
+                showToast("Licencia revocada");
+                adminCargarLicencias();
+            }
+        }
+
+        async function adminEliminarSolicitud(id) {
+            await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/solicitudes_organizadores/${id}.json`, { method: "DELETE" });
+            adminCargarLicencias();
         }
         // ==========================================================
         // GESTIÓN INTELIGENTE DEL BOTÓN ATRÁS (MÓVILES / GESTOS)

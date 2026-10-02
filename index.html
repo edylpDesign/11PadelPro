@@ -4255,24 +4255,29 @@
         function entrarModo(m) {
             modoSeleccionado = m;
             
-            // 1. Ocultar todas las pantallas maestras de la barra
-            ocultarSeccionesPrincipales();
+            // Oculta las pestañas de la barra inferior (Home, Jugar, etc.)
+            if (typeof ocultarSeccionesPrincipales === 'function') {
+                ocultarSeccionesPrincipales();
+            }
             
-            // 2. Ocultar subpantallas previas
+            // Oculta otras pantallas secundarias
             const subVistas = ['viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
             subVistas.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.classList.add('hidden');
+                if (el) {
+                    el.classList.add('hidden');
+                    el.style.setProperty("display", "none", "important");
+                }
             });
 
-            // 3. Mostrar la vista de ligas del modo
+            // Fuerza la vista de ligas a mostrarse en pantalla completa
             const vLigas = document.getElementById("viewLigasModo");
             if (vLigas) {
                 vLigas.classList.remove("hidden");
-                vLigas.style.display = "block";
+                vLigas.style.setProperty("display", "block", "important");
             }
             
-            // 4. Asignar título correspondiente
+            // Cambia el título según el modo tocado
             let titulo = "Ligas";
             if (m === 'americano') titulo = "Ligas: 8 Loco";
             else if (m === 'pozo') titulo = "Ligas: Pozo";
@@ -4281,7 +4286,7 @@
             const titEl = document.getElementById("tituloModoLigas");
             if (titEl) titEl.textContent = titulo;
             
-            // 5. Cargar la lista de ligas creadas
+            // Dibuja la lista de ligas guardadas
             renderLigasDelModo();
             
             if (typeof actualizarTituloPestañaActiva === 'function') {
@@ -4332,9 +4337,14 @@
         }
 
         function abrirPadronJugadores() {
-            ocultarSeccionesPrincipales();
+            if (typeof ocultarSeccionesPrincipales === 'function') {
+                ocultarSeccionesPrincipales();
+            }
             const vPadron = document.getElementById("viewPadron");
-            if (vPadron) vPadron.classList.remove("hidden");
+            if (vPadron) {
+                vPadron.classList.remove("hidden");
+                vPadron.style.setProperty("display", "block", "important");
+            }
             if (typeof renderPadron === 'function') renderPadron();
             if (typeof actualizarTituloPestañaActiva === 'function') {
                 actualizarTituloPestañaActiva('Padrón', 'viewPadron');

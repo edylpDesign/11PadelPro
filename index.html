@@ -2375,11 +2375,10 @@
                 <div class="scroll-chips" id="amRoundsNav"></div>
                 <div id="amFormatNoticeContainer"></div>
                 <div id="amMatchesContainer"></div>
-                <div style="display:flex; gap:6px; margin-top:12px;">
-                    <button type="button" class="btn btn-dark btn-sm" style="flex:1;" onclick="agregarRondaExtra8Loco()">➕ Ronda Extra</button>
-                    <button type="button" class="btn btn-danger btn-sm" style="flex:1;" onclick="eliminarUltimaRonda8Loco()">🗑️ Borrar Ronda</button>
-                    <button type="button" class="btn btn-green btn-sm" style="flex:1;" onclick="finalizarJornada8LocoOficial()">🏁 Finalizar</button>
-                </div>
+                <div style="display:flex; gap:8px; margin-top:12px;">
+                 <button class="btn btn-dark btn-sm" style="flex:1;" onclick="agregarRondaExtra8Loco()">➕ Ronda Extra</button>
+                 <button class="btn btn-green btn-sm" style="flex:1;" onclick="finalizarJornada8LocoOficial()">🏁 Finalizar Jornada</button>
+             </div>
             </div>
             <div id="amLiveTablaView" class="hidden card">
                 <h4 style="color:var(--padel-volt); margin-bottom:12px; font-size:0.85rem; font-weight:800;"><i
@@ -4836,18 +4835,41 @@
         }
 
         function renderListaJornadasLiga() {
-            const cont = document.getElementById("listaJornadasContenedor"); cont.innerHTML = "";
+            const cont = document.getElementById("listaJornadasContenedor");
+            cont.innerHTML = "";
             if (!ligaActiva.jornadas || !ligaActiva.jornadas.length) {
                 cont.innerHTML = "<p style='color:var(--txt-dim); padding:14px; text-align:center;'>No hay jornadas creadas.</p>";
                 return;
             }
             ligaActiva.jornadas.forEach(j => {
-                const desc = modoSeleccionado === 'teams' ? `${(j.parejas || []).length} parejas participantes` : `${j.convocados.length} jugadores convocados`;
-                cont.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; margin-bottom:8px;">
-                    <div><strong style="color:var(--txt-main); font-size:0.9rem;">${j.nombre}</strong><br><small style="color:var(--txt-muted);">${desc}</small></div>
-                    <button type="button" class="btn btn-sm btn-green" onclick="cargarJornadaEnVivo('${j.id}')">Entrar</button>
+                const desc = modoSeleccionado === 'teams' ? `${(j.parejas || []).length} parejas participantes` : `${(j.convocados || []).length} jugadores convocados`;
+                cont.innerHTML += `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; margin-bottom:8px;">
+                    <div>
+                        <strong style="color:var(--txt-main); font-size:0.9rem;">${j.nombre}</strong><br>
+                        <small style="color:var(--txt-muted);">${desc}</small>
+                    </div>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <button type="button" class="btn btn-sm btn-green" onclick="cargarJornadaEnVivo('${j.id}')">Entrar</button>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="eliminarJornadaLiga('${j.id}')" title="Eliminar Jornada">🗑️</button>
+                    </div>
                 </div>`;
             });
+        }
+
+        function eliminarJornadaLiga(jornadaId) {
+            if (!ligaActiva || !ligaActiva.jornadas) return;
+
+            const jornadaABorrar = ligaActiva.jornadas.find(x => x.id === jornadaId);
+            const nombre = jornadaABorrar ? jornadaABorrar.nombre : "esta jornada";
+
+            if (confirm(`¿Estás seguro de eliminar "${nombre}"? Se perderán los marcadores y estadísticas de esta fecha.`)) {
+                ligaActiva.jornadas = ligaActiva.jornadas.filter(x => x.id !== jornadaId);
+                saveLigaActiva();
+                renderListaJornadasLiga();
+                renderTablaGeneralLiga();
+                showToast(`Jornada "${nombre}" eliminada correctamente`);
+            }
         }
 
         function saveLigaActiva() {

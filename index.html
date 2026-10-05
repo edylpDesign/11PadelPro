@@ -2375,11 +2375,10 @@
                 <div class="scroll-chips" id="amRoundsNav"></div>
                 <div id="amFormatNoticeContainer"></div>
                 <div id="amMatchesContainer"></div>
-                <div style="display:flex; gap:8px; margin-top:12px;">
-                    <button class="btn btn-dark btn-sm" style="flex:1;" onclick="agregarRondaExtra8Loco()">➕ Ronda
-                        Extra</button>
-                    <button class="btn btn-green btn-sm" style="flex:1;" onclick="finalizarJornada8LocoOficial()">🏁
-                        Finalizar Jornada</button>
+                <div style="display:flex; gap:6px; margin-top:12px;">
+                    <button type="button" class="btn btn-dark btn-sm" style="flex:1;" onclick="agregarRondaExtra8Loco()">➕ Ronda Extra</button>
+                    <button type="button" class="btn btn-danger btn-sm" style="flex:1;" onclick="eliminarUltimaRonda8Loco()">🗑️ Borrar Ronda</button>
+                    <button type="button" class="btn btn-green btn-sm" style="flex:1;" onclick="finalizarJornada8LocoOficial()">🏁 Finalizar</button>
                 </div>
             </div>
             <div id="amLiveTablaView" class="hidden card">
@@ -4776,15 +4775,16 @@
                     tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}"><td>${obtenerIconoPosicion(idx + 1)}</td><td><strong>${team}</strong></td><td>${dat.pj}</td><td>${dat.pg}</td><td style="color:var(--padel-volt); font-weight:900;">${dat.pts}</td><td>${dat.diff > 0 ? '+' + dat.diff : dat.diff}</td><td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td></tr>`;
                 });
             } else {
-                th.innerHTML = "<tr><th>Pos</th><th>Jugador</th><th>PJ</th><th>W</th><th>Pts</th><th>+/-</th><th>🍺</th></tr>";
+                th.innerHTML = "<tr><th>Pos</th><th>Jugador</th><th>PJ</th><th>PG</th><th>Pts Anotados</th><th>+/-</th><th>🍺</th></tr>";
                 const stats = {};
                 (ligaActiva.jornadas || []).forEach(j => {
                     if (j.rounds) {
                         j.rounds.forEach(r => {
                             (r.matches || []).forEach(m => {
-                                const s1 = parseInt(m.score1) || 0;
-                                const s2 = parseInt(m.score2) || 0;
-                                const esJugado = m.jugado || (s1 > 0 || s2 > 0);
+                                const s1 = parseInt(m.score1, 10) || 0;
+                                const s2 = parseInt(m.score2, 10) || 0;
+                                const esJugado = m.jugado === true || (s1 > 0 || s2 > 0);
+
                                 if (esJugado) {
                                     (m.p1 || []).forEach(p => {
                                         if (!p || p === "BYE") return;
@@ -4809,17 +4809,28 @@
                     if (j.caguamas) {
                         Object.entries(j.caguamas).forEach(([p, c]) => {
                             stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
-                            stats[p].cags += c;
+                            stats[p].cags += parseInt(c, 10) || 0;
                         });
                     }
                 });
 
+                // Orden por Puntos anotados reales > Diferencia de puntos > Victorias
                 const sorted = Object.entries(stats).sort((a, b) => {
                     if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
-                    return b[1].diff - a[1].diff;
+                    if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
+                    return b[1].w - a[1].w;
                 });
+
                 sorted.forEach(([p, dat], idx) => {
-                    tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}"><td>${obtenerIconoPosicion(idx + 1)}</td><td><strong>${p}</strong></td><td>${dat.pj}</td><td>${dat.w}</td><td style="color:var(--padel-volt); font-weight:900;">${dat.pts}</td><td>${dat.diff}</td><td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td></tr>`;
+                    tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
+                        <td>${obtenerIconoPosicion(idx + 1)}</td>
+                        <td><strong>${p}</strong></td>
+                        <td>${dat.pj}</td>
+                        <td>${dat.w}</td>
+                        <td style="color:var(--padel-volt); font-weight:900;">${dat.pts}</td>
+                        <td>${dat.diff > 0 ? '+' + dat.diff : dat.diff}</td>
+                        <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
+                    </tr>`;
                 });
             }
         }
@@ -5226,30 +5237,40 @@
                     </tr>`;
                 });
             } else {
-                th.innerHTML = `<tr><th>Pos</th><th>Jugador</th><th>PJ</th><th>W</th><th>Pts</th><th>+/-</th><th>🍺</th></tr>`;
+                th.innerHTML = `<tr><th>Pos</th><th>Jugador</th><th>PJ</th><th>PG</th><th>Pts Anotados</th><th>+/-</th><th>🍺</th></tr>`;
                 const stats = {};
-                (jornadaActiva.convocados || []).forEach(p => stats[p] = { pj: 0, w: 0, diff: 0, pts: 0, cags: (jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0 });
+                (jornadaActiva.convocados || []).forEach(p => {
+                    stats[p] = { 
+                        pj: 0, 
+                        w: 0, 
+                        diff: 0, 
+                        pts: 0, 
+                        cags: (jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0 
+                    };
+                });
 
                 if (jornadaActiva.rounds) {
                     jornadaActiva.rounds.forEach(r => {
-                        r.matches.forEach(m => {
-                            const s1 = parseInt(m.score1) || 0;
-                            const s2 = parseInt(m.score2) || 0;
-                            const esJugado = m.jugado || (s1 > 0 || s2 > 0);
+                        (r.matches || []).forEach(m => {
+                            const s1 = parseInt(m.score1, 10) || 0;
+                            const s2 = parseInt(m.score2, 10) || 0;
+                            const esJugado = m.jugado === true || (s1 > 0 || s2 > 0);
+
                             if (esJugado) {
                                 (m.p1 || []).forEach(p => {
                                     if (!p || p === "BYE") return;
-                                    stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: (jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0 };
+                                    if (!stats[p]) stats[p] = { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
                                     stats[p].pj++;
-                                    stats[p].pts += s1;
+                                    stats[p].pts += s1; // Suma los puntos/games exactos anotados por su pareja
                                     stats[p].diff += (s1 - s2);
                                     if (s1 > s2) stats[p].w++;
                                 });
+
                                 (m.p2 || []).forEach(p => {
                                     if (!p || p === "BYE") return;
-                                    stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: (jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0 };
+                                    if (!stats[p]) stats[p] = { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
                                     stats[p].pj++;
-                                    stats[p].pts += s2;
+                                    stats[p].pts += s2; // Suma los puntos/games exactos anotados por su pareja
                                     stats[p].diff += (s2 - s1);
                                     if (s2 > s1) stats[p].w++;
                                 });
@@ -5257,18 +5278,22 @@
                         });
                     });
                 }
+
+                // Criterio oficial 8 Loco: Puntos anotados en cancha > Diferencia de puntos > Victorias
                 const sorted = Object.entries(stats).sort((a, b) => {
                     if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
-                    return b[1].diff - a[1].diff;
+                    if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
+                    return b[1].w - a[1].w;
                 });
+
                 sorted.forEach(([p, dat], idx) => {
                     tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
                         <td>${obtenerIconoPosicion(idx + 1)}</td>
                         <td><strong>${p}</strong></td>
                         <td>${dat.pj}</td>
                         <td>${dat.w}</td>
-                        <td style="color:var(--padel-volt); font-weight:900;">${dat.pts}</td>
-                        <td>${dat.diff}</td>
+                        <td style="color:var(--padel-volt); font-weight:900; font-size:1rem;">${dat.pts}</td>
+                        <td>${dat.diff > 0 ? '+' + dat.diff : dat.diff}</td>
                         <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
                     </tr>`;
                 });
@@ -5456,12 +5481,57 @@
         }
 
         function agregarRondaExtra8Loco() {
-            let extra = null;
-            if (modoSeleccionado === 'teams') extra = generarRondasTeams(jornadaActiva.parejas);
-            else extra = generarRondas8Loco(jornadaActiva.convocados);
-            jornadaActiva.rounds.push(extra[0]);
+            if (!jornadaActiva) return;
+            let fixture = null;
+            if (modoSeleccionado === 'teams') {
+                fixture = generarRondasTeams(jornadaActiva.parejas || []);
+            } else {
+                fixture = generarRondas8Loco(jornadaActiva.convocados || []);
+            }
+
+            if (!fixture || fixture.length === 0) {
+                showToast("No hay suficientes jugadores para generar rondas", "error");
+                return;
+            }
+
+            // Selecciona la siguiente ronda rotativa sin repetir siempre la primera
+            const proximoIndice = (jornadaActiva.rounds ? jornadaActiva.rounds.length : 0) % fixture.length;
+            const nuevaRonda = JSON.parse(JSON.stringify(fixture[proximoIndice]));
+
+            // Reinicia marcadores en 0
+            if (nuevaRonda.matches) {
+                nuevaRonda.matches.forEach(m => {
+                    m.score1 = 0;
+                    m.score2 = 0;
+                    m.jugado = false;
+                });
+            }
+
+            if (!jornadaActiva.rounds) jornadaActiva.rounds = [];
+            jornadaActiva.rounds.push(nuevaRonda);
+            jornadaActiva.currentRound = jornadaActiva.rounds.length;
+
             saveLigaActiva();
+            render8LocoNav();
             show8LocoRound(jornadaActiva.rounds.length);
+            showToast(`¡Ronda ${jornadaActiva.rounds.length} generada con éxito!`);
+        }
+
+        function eliminarUltimaRonda8Loco() {
+            if (!jornadaActiva || !jornadaActiva.rounds || jornadaActiva.rounds.length <= 1) {
+                showToast("No puedes eliminar la única ronda existente", "error");
+                return;
+            }
+
+            const total = jornadaActiva.rounds.length;
+            if (confirm(`¿Eliminar la Ronda ${total}? Esta acción no se puede deshacer.`)) {
+                jornadaActiva.rounds.pop();
+                jornadaActiva.currentRound = Math.min(jornadaActiva.currentRound, jornadaActiva.rounds.length);
+                saveLigaActiva();
+                render8LocoNav();
+                show8LocoRound(jornadaActiva.currentRound);
+                showToast(`Ronda ${total} eliminada`);
+            }
         }
 
         function finalizarJornada8LocoOficial() {

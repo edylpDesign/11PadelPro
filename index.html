@@ -2008,6 +2008,12 @@
             </div>
             <!-- BOTÓN CANDADO ADMIN -->
             <!-- BOTÓN PERFIL / LOGIN -->
+             <!-- BOTÓN NOTIFICACIONES -->
+            <button type="button" class="btn-gear-admin" id="btnNotificacionesTop" onclick="abrirModalNotificaciones()"
+                title="Invitaciones" style="position:relative;">
+                <i class="fas fa-bell"></i>
+                <span id="badgeNotificacionesCount" style="display:none; position:absolute; top:4px; right:4px; width:10px; height:10px; background:var(--padel-red); border-radius:50%; border:2px solid var(--bg-card);"></span>
+            </button>
             <button type="button" class="btn-gear-admin" id="btnPerfilUsuarioTop" onclick="abrirModalPerfilOAcceso()"
                 title="Mi Perfil / Acceso" style="color:var(--padel-volt);">
                 <i class="fas fa-user-circle"></i>
@@ -2265,21 +2271,14 @@
         </div>
 
         <div id="viewLigaDetalle" class="hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:6px;">
-                <button class="btn btn-sm btn-dark" onclick="backToLigasModo()"><i class="fas fa-arrow-left"></i>
-                    Ligas</button>
-                <div style="display:flex; gap:6px;">
-                    <button class="btn btn-sm btn-wa" onclick="compartirWhatsAppTablaGeneralLiga()"
-                        title="Compartir Tabla General">
-                        <i class="fab fa-whatsapp"></i> Tabla General
-                    </button>
-                    <button class="btn btn-sm btn-green" id="btnNuevaJornadaLiga" onclick="abrirModalNuevaJornada()">+
-                        Jornada</button>
-                    <button type="button" class="btn btn-sm btn-dark"
-                        style="border:1px solid var(--padel-volt); color:var(--padel-volt); font-weight:800;"
-                        onclick="sincronizarTorneoActualANube()">
-                        <i class="fas fa-cloud-upload-alt"></i> Sincronizar Nube
-                    </button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:6px; flex-wrap:wrap;">
+                <button class="btn btn-sm btn-dark" onclick="backToLigasModo()"><i class="fas fa-arrow-left"></i> Ligas</button>
+                <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-sm btn-dark" style="border:1px solid var(--padel-volt); color:var(--padel-volt);" onclick="abrirModalInvitarRol('editor')" title="Permitir editar marcadores"><i class="fas fa-user-edit"></i> + Editor</button>
+                    <button type="button" class="btn btn-sm btn-dark" style="border:1px solid var(--padel-blue-glow); color:var(--padel-blue-glow);" onclick="abrirModalInvitarRol('visor')" title="Acceso solo lectura"><i class="fas fa-eye"></i> + Visor</button>
+                    <button class="btn btn-sm btn-wa" onclick="compartirWhatsAppTablaGeneralLiga()" title="Compartir Tabla General"><i class="fab fa-whatsapp"></i></button>
+                    <button class="btn btn-sm btn-green" id="btnNuevaJornadaLiga" onclick="abrirModalNuevaJornada()">+ Jornada</button>
+                    <button type="button" class="btn btn-sm btn-dark" style="border:1px solid var(--padel-volt); color:var(--padel-volt); font-weight:800;" onclick="sincronizarTorneoActualANube()"><i class="fas fa-cloud-upload-alt"></i></button>
                 </div>
             </div>
             <div class="card">
@@ -2735,6 +2734,30 @@
         </div>
     </div>
 
+    <!-- MODAL BANDEJA DE INVITACIONES -->
+    <div id="modalNotificaciones" class="modal" onclick="closeModalOnBackdrop(event, 'modalNotificaciones')">
+        <div class="modal-content" style="max-width:420px; padding:20px;">
+            <button type="button" class="modal-close-icon" onclick="closeModal('modalNotificaciones')">×</button>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; border-bottom:1px solid var(--border-glow); padding-bottom:10px;">
+                <i class="fas fa-bell" style="color:var(--padel-volt); font-size:1.1rem;"></i>
+                <h3 style="color:var(--txt-main); font-size:1rem; font-weight:800; margin:0;">Invitaciones y Accesos</h3>
+            </div>
+            <div id="listaNotificacionesContainer" style="display:flex; flex-direction:column; gap:8px; max-height:60vh; overflow-y:auto; padding-right:2px;">
+                <p style="color:var(--txt-dim); font-size:0.75rem; text-align:center; padding:16px;">Cargando notificaciones...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SELECCIONAR JUGADOR PARA INVITAR -->
+    <div id="modalInvitarRol" class="modal" onclick="closeModalOnBackdrop(event, 'modalInvitarRol')">
+        <div class="modal-content" style="max-width:440px;">
+            <button type="button" class="modal-close-icon" onclick="closeModal('modalInvitarRol')">×</button>
+            <h3 id="tituloModalInvitarRol" style="color:var(--txt-main); margin-bottom:6px; font-weight:800;">Invitar Colaborador</h3>
+            <p id="subtituloModalInvitarRol" style="font-size:0.75rem; color:var(--txt-muted); margin-bottom:12px;">Elige a un jugador del padrón con WhatsApp registrado:</p>
+            
+            <div id="listaJugadoresParaInvitar" style="display:flex; flex-direction:column; gap:6px; max-height:300px; overflow-y:auto; padding-right:4px;"></div>
+        </div>
+    </div>
     <!-- MODAL CREAR LIGA -->
     <div id="modalCrearLiga" class="modal" onclick="closeModalOnBackdrop(event, 'modalCrearLiga')">
         <div class="modal-content">
@@ -6846,6 +6869,211 @@
         }
 
         // GUARDAR TELÉFONO CON PROTECCIÓN DE UNICIDAD Y RECLAMO
+        let rolAInvitarActual = 'editor';
+        let invitacionesPendientes = [];
+
+        function abrirModalInvitarRol(rol) {
+            if (!ligaActiva) {
+                showToast("Debes abrir una liga primero", "error");
+                return;
+            }
+            rolAInvitarActual = rol;
+            const esEditor = (rol === 'editor');
+            const tit = document.getElementById("tituloModalInvitarRol");
+            const sub = document.getElementById("subtituloModalInvitarRol");
+            if (tit) tit.innerHTML = esEditor ? `<i class="fas fa-user-edit" style="color:var(--padel-volt);"></i> Invitar Editor de Liga` : `<i class="fas fa-eye" style="color:var(--padel-blue-glow);"></i> Invitar Visor de Liga`;
+            if (sub) sub.textContent = esEditor ? "El usuario podrá registrar marcadores en tiempo real." : "El usuario podrá ver en vivo tablas y partidos en modo solo lectura.";
+
+            const cont = document.getElementById("listaJugadoresParaInvitar");
+            if (!cont) return;
+            cont.innerHTML = "";
+
+            const d = getUserData();
+            const jugadores = d.jugadores || [];
+
+            if (jugadores.length === 0) {
+                cont.innerHTML = `<p style="color:var(--txt-dim); font-size:0.75rem; text-align:center; padding:16px;">No tienes jugadores registrados en el padrón.</p>`;
+            } else {
+                jugadores.forEach(j => {
+                    const norm = normalizarJugador(j);
+                    const tieneTel = norm.telefono && norm.telefono.length === 10;
+                    cont.innerHTML += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:#0b1120; border:1px solid var(--border-glow); padding:8px 10px; border-radius:10px; margin-bottom:6px;">
+                            <div>
+                                <strong style="color:var(--txt-main); font-size:0.85rem;">${norm.nombre}</strong><br>
+                                <small style="color:${tieneTel ? 'var(--padel-volt)' : 'var(--padel-orange)'}; font-size:0.68rem;">
+                                    ${tieneTel ? '📱 ' + norm.telefono : '⚠️ Sin WhatsApp de 10 dígitos'}
+                                </small>
+                            </div>
+                            <button type="button" class="btn btn-sm ${tieneTel ? 'btn-green' : 'btn-dark'}" 
+                                ${tieneTel ? '' : 'disabled style="opacity:0.4;"'}
+                                onclick="enviarInvitacionJugador('${norm.nombre}', '${norm.telefono}')">
+                                Invitar <i class="fab fa-whatsapp"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById("modalInvitarRol").classList.add("active");
+        }
+
+        async function enviarInvitacionJugador(nombreJugador, telefono) {
+            if (!ligaActiva || !telefono) return;
+
+            const remitente = (usuarioActivo && usuarioActivo.displayName) ? usuarioActivo.displayName : "Organizador";
+            const invId = "inv_" + Date.now();
+            const rolTexto = (rolAInvitarActual === 'editor') ? "EDITOR" : "VISOR / ESPECTADOR";
+
+            const nuevaInvitacion = {
+                id: invId,
+                torneoId: ligaActiva.id,
+                torneoNombre: ligaActiva.nombre,
+                modo: modoSeleccionado || 'americano',
+                rol: rolAInvitarActual,
+                remitente: remitente,
+                fecha: new Date().toISOString().split("T")[0],
+                timestamp: Date.now(),
+                estado: "pendiente"
+            };
+
+            try {
+                showToast("Generando invitación...");
+                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/invitaciones/${telefono}/${invId}.json`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(nuevaInvitacion)
+                });
+
+                closeModal("modalInvitarRol");
+
+                const appUrl = window.location.origin + window.location.pathname;
+                const msg = `🎾 ¡Hola *${nombreJugador}*!\nTe he invitado como *${rolTexto}* a la liga *${ligaActiva.nombre}* en 11Padel Point Pro.\n\n📲 Abre la app con tu número registrado para aceptar el acceso:\n👉 ${appUrl}`;
+                const waUrl = `https://wa.me/52${telefono}?text=${encodeURIComponent(msg)}`;
+                abrirEnlaceWhatsAppDirecto(waUrl);
+
+                showToast("¡Invitación registrada y enviada por WhatsApp!");
+            } catch (err) {
+                console.error("Error al enviar invitación:", err);
+                showToast("Error de conexión al generar invitación", "error");
+            }
+        }
+
+        async function consultarInvitacionesUsuario(telefono) {
+            if (!telefono || telefono.length !== 10) return;
+            try {
+                const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/invitaciones/${telefono}.json`);
+                if (res.ok) {
+                    const data = await res.json();
+                    invitacionesPendientes = data ? Object.entries(data).map(([id, inv]) => ({ ...inv, idFirebase: id })) : [];
+                    actualizarBadgeNotificaciones();
+                }
+            } catch (err) {
+                console.warn("No se pudieron consultar invitaciones", err);
+            }
+        }
+
+        function actualizarBadgeNotificaciones() {
+            const badge = document.getElementById("badgeNotificacionesCount");
+            if (!badge) return;
+            const activas = invitacionesPendientes.filter(x => x.estado === "pendiente");
+            badge.style.display = activas.length > 0 ? "block" : "none";
+        }
+
+        async function abrirModalNotificaciones() {
+            const modal = document.getElementById("modalNotificaciones");
+            const cont = document.getElementById("listaNotificacionesContainer");
+            if (!modal || !cont) return;
+
+            const inputTel = document.getElementById("perfilTelefonoInput");
+            const tel = inputTel ? inputTel.value.trim() : "";
+
+            if (!tel || tel.length !== 10) {
+                cont.innerHTML = `
+                    <div style="text-align:center; padding:20px 10px; color:var(--padel-orange); font-size:0.78rem;">
+                        <i class="fas fa-exclamation-triangle fa-2x" style="margin-bottom:8px; display:block;"></i>
+                        Para recibir invitaciones vincula tu celular de 10 dígitos en la sección <strong>Cuenta</strong>.
+                    </div>`;
+                modal.classList.add("active");
+                return;
+            }
+
+            modal.classList.add("active");
+            cont.innerHTML = `<div style="text-align:center; padding:20px; color:var(--txt-dim); font-size:0.75rem;"><i class="fas fa-spinner fa-spin fa-2x" style="color:var(--padel-volt); margin-bottom:8px; display:block;"></i>Buscando invitaciones...</div>`;
+
+            await consultarInvitacionesUsuario(tel);
+
+            const pendientes = invitacionesPendientes.filter(x => x.estado === "pendiente");
+            if (pendientes.length === 0) {
+                cont.innerHTML = `
+                    <div style="text-align:center; padding:24px 10px; color:var(--txt-muted); font-size:0.78rem;">
+                        <i class="far fa-bell-slash fa-2x" style="color:var(--txt-dim); margin-bottom:8px; display:block;"></i>
+                        No tienes invitaciones pendientes por el momento.
+                    </div>`;
+                return;
+            }
+
+            cont.innerHTML = "";
+            pendientes.forEach(inv => {
+                const esEditor = (inv.rol === "editor");
+                const badgeRol = esEditor
+                    ? `<span style="background:rgba(0,230,118,0.15); color:var(--padel-volt); border:1px solid rgba(0,230,118,0.3); padding:2px 6px; border-radius:6px; font-size:0.65rem; font-weight:800;">EDITOR</span>`
+                    : `<span style="background:rgba(56,189,248,0.15); color:var(--padel-blue-glow); border:1px solid rgba(56,189,248,0.3); padding:2px 6px; border-radius:6px; font-size:0.65rem; font-weight:800;">VISOR</span>`;
+
+                cont.innerHTML += `
+                    <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:6px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:var(--txt-main); font-size:0.85rem;">${inv.torneoNombre || 'Liga / Torneo'}</strong>
+                            ${badgeRol}
+                        </div>
+                        <p style="font-size:0.73rem; color:var(--txt-muted); margin:0;">
+                            Invitado por: <strong style="color:var(--txt-main);">${inv.remitente || 'Organizador'}</strong>
+                        </p>
+                        <div style="display:flex; gap:6px; margin-top:6px;">
+                            <button type="button" class="btn btn-green btn-sm" style="flex:1; padding:6px 8px;" onclick="responderInvitacion('${inv.idFirebase}', '${inv.torneoId}', '${inv.rol}', true)">
+                                <i class="fas fa-check"></i> Aceptar
+                            </button>
+                            <button type="button" class="btn btn-dark btn-sm" style="flex:1; padding:6px 8px;" onclick="responderInvitacion('${inv.idFirebase}', '${inv.torneoId}', '${inv.rol}', false)">
+                                <i class="fas fa-times"></i> Rechazar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function responderInvitacion(idFirebase, torneoId, rol, aceptada) {
+            const inputTel = document.getElementById("perfilTelefonoInput");
+            const tel = inputTel ? inputTel.value.trim() : "";
+            if (!tel) return;
+
+            try {
+                if (aceptada) {
+                    showToast("Procesando acceso...");
+                    const campo = (rol === "editor") ? "editores" : "espectadores";
+                    await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/torneos_cloud/${torneoId}/${campo}/${tel}.json`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(true)
+                    });
+                }
+
+                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/invitaciones/${tel}/${idFirebase}.json`, {
+                    method: "DELETE"
+                });
+
+                showToast(aceptada ? "¡Invitación aceptada! Sincronizando..." : "Invitación rechazada");
+                await consultarInvitacionesUsuario(tel);
+                abrirModalNotificaciones();
+
+                if (aceptada) {
+                    sincronizarDatosGlobalesDesdeNube();
+                }
+            } catch (err) {
+                console.error("Error al responder invitación:", err);
+                showToast("Error al procesar la invitación", "error");
+            }
+        }
         async function guardarTelefonoPerfil() {
             if (!usuarioActivo) {
                 showToast("Debes iniciar sesión con Google primero", "error");

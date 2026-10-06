@@ -2152,6 +2152,15 @@
                     <button type="button" class="btn-mode-hero-action"><span>JUGAR</span> <i class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
+            <!-- BANNERS GRANDES PATROCINADORES 1 Y 2 -->
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:16px;">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" id="linkBannerGrande1" style="display:block; width:100%; height:90px; border-radius:14px; overflow:hidden; border:1px solid var(--border-glow); box-shadow:0 4px 14px rgba(0,0,0,0.4);">
+                    <img src="img/banner_patrocinador1.png" alt="Patrocinador 1" style="width:100%; height:100%; object-fit:cover; display:block;">
+                </a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" id="linkBannerGrande2" style="display:block; width:100%; height:90px; border-radius:14px; overflow:hidden; border:1px solid var(--border-glow); box-shadow:0 4px 14px rgba(0,0,0,0.4);">
+                    <img src="img/banner_patrocinador2.png" alt="Patrocinador 2" style="width:100%; height:100%; object-fit:cover; display:block;">
+                </a>
+            </div>
         </div>
 
         <!-- ==========================================
@@ -2193,6 +2202,15 @@
                     <div class="mode-info-title">Padrón de Jugadores Registrados</div>
                     <div class="mode-info-sub">Gestión de plantilla, teléfonos, categorías y perfiles.</div>
                 </div>
+            </div>
+            <!-- BANNERS GRANDES PATROCINADORES 3 Y 4 -->
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:16px;">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" id="linkBannerGrande3" style="display:block; width:100%; height:90px; border-radius:14px; overflow:hidden; border:1px solid var(--border-glow); box-shadow:0 4px 14px rgba(0,0,0,0.4);">
+                    <img src="img/banner_patrocinador3.png" alt="Patrocinador 3" style="width:100%; height:100%; object-fit:cover; display:block;">
+                </a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" id="linkBannerGrande4" style="display:block; width:100%; height:90px; border-radius:14px; overflow:hidden; border:1px solid var(--border-glow); box-shadow:0 4px 14px rgba(0,0,0,0.4);">
+                    <img src="img/banner_patrocinador4.png" alt="Patrocinador 4" style="width:100%; height:100%; object-fit:cover; display:block;">
+                </a>
             </div>
         </div>
 
@@ -2242,6 +2260,15 @@
                         VER TODO <i class="fas fa-arrow-right"></i>
                     </span>
                 </button>
+            </div>
+            <!-- BANNERS GRANDES PATROCINADORES 5 Y 6 -->
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:16px;">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" id="linkBannerGrande5" style="display:block; width:100%; height:90px; border-radius:14px; overflow:hidden; border:1px solid var(--border-glow); box-shadow:0 4px 14px rgba(0,0,0,0.4);">
+                    <img src="img/banner_patrocinador5.png" alt="Patrocinador 5" style="width:100%; height:100%; object-fit:cover; display:block;">
+                </a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" id="linkBannerGrande6" style="display:block; width:100%; height:90px; border-radius:14px; overflow:hidden; border:1px solid var(--border-glow); box-shadow:0 4px 14px rgba(0,0,0,0.4);">
+                    <img src="img/banner_patrocinador6.png" alt="Patrocinador 6" style="width:100%; height:100%; object-fit:cover; display:block;">
+                </a>
             </div>
         </div>
 
@@ -4142,9 +4169,12 @@
             if (footerSponsor) footerSponsor.textContent = `Patrocinado por: ${nomSponsor}`;
 
             for (let i = 1; i <= 6; i++) {
-                const btn = document.getElementById(`linkBanner${i}`);
-                if (btn) btn.href = normalizarUrl(appConfig[`banner${i}Url`]);
-            }
+             const btn = document.getElementById(`linkBanner${i}`);
+             if (btn) btn.href = normalizarUrl(appConfig[`banner${i}Url`]);
+
+             const btnGrande = document.getElementById(`linkBannerGrande${i}`);
+             if (btnGrande) btnGrande.href = normalizarUrl(appConfig[`banner${i}Url`]);
+         }
 
             const clubTxt = document.getElementById("newsClubName");
             if (clubTxt) clubTxt.innerHTML = `<i class="fas fa-bullhorn" style="color:var(--padel-blue-glow);"></i> <span>${appConfig.newsClub || 'Club Destacado'}</span>`;
@@ -5384,6 +5414,14 @@
             const cont = document.getElementById("pozoPlayersRondaContainer");
             cont.innerHTML = "";
 
+            const esVisor = (obtenerRolUsuarioEnLigaActual() === 'visor');
+            const disableAttr = esVisor ? 'disabled style="display:none;"' : '';
+            const readonlyAttr = esVisor ? 'readonly style="background:#0b1120 !important; cursor:default;"' : '';
+
+            // Ocultar botones inferiores si es visor
+            const btnAccionesPozo = document.querySelector("#pozoLivePartidosView > div:last-child");
+            if (btnAccionesPozo) btnAccionesPozo.style.display = esVisor ? "none" : "flex";
+
             jornadaActiva.convocados.forEach(p => {
                 if (rData[p] === undefined) rData[p] = 0;
                 const pts = rData[p];
@@ -5396,12 +5434,12 @@
                     <div>
                         <strong style="color:var(--txt-main); font-size:0.95rem;">${p}</strong>
                         <div style="font-size:0.72rem; color:var(--txt-muted); margin-top:2px;">Jornada: <strong style="color:var(--padel-volt); font-size:0.8rem;">${totalJornada} pts</strong></div>
-                        <button type="button" class="caguama-badge" style="margin-top:4px;" onclick="modificarCaguamaJugador('${p}', 1, ${n})" title="Toca para +1">🍺 ${cags}</button>
+                        <button type="button" class="caguama-badge" style="margin-top:4px;" ${esVisor ? 'disabled' : `onclick="modificarCaguamaJugador('${p}', 1,${n})"`} title="Caguamas">🍺 ${cags}</button>
                     </div>
                     <div class="score-ctrl">
-                        <button type="button" class="score-btn" onclick="modificarPuntosPozo(${n}, '${p}', -1)">−</button>
-                        <input type="number" class="score-in" value="${pts}" oninput="escribirPuntosPozo(${n}, '${p}', this.value)">
-                        <button type="button" class="score-btn" onclick="modificarPuntosPozo(${n}, '${p}', 1)">+</button>
+                        <button type="button" class="score-btn" ${disableAttr} onclick="modificarPuntosPozo(${n}, '${p}', -1)">−</button>
+                        <input type="number" class="score-in" value="${pts}" ${readonlyAttr} oninput="escribirPuntosPozo(${n}, '${p}', this.value)">
+                        <button type="button" class="score-btn" ${disableAttr} onclick="modificarPuntosPozo(${n}, '${p}', 1)">+</button>
                     </div>
                 </div>`;
             });
@@ -5456,18 +5494,33 @@
             cont.innerHTML = "";
             if (!jornadaActiva.caguamas) jornadaActiva.caguamas = {};
 
+            const esVisor = (obtenerRolUsuarioEnLigaActual() === 'visor');
+
+            // Ocultar botones de acción de ronda si es visor
+            const btnAcciones = document.querySelector("#amLivePartidosView > div:last-child");
+            if (btnAcciones) btnAcciones.style.display = esVisor ? "none" : "flex";
+
             const noticeCont = document.getElementById("amFormatNoticeContainer");
             if (noticeCont) {
-                const totalPlayers = (jornadaActiva.convocados || []).length;
-                if (modoSeleccionado === 'americano' && totalPlayers === 6) {
+                if (esVisor) {
                     noticeCont.innerHTML = `
-                        <div class="format-alert-box">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <div><strong>Fixture Equilibrado:</strong> Con <strong>6 jugadores</strong> se disputan <strong>6 rondas</strong> exactas para que todos jueguen <strong>4 partidos</strong> (2 descansos por persona).</div>
+                        <div style="background:rgba(56,189,248,0.12); border:1.5px solid var(--padel-blue-glow); border-radius:12px; padding:10px 14px; margin-bottom:12px; display:flex; align-items:center; gap:8px; color:var(--padel-blue-glow); font-size:0.75rem; font-weight:800;">
+                            <i class="fas fa-eye fa-lg"></i>
+                            <span>MODO VISOR ACTIVO: Estás viendo los marcadores en tiempo real (solo lectura).</span>
                         </div>
                     `;
                 } else {
-                    noticeCont.innerHTML = "";
+                    const totalPlayers = (jornadaActiva.convocados || []).length;
+                    if (modoSeleccionado === 'americano' && totalPlayers === 6) {
+                        noticeCont.innerHTML = `
+                            <div class="format-alert-box">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <div><strong>Fixture Equilibrado:</strong> Con <strong>6 jugadores</strong> se disputan <strong>6 rondas</strong> exactas para que todos jueguen <strong>4 partidos</strong> (2 descansos por persona).</div>
+                            </div>
+                        `;
+                    } else {
+                        noticeCont.innerHTML = "";
+                    }
                 }
             }
 
@@ -5483,6 +5536,9 @@
                 const cags2A = jornadaActiva.caguamas[p2A] || 0;
                 const cags2B = jornadaActiva.caguamas[p2B] || 0;
 
+                const disableAttr = esVisor ? 'disabled style="display:none;"' : '';
+                const readonlyAttr = esVisor ? 'readonly style="background:#0b1120 !important; cursor:default;"' : '';
+
                 cont.innerHTML += `
                 <div class="padel-court-card">
                     <span class="court-title-badge"><i class="fas fa-layer-group"></i> PISTA ${idx + 1}</span>
@@ -5490,17 +5546,17 @@
                         <div class="team-players-column">
                             <div class="player-row-unit">
                                 <span class="player-name-txt">${p1A}</span>
-                                <button type="button" class="btn-caguama-ind" onclick="modificarCaguamaJugador('${p1A}', 1, ${n})" title="Toca para +1 caguama">🍺 ${cags1A}</button>
+                                <button type="button" class="btn-caguama-ind" ${esVisor ? 'disabled' : `onclick="modificarCaguamaJugador('${p1A}', 1,${n})"`} title="Caguamas">🍺 ${cags1A}</button>
                             </div>
                             <div class="player-row-unit">
                                 <span class="player-name-txt">${p1B}</span>
-                                <button type="button" class="btn-caguama-ind" onclick="modificarCaguamaJugador('${p1B}', 1, ${n})" title="Toca para +1 caguama">🍺 ${cags1B}</button>
+                                <button type="button" class="btn-caguama-ind" ${esVisor ? 'disabled' : `onclick="modificarCaguamaJugador('${p1B}', 1,${n})"`} title="Caguamas">🍺 ${cags1B}</button>
                             </div>
                         </div>
                         <div class="score-ctrl">
-                            <button type="button" class="score-btn" onclick="cambiarPuntos8Loco(${n - 1}, ${idx}, 1, -1)">−</button>
-                            <input type="number" class="score-in" value="${m.score1 !== undefined ? m.score1 : 0}" oninput="escribirPuntos8Loco(${n - 1}, ${idx}, 1, this.value)">
-                            <button type="button" class="score-btn" onclick="cambiarPuntos8Loco(${n - 1}, ${idx}, 1, 1)">+</button>
+                            <button type="button" class="score-btn" ${disableAttr} onclick="cambiarPuntos8Loco(${n - 1}, ${idx}, 1, -1)">−</button>
+                            <input type="number" class="score-in" value="${m.score1 !== undefined ? m.score1 : 0}" ${readonlyAttr} oninput="escribirPuntos8Loco(${n - 1}, ${idx}, 1, this.value)">
+                            <button type="button" class="score-btn" ${disableAttr} onclick="cambiarPuntos8Loco(${n - 1}, ${idx}, 1, 1)">+</button>
                         </div>
                     </div>
                     <div class="padel-court-net"></div>
@@ -5508,17 +5564,17 @@
                         <div class="team-players-column">
                             <div class="player-row-unit">
                                 <span class="player-name-txt">${p2A}</span>
-                                <button type="button" class="btn-caguama-ind" onclick="modificarCaguamaJugador('${p2A}', 1, ${n})" title="Toca para +1 caguama">🍺 ${cags2A}</button>
+                                <button type="button" class="btn-caguama-ind" ${esVisor ? 'disabled' : `onclick="modificarCaguamaJugador('${p2A}', 1,${n})"`} title="Caguamas">🍺 ${cags2A}</button>
                             </div>
                             <div class="player-row-unit">
                                 <span class="player-name-txt">${p2B}</span>
-                                <button type="button" class="btn-caguama-ind" onclick="modificarCaguamaJugador('${p2B}', 1, ${n})" title="Toca para +1 caguama">🍺 ${cags2B}</button>
+                                <button type="button" class="btn-caguama-ind" ${esVisor ? 'disabled' : `onclick="modificarCaguamaJugador('${p2B}', 1,${n})"`} title="Caguamas">🍺 ${cags2B}</button>
                             </div>
                         </div>
                         <div class="score-ctrl">
-                            <button type="button" class="score-btn" onclick="cambiarPuntos8Loco(${n - 1}, ${idx}, 2, -1)">−</button>
-                            <input type="number" class="score-in" value="${m.score2 !== undefined ? m.score2 : 0}" oninput="escribirPuntos8Loco(${n - 1}, ${idx}, 2, this.value)">
-                            <button type="button" class="score-btn" onclick="cambiarPuntos8Loco(${n - 1}, ${idx}, 2, 1)">+</button>
+                            <button type="button" class="score-btn" ${disableAttr} onclick="cambiarPuntos8Loco(${n - 1}, ${idx}, 2, -1)">−</button>
+                            <input type="number" class="score-in" value="${m.score2 !== undefined ? m.score2 : 0}" ${readonlyAttr} oninput="escribirPuntos8Loco(${n - 1}, ${idx}, 2, this.value)">
+                            <button type="button" class="score-btn" ${disableAttr} onclick="cambiarPuntos8Loco(${n - 1}, ${idx}, 2, 1)">+</button>
                         </div>
                     </div>
                 </div>`;
@@ -6872,6 +6928,19 @@
         let rolAInvitarActual = 'editor';
         let invitacionesPendientes = [];
 
+        function obtenerRolUsuarioEnLigaActual() {
+            if (!ligaActiva) return 'propietario';
+            const inputTel = document.getElementById("perfilTelefonoInput");
+            const miTel = inputTel ? inputTel.value.trim() : "";
+            
+            // Si el torneo no tiene editores o espectadores definidos aún, se asume propietario local
+            const editores = ligaActiva.editores || {};
+            const espectadores = ligaActiva.espectadores || {};
+
+            if (espectadores[miTel]) return 'visor';
+            if (editores[miTel]) return 'editor';
+            return 'propietario';
+        }
         function abrirModalInvitarRol(rol) {
             if (!ligaActiva) {
                 showToast("Debes abrir una liga primero", "error");

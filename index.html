@@ -5230,51 +5230,48 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             }
 
             // ==========================================
-            // CASO 2: 10 JUGADORES (2 Pistas, 5 Rondas)
-            // Juegan 8 y descansan 2 por ronda.
-            // Todos juegan 4 partidos y descansan 1.
+            // CASO 10 JUGADORES (Americano Completo - 12 Rondas)
+            // Todos juegan 9 partidos con parejas rotativas.
+            // Ronda 12: Nivelación especial para los 2 rezagados.
             // ==========================================
             if (n === 10) {
                 const c10 = [
-                    // Ronda 1: descansan 8 y 9
+                    // Ronda 1: descansan 8, 9
+                    { matches: [{ p1: [j[0], j[1]], p2: [j[2], j[3]], score1: 0, score2: 0, jugado: false }, { p1: [j[4], j[5]], p2: [j[6], j[7]], score1: 0, score2: 0, jugado: false }], descansan: [j[8], j[9]] },
+                    // Ronda 2: descansan 0, 7
+                    { matches: [{ p1: [j[8], j[2]], p2: [j[1], j[4]], score1: 0, score2: 0, jugado: false }, { p1: [j[9], j[3]], p2: [j[5], j[6]], score1: 0, score2: 0, jugado: false }], descansan: [j[0], j[7]] },
+                    // Ronda 3: descansan 1, 6
+                    { matches: [{ p1: [j[0], j[2]], p2: [j[8], j[5]], score1: 0, score2: 0, jugado: false }, { p1: [j[7], j[3]], p2: [j[9], j[4]], score1: 0, score2: 0, jugado: false }], descansan: [j[1], j[6]] },
+                    // Ronda 4: descansan 2, 5
+                    { matches: [{ p1: [j[1], j[0]], p2: [j[6], j[9]], score1: 0, score2: 0, jugado: false }, { p1: [j[8], j[7]], p2: [j[3], j[4]], score1: 0, score2: 0, jugado: false }], descansan: [j[2], j[5]] },
+                    // Ronda 5: descansan 3, 4
+                    { matches: [{ p1: [j[2], j[7]], p2: [j[0], j[6]], score1: 0, score2: 0, jugado: false }, { p1: [j[1], j[9]], p2: [j[8], j[5]], score1: 0, score2: 0, jugado: false }], descansan: [j[3], j[4]] },
+                    // Ronda 6: descansan 8, 0
+                    { matches: [{ p1: [j[3], j[6]], p2: [j[2], j[5]], score1: 0, score2: 0, jugado: false }, { p1: [j[4], j[7]], p2: [j[1], j[9]], score1: 0, score2: 0, jugado: false }], descansan: [j[8], j[0]] },
+                    // Ronda 7: descansan 9, 1
+                    { matches: [{ p1: [j[8], j[3]], p2: [j[0], j[4]], score1: 0, score2: 0, jugado: false }, { p1: [j[5], j[7]], p2: [j[2], j[6]], score1: 0, score2: 0, jugado: false }], descansan: [j[9], j[1]] },
+                    // Ronda 8: descansan 2, 8
+                    { matches: [{ p1: [j[9], j[0]], p2: [j[3], j[5]], score1: 0, score2: 0, jugado: false }, { p1: [j[1], j[7]], p2: [j[4], j[6]], score1: 0, score2: 0, jugado: false }], descansan: [j[2], j[8]] },
+                    // Ronda 9: descansan 3, 9
+                    { matches: [{ p1: [j[8], j[1]], p2: [j[2], j[4]], score1: 0, score2: 0, jugado: false }, { p1: [j[0], j[5]], p2: [j[6], j[7]], score1: 0, score2: 0, jugado: false }], descansan: [j[3], j[9]] },
+                    // Ronda 10: descansan 4, 6
+                    { matches: [{ p1: [j[9], j[2]], p2: [j[8], j[0]], score1: 0, score2: 0, jugado: false }, { p1: [j[3], j[1]], p2: [j[5], j[7]], score1: 0, score2: 0, jugado: false }], descansan: [j[4], j[6]] },
+                    // Ronda 11: descansan 5, 7
+                    { matches: [{ p1: [j[4], j[1]], p2: [j[8], j[6]], score1: 0, score2: 0, jugado: false }, { p1: [j[9], j[3]], p2: [j[0], j[2]], score1: 0, score2: 0, jugado: false }], descansan: [j[5], j[7]] },
+                    // Ronda 12: RONDA ESPECIAL DE NIVELACIÓN
+                    // Rezagan j[8] y j[9] que descansaron 3 veces. Se enfrentan como rivales con 2 comodines (j[0] y j[1]).
                     {
-                        matches: [
-                            { p1: [j[0], j[1]], p2: [j[2], j[3]], score1: 0, score2: 0, jugado: false },
-                            { p1: [j[4], j[5]], p2: [j[6], j[7]], score1: 0, score2: 0, jugado: false }
-                        ],
-                        descansan: [j[8], j[9]]
-                    },
-                    // Ronda 2: descansan 6 y 7
-                    {
-                        matches: [
-                            { p1: [j[8], j[2]], p2: [j[0], j[4]], score1: 0, score2: 0, jugado: false },
-                            { p1: [j[9], j[3]], p2: [j[1], j[5]], score1: 0, score2: 0, jugado: false }
-                        ],
-                        descansan: [j[6], j[7]]
-                    },
-                    // Ronda 3: descansan 4 y 5
-                    {
-                        matches: [
-                            { p1: [j[6], j[0]], p2: [j[8], j[3]], score1: 0, score2: 0, jugado: false },
-                            { p1: [j[7], j[1]], p2: [j[9], j[2]], score1: 0, score2: 0, jugado: false }
-                        ],
-                        descansan: [j[4], j[5]]
-                    },
-                    // Ronda 4: descansan 2 y 3
-                    {
-                        matches: [
-                            { p1: [j[4], j[7]], p2: [j[6], j[9]], score1: 0, score2: 0, jugado: false },
-                            { p1: [j[5], j[0]], p2: [j[8], j[1]], score1: 0, score2: 0, jugado: false }
-                        ],
-                        descansan: [j[2], j[3]]
-                    },
-                    // Ronda 5: descansan 0 y 1
-                    {
-                        matches: [
-                            { p1: [j[2], j[6]], p2: [j[5], j[8]], score1: 0, score2: 0, jugado: false },
-                            { p1: [j[3], j[7]], p2: [j[4], j[9]], score1: 0, score2: 0, jugado: false }
-                        ],
-                        descansan: [j[0], j[1]]
+                        esRondaEspecial: true,
+                        jugadoresValidos: [j[8], j[9]],
+                        jugadoresComodin: [j[0], j[1]],
+                        matches: [{
+                            p1: [j[8], j[0]], // j[8] compite, j[0] es comodín
+                            p2: [j[9], j[1]], // j[9] compite, j[1] es comodín
+                            score1: 0,
+                            score2: 0,
+                            jugado: false
+                        }],
+                        descansan: [j[2], j[3], j[4], j[5], j[6], j[7]]
                     }
                 ];
                 return c10;
@@ -5749,6 +5746,18 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                         <div style="background:rgba(56,189,248,0.12); border:1.5px solid var(--padel-blue-glow); border-radius:12px; padding:10px 14px; margin-bottom:12px; display:flex; align-items:center; gap:8px; color:var(--padel-blue-glow); font-size:0.75rem; font-weight:800;">
                             <i class="fas fa-eye fa-lg"></i>
                             <span>MODO VISOR ACTIVO: Estás viendo los marcadores en tiempo real (solo lectura).</span>
+                        </div>
+                    `;
+                } else if (curr.esRondaEspecial) {
+                    noticeCont.innerHTML = `
+                        <div style="background:rgba(245,158,11,0.2); border:2px solid var(--padel-orange); border-radius:12px; padding:12px 16px; margin-bottom:14px; text-align:center;">
+                            <span style="color:var(--padel-orange); font-size:0.95rem; font-weight:900; letter-spacing:1px; display:block; margin-bottom:4px;">
+                                ⚡ RONDA ESPECIAL DE NIVELACIÓN (RONDA 12)
+                            </span>
+                            <p style="font-size:0.75rem; color:#fef3c7; line-height:1.4; margin:0;">
+                                Partida exclusiva para nivelar partidos jugados: <strong>${curr.jugadoresValidos.join(' y ')}</strong> disputan sus puntos faltantes.<br>
+                                <span style="color:var(--padel-volt); font-weight:800;">* Los compañeros comodines (${curr.jugadoresComodin.join(' y ')}) NO sumarán puntos a la tabla general.</span>
+                            </p>
                         </div>
                     `;
                 } else {

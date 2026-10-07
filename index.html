@@ -2,6 +2,46 @@
 <html lang="es">
 
 <head>
+    <script>
+    (function() {
+      const TARGET_DOMAIN = "https://11padelpoint.com";
+
+      if (window.location.hostname.includes("github.io")) {
+        try {
+          const payload = {};
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            payload[key] = localStorage.getItem(key);
+          }
+          const encoded = encodeURIComponent(JSON.stringify(payload));
+          window.location.replace(`${TARGET_DOMAIN}/#migrated_data=${encoded}`);
+        } catch (e) {
+          window.location.replace(TARGET_DOMAIN);
+        }
+        return;
+      }
+
+      if (window.location.hash.includes("migrated_data=")) {
+        try {
+          const hash = window.location.hash.substring(1);
+          const params = new URLSearchParams(hash);
+          const rawData = params.get("migrated_data");
+          if (rawData) {
+            const data = JSON.parse(decodeURIComponent(rawData));
+            Object.keys(data).forEach(key => {
+              if (!localStorage.getItem(key)) {
+                localStorage.setItem(key, data[key]);
+              }
+            });
+          }
+        } catch (err) {
+          console.error("Error al importar datos locales:", err);
+        } finally {
+          history.replaceState(null, document.title, window.location.pathname + window.location.search);
+        }
+      }
+    })();
+  </script>
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">

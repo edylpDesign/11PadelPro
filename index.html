@@ -4396,8 +4396,16 @@
         }
 
         function backToHubModos() {
-            // 1. Ocultar todas las subpantallas internas
-            const subVistas = ['viewLigasModo', 'viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
+            // 1. Ocultar todas las subpantallas (incluido el Padrón)
+            const subVistas = [
+                'viewPadron', 
+                'viewLigasModo', 
+                'viewLigaDetalle', 
+                'viewPartidoVivo', 
+                'viewJornadaPozoVivo', 
+                'viewJornada8LocoVivo', 
+                'viewAdmin'
+            ];
             subVistas.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -4406,23 +4414,29 @@
                 }
             });
 
+            // 2. Ocultar botón flotante de WhatsApp
             const waFloat = document.getElementById('globalFloatingWaBtn');
             if (waFloat) waFloat.classList.add('hidden');
 
-            // 2. Identificar qué botón de la barra inferior estaba activo
-            const btnActivo = document.querySelector('.bottom-nav-item.active');
-            let seccionDestino = 'jugar';
-
-            if (btnActivo) {
-                const clickAttr = btnActivo.getAttribute('onclick') || '';
-                if (clickAttr.includes('explorar')) seccionDestino = 'explorar';
-                else if (clickAttr.includes('inicio')) seccionDestino = 'inicio';
-                else if (clickAttr.includes('perfil')) seccionDestino = 'perfil';
-                else if (clickAttr.includes('torneo_oficial')) seccionDestino = 'torneo_oficial';
+            // 3. Restaurar y mostrar la sección JUGAR (donde están tus ligas y padrón)
+            const secJugar = document.getElementById('secJugar');
+            if (secJugar) {
+                secJugar.classList.remove('hidden');
+                secJugar.style.display = 'block';
             }
 
-            // 3. Cambiar de sección de forma limpia con el controlador oficial
-            cambiarSeccionApp(seccionDestino);
+            // Si tienes el hub de modos principal, asegurarlo visible
+            const hubModos = document.getElementById('hubModos');
+            if (hubModos) {
+                hubModos.classList.remove('hidden');
+                hubModos.style.display = 'block';
+            }
+
+            // 4. Asegurar que el icono de Jugar en la barra inferior quede activo
+            document.querySelectorAll('.bottom-nav-item').forEach(it => it.classList.remove('active'));
+            const btnJugarNav = document.querySelector('.bottom-nav-item:nth-child(2)');
+            if (btnJugarNav) btnJugarNav.classList.add('active');
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 

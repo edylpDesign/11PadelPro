@@ -2865,22 +2865,36 @@
             </div>
 
             <div id="individualConfigZone">
-                <div
-                    style="background:var(--bg-card-subtle); padding:12px; border-radius:12px; margin:12px 0; border:1px solid var(--border-glow);">
-                    <span style="font-size:0.75rem; font-weight:800; color:var(--txt-muted);">Registro rápido al
-                        vuelo:</span>
-                    <div style="display:flex; gap:6px; margin-top:6px;">
-                        <input type="text" id="inputRegistroExpress" placeholder="Nombre y Apellido" style="margin:0;">
-                        <button type="button" class="btn btn-sm btn-green"
-                            onclick="registrarJugadorExpress()">+</button>
-                    </div>
-                </div>
-                <p style="font-size:0.75rem; font-weight:800; color:var(--txt-muted); margin-bottom:6px;">Selecciona
-                    Convocados (<span id="countConvocados" style="color:var(--padel-volt);">0</span>):</p>
-                <div id="pillsConvocadosContainer"
-                    style="display:flex; flex-wrap:wrap; gap:6px; max-height:140px; overflow-y:auto; margin-bottom:14px;">
-                </div>
-            </div>
+             <div
+                 style="background:var(--bg-card-subtle); padding:12px; border-radius:12px; margin:12px 0; border:1px solid var(--border-glow);">
+                 <span style="font-size:0.75rem; font-weight:800; color:var(--txt-muted);">Registro rápido al vuelo:</span>
+                 <div style="display:flex; gap:6px; margin-top:6px;">
+                     <input type="text" id="inputRegistroExpress" placeholder="Nombre y Apellido" style="margin:0;">
+                     <button type="button" class="btn btn-sm btn-green" onclick="registrarJugadorExpress()">+</button>
+                 </div>
+             </div>
+
+             <!-- BARRA DE BÚSQUEDA RÁPIDA -->
+             <div style="margin-bottom:10px;">
+                 <div style="position:relative;">
+                     <input type="text" id="inputBuscarJugadorConvocatoria" placeholder="🔍 Buscar jugador en el padrón..." 
+                            oninput="filtrarJugadoresConvocatoria(this.value)"
+                            style="margin-top:0; padding-left:34px; background:#0b1120; border-radius:10px; font-size:0.8rem;">
+                     <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--txt-dim); font-size:0.75rem;"></i>
+                 </div>
+             </div>
+
+             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                 <p style="font-size:0.75rem; font-weight:800; color:var(--txt-muted); margin:0;">
+                     Convocados elegidos: (<strong id="countConvocados" style="color:var(--padel-volt);">0</strong>)
+                 </p>
+                 <small style="color:var(--txt-dim); font-size:0.68rem;">Toca para sumar o quitar</small>
+             </div>
+
+             <div id="pillsConvocadosContainer"
+                 style="display:flex; flex-wrap:wrap; gap:6px; max-height:160px; overflow-y:auto; margin-bottom:14px; padding:4px; background:rgba(0,0,0,0.15); border-radius:10px;">
+             </div>
+         </div>
 
             <div style="display:flex; gap:8px; margin-top:14px;">
                 <button type="button" class="btn btn-dark btn-sm" style="flex:1; padding:12px;"
@@ -5020,102 +5034,75 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
         let convocadosSeleccionados = [];
         let parejasFijasSeleccionadas = [];
 
-        function abrirModalNuevaJornada() {
-            document.getElementById("jornadaNombreInput").value = `Jornada ${(ligaActiva.jornadas || []).length + 1}`;
-            const isTeams = modoSeleccionado === 'teams';
-            document.getElementById("teamsConfigZone").classList.toggle("hidden", !isTeams);
-            document.getElementById("individualConfigZone").classList.toggle("hidden", isTeams);
-            document.getElementById("modalJornadaTitulo").textContent = isTeams ? "Convocatoria por Parejas Fijas" : "Convocatoria de Jornada";
+        let filtroBusquedaConvocados = "";
 
-            if (isTeams) {
-                parejasFijasSeleccionadas = [];
-                llenarSelectoresPadron(["selectTeamP1", "selectTeamP2"]);
-                renderParejasFijasModal();
-            } else {
-                const d = getUserData();
-                convocadosSeleccionados = (d.jugadores || []).map(j => obtenerNombreJugador(j));
-                renderPills();
-            }
-            document.getElementById("modalNuevaJornada").classList.add("active");
-        }
+     function abrirModalNuevaJornada() {
+         document.getElementById("jornadaNombreInput").value = `Jornada ${(ligaActiva.jornadas || []).length + 1}`;
+         const isTeams = modoSeleccionado === 'teams';
+         document.getElementById("teamsConfigZone").classList.toggle("hidden", !isTeams);
+         document.getElementById("individualConfigZone").classList.toggle("hidden", isTeams);
+         document.getElementById("modalJornadaTitulo").textContent = isTeams ? "Convocatoria por Parejas Fijas" : "Convocatoria de Jornada";
 
-        function agregarParejaFijaExpress() {
-            const p1 = document.getElementById("teamInputP1").value.trim();
-            const p2 = document.getElementById("teamInputP2").value.trim();
-            if (!p1 || !p2) return showToast("Ingresa los 2 jugadores de la pareja", "error");
+         if (isTeams) {
+             parejasFijasSeleccionadas = [];
+             llenarSelectoresPadron(["selectTeamP1", "selectTeamP2"]);
+             renderParejasFijasModal();
+         } else {
+             // Inicia vacío: 0 seleccionados para elegir de 1 en 1
+             convocadosSeleccionados = [];
+             filtroBusquedaConvocados = "";
+             const inpBuscar = document.getElementById("inputBuscarJugadorConvocatoria");
+             if (inpBuscar) inpBuscar.value = "";
+             renderPills();
+         }
+         document.getElementById("modalNuevaJornada").classList.add("active");
+     }
 
-            const d = getUserData();
-            let cambio = false;
-            [p1, p2].forEach(nom => {
-                const yaExiste = (d.jugadores || []).some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
-                if (!yaExiste) {
-                    d.jugadores.push({ nombre: nom, telefono: "", categoria: "Sin Categoría" });
-                    cambio = true;
-                }
-            });
-            if (cambio) saveUserData(d);
+     function filtrarJugadoresConvocatoria(termino) {
+         filtroBusquedaConvocados = (termino || "").toLowerCase().trim();
+         renderPills();
+     }
 
-            parejasFijasSeleccionadas.push([p1, p2]);
-            document.getElementById("teamInputP1").value = "";
-            document.getElementById("teamInputP2").value = "";
-            llenarSelectoresPadron(["selectTeamP1", "selectTeamP2"]);
-            renderParejasFijasModal();
-        }
+     function renderPills() {
+         const d = getUserData();
+         const cont = document.getElementById("pillsConvocadosContainer");
+         if (!cont) return;
+         cont.innerHTML = "";
 
-        function borrarParejaFijaModal(idx) {
-            parejasFijasSeleccionadas.splice(idx, 1);
-            renderParejasFijasModal();
-        }
+         const lista = d.jugadores || [];
+         if (lista.length === 0) {
+             cont.innerHTML = `<span style="font-size:0.75rem; color:var(--txt-dim); padding:8px;">No hay jugadores en el padrón. Usa el registro express arriba.</span>`;
+             document.getElementById("countConvocados").textContent = "0";
+             return;
+         }
 
-        function renderParejasFijasModal() {
-            const cont = document.getElementById("listaParejasFijasContainer");
-            const count = document.getElementById("countTeamsRegistrados");
-            if (count) count.textContent = parejasFijasSeleccionadas.length;
-            if (!cont) return;
-            cont.innerHTML = "";
+         // Filtrar según lo que se va escribiendo en la barra de búsqueda
+         const filtrados = lista.filter(item => {
+             const nom = obtenerNombreJugador(item).toLowerCase();
+             return nom.includes(filtroBusquedaConvocados);
+         });
 
-            if (parejasFijasSeleccionadas.length === 0) {
-                cont.innerHTML = "<p style='color:var(--txt-dim); font-size:0.75rem; text-align:center;'>Añade al menos 3 parejas para generar el fixture.</p>";
-                return;
-            }
+         if (filtrados.length === 0) {
+             cont.innerHTML = `<span style="font-size:0.75rem; color:var(--txt-dim); padding:8px;">No se encontraron jugadores con "${filtroBusquedaConvocados}".</span>`;
+         } else {
+             filtrados.forEach(item => {
+                 const j = obtenerNombreJugador(item);
+                 const sel = convocadosSeleccionados.includes(j);
+                 cont.innerHTML += `<div class="chip-pill ${sel ? 'active' : ''}" onclick="togglePill('${j}')">${sel ? '✓ ' : '+ '}${j}</div>`;
+             });
+         }
 
-            parejasFijasSeleccionadas.forEach((pair, idx) => {
-                cont.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:#0b1120; border:1px solid var(--border-glow); padding:6px 10px; border-radius:8px;">
-                        <span style="font-size:0.8rem; font-weight:800; color:var(--txt-main);">Dupla ${idx + 1}: <span style="color:#d8b4fe;">${pair.join(' & ')}</span></span>
-                        <button type="button" class="btn btn-sm btn-danger" style="padding:2px 6px;" onclick="borrarParejaFijaModal(${idx})">🗑</button>
-                    </div>
-                `;
-            });
-        }
+         document.getElementById("countConvocados").textContent = convocadosSeleccionados.length;
+     }
 
-        function registrarJugadorExpress() {
-            const inp = document.getElementById("inputRegistroExpress"); const nom = inp.value.trim();
-            if (!nom) return; const d = getUserData();
-            const yaExiste = (d.jugadores || []).some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
-            if (!yaExiste) {
-                d.jugadores.push({ nombre: nom, telefono: "", categoria: "Sin Categoría" });
-                saveUserData(d);
-            }
-            if (!convocadosSeleccionados.includes(nom)) convocadosSeleccionados.push(nom);
-            inp.value = ""; renderPills();
-        }
-
-        function renderPills() {
-            const d = getUserData(); const cont = document.getElementById("pillsConvocadosContainer"); cont.innerHTML = "";
-            (d.jugadores || []).forEach(item => {
-                const j = obtenerNombreJugador(item);
-                const sel = convocadosSeleccionados.includes(j);
-                cont.innerHTML += `<div class="chip-pill ${sel ? 'active' : ''}" onclick="togglePill('${j}')">${sel ? '✓ ' : ''}${j}</div>`;
-            });
-            document.getElementById("countConvocados").textContent = convocadosSeleccionados.length;
-        }
-
-        function togglePill(nom) {
-            if (convocadosSeleccionados.includes(nom)) convocadosSeleccionados = convocadosSeleccionados.filter(x => x !== nom);
-            else convocadosSeleccionados.push(nom);
-            renderPills();
-        }
+     function togglePill(nom) {
+         if (convocadosSeleccionados.includes(nom)) {
+             convocadosSeleccionados = convocadosSeleccionados.filter(x => x !== nom);
+         } else {
+             convocadosSeleccionados.push(nom);
+         }
+         renderPills();
+     }
 
         function generarRondasTeams(teams) {
             let pool = [...teams];
@@ -5147,83 +5134,170 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
         }
 
         function generarRondas8Loco(players) {
-            const n = players.length;
+            const j = (players || []).map(p => (typeof p === 'string' ? p : (p.nombre || ''))).filter(Boolean);
+            const n = j.length;
+            if (n < 4) return [];
 
-            // CASO ESPECÍFICO: 6 JUGADORES
+            // ==========================================
+            // CASO 1: 6 JUGADORES (1 Pista, 6 Rondas)
+            // Cada uno juega 4 partidos y descansa 2
+            // ==========================================
             if (n === 6) {
-            // Cada jugador juega 4 partidos y descansa 2 partidos
-            const combinaciones6 = [
-                { p1: [jugadores[0], jugadores[1]], p2: [jugadores[2], jugadores[3]], descansan: [jugadores[4], jugadores[5]] },
-                { p1: [jugadores[4], jugadores[2]], p2: [jugadores[0], jugadores[5]], descansan: [jugadores[1], jugadores[3]] },
-                { p1: [jugadores[1], jugadores[3]], p2: [jugadores[4], jugadores[5]], descansan: [jugadores[0], jugadores[2]] },
-                { p1: [jugadores[0], jugadores[4]], p2: [jugadores[1], jugadores[2]], descansan: [jugadores[3], jugadores[5]] },
-                { p1: [jugadores[2], jugadores[5]], p2: [jugadores[3], jugadores[4]], descansan: [jugadores[0], jugadores[1]] },
-                { p1: [jugadores[0], jugadores[3]], p2: [jugadores[1], jugadores[5]], descansan: [jugadores[2], jugadores[4]] }
-            ];
+                const c6 = [
+                    { p1: [j[0], j[1]], p2: [j[2], j[3]], descansan: [j[4], j[5]] },
+                    { p1: [j[4], j[2]], p2: [j[0], j[5]], descansan: [j[1], j[3]] },
+                    { p1: [j[1], j[3]], p2: [j[4], j[5]], descansan: [j[0], j[2]] },
+                    { p1: [j[0], j[4]], p2: [j[1], j[2]], descansan: [j[3], j[5]] },
+                    { p1: [j[2], j[5]], p2: [j[3], j[4]], descansan: [j[0], j[1]] },
+                    { p1: [j[0], j[3]], p2: [j[1], j[5]], descansan: [j[2], j[4]] }
+                ];
+                return c6.map(r => ({
+                    matches: [{ p1: r.p1, p2: r.p2, score1: 0, score2: 0, jugado: false }],
+                    descansan: r.descansan
+                }));
+            }
 
-            return combinaciones6.map(c => ({
-                matches: [{ p1: c.p1, p2: c.p2, score1: 0, score2: 0, jugado: false }],
-                descansan: c.descansan
-            }));
-        }
-
-            // CASO ESPECÍFICO: 9 JUGADORES (2 pistas completas, 1 descanso por ronda rotativo)
-            if (n === 9) {
-                const r = [];
-                for (let round = 0; round < 9; round++) {
-                    const descansan = [players[round]];
-                    const activos = players.filter((_, idx) => idx !== round);
-                    r.push({
+            // ==========================================
+            // CASO 2: 10 JUGADORES (2 Pistas, 5 Rondas)
+            // Juegan 8 y descansan 2 por ronda.
+            // Todos juegan 4 partidos y descansan 1.
+            // ==========================================
+            if (n === 10) {
+                const c10 = [
+                    // Ronda 1: descansan 8 y 9
+                    {
                         matches: [
-                            { p1: [activos[0], activos[1]], p2: [activos[2], activos[3]], score1: 0, score2: 0, jugado: false },
-                            { p1: [activos[4], activos[5]], p2: [activos[6], activos[7]], score1: 0, score2: 0, jugado: false }
+                            { p1: [j[0], j[1]], p2: [j[2], j[3]], score1: 0, score2: 0, jugado: false },
+                            { p1: [j[4], j[5]], p2: [j[6], j[7]], score1: 0, score2: 0, jugado: false }
                         ],
-                        descansan: descansan
-                    });
-                }
-                return r;
+                        descansan: [j[8], j[9]]
+                    },
+                    // Ronda 2: descansan 6 y 7
+                    {
+                        matches: [
+                            { p1: [j[8], j[2]], p2: [j[0], j[4]], score1: 0, score2: 0, jugado: false },
+                            { p1: [j[9], j[3]], p2: [j[1], j[5]], score1: 0, score2: 0, jugado: false }
+                        ],
+                        descansan: [j[6], j[7]]
+                    },
+                    // Ronda 3: descansan 4 y 5
+                    {
+                        matches: [
+                            { p1: [j[6], j[0]], p2: [j[8], j[3]], score1: 0, score2: 0, jugado: false },
+                            { p1: [j[7], j[1]], p2: [j[9], j[2]], score1: 0, score2: 0, jugado: false }
+                        ],
+                        descansan: [j[4], j[5]]
+                    },
+                    // Ronda 4: descansan 2 y 3
+                    {
+                        matches: [
+                            { p1: [j[4], j[7]], p2: [j[6], j[9]], score1: 0, score2: 0, jugado: false },
+                            { p1: [j[5], j[0]], p2: [j[8], j[1]], score1: 0, score2: 0, jugado: false }
+                        ],
+                        descansan: [j[2], j[3]]
+                    },
+                    // Ronda 5: descansan 0 y 1
+                    {
+                        matches: [
+                            { p1: [j[2], j[6]], p2: [j[5], j[8]], score1: 0, score2: 0, jugado: false },
+                            { p1: [j[3], j[7]], p2: [j[4], j[9]], score1: 0, score2: 0, jugado: false }
+                        ],
+                        descansan: [j[0], j[1]]
+                    }
+                ];
+                return c10;
             }
 
-            // CASO GENERAL (8, 12, 16 o cualquier cantidad)
-            let pool = [...players];
-            const isOdd = (n % 2 !== 0);
-            if (isOdd) pool.push("BYE");
-
-            const totalRondas = isOdd ? n : (n - 1);
+            // ==========================================
+            // CASO GENERAL (5, 7, 8, 9, 11, 12+ JUGADORES)
+            // ==========================================
             const numPistas = Math.floor(n / 4);
-            const r = [];
-            let rotation = [...pool];
+            const cupoPistas = numPistas * 4;
+            const descansosPorRonda = n - cupoPistas;
+            const totalRondas = (n % 2 !== 0) ? n : Math.max(n - 1, 5);
 
-            for (let round = 0; round < totalRondas; round++) {
+            const contadorPareja = {};
+            const contadorDescansos = {};
+            const contadorPartidos = {};
+            j.forEach(p => {
+                contadorDescansos[p] = 0;
+                contadorPartidos[p] = 0;
+                contadorPareja[p] = {};
+                j.forEach(q => { if (p !== q) contadorPareja[p][q] = 0; });
+            });
+
+            const rondasGeneradas = [];
+
+            for (let r = 0; r < totalRondas; r++) {
+                let pool = [...j];
+                let descansanRonda = [];
+
+                // 1. Asignar descansos a quienes menos han descansado
+                if (descansosPorRonda > 0) {
+                    pool.sort((a, b) => {
+                        if (contadorDescansos[a] !== contadorDescansos[b]) {
+                            return contadorDescansos[a] - contadorDescansos[b];
+                        }
+                        return contadorPartidos[b] - contadorPartidos[a];
+                    });
+                    descansanRonda = pool.slice(0, descansosPorRonda);
+                    descansanRonda.forEach(d => { contadorDescansos[d]++; });
+                    pool = pool.slice(descansosPorRonda);
+                }
+
+                // 2. Mezclar el orden para no llenar siempre la pista 1 con los mismos
+                for (let k = pool.length - 1; k > 0; k--) {
+                    const rand = Math.floor(Math.random() * (k + 1));
+                    [pool[k], pool[rand]] = [pool[rand], pool[k]];
+                }
+
+                // 3. Formar parejas balanceadas
+                let disponibles = [...pool];
                 const parejasRonda = [];
-                const descansan = [];
-                for (let i = 0; i < rotation.length / 2; i++) {
-                    const pA = rotation[i];
-                    const pB = rotation[rotation.length - 1 - i];
-                    if (pA === "BYE") descansan.push(pB);
-                    else if (pB === "BYE") descansan.push(pA);
-                    else parejasRonda.push([pA, pB]);
+
+                while (disponibles.length >= 2) {
+                    const p1 = disponibles.shift();
+                    let mejorParejaIdx = 0;
+                    let menorCruce = 999;
+                    for (let i = 0; i < disponibles.length; i++) {
+                        const candidato = disponibles[i];
+                        const cruces = (contadorPareja[p1] && contadorPareja[p1][candidato]) || 0;
+                        if (cruces < menorCruce) {
+                            menorCruce = cruces;
+                            mejorParejaIdx = i;
+                        }
+                    }
+                    const p2 = disponibles.splice(mejorParejaIdx, 1)[0];
+                    parejasRonda.push([p1, p2]);
+                    contadorPareja[p1][p2] = (contadorPareja[p1][p2] || 0) + 1;
+                    contadorPareja[p2][p1] = (contadorPareja[p2][p1] || 0) + 1;
+                    contadorPartidos[p1]++;
+                    contadorPartidos[p2]++;
                 }
 
+                // 4. Distribuir duplas en las pistas correspondientes
                 const matches = [];
-                let courtCount = 0;
-                for (let p = 0; p + 1 < parejasRonda.length && courtCount < numPistas; p += 2) {
-                    matches.push({ p1: parejasRonda[p], p2: parejasRonda[p + 1], score1: 0, score2: 0, jugado: false });
-                    courtCount++;
+                for (let c = 0; c < numPistas; c++) {
+                    const idx1 = c * 2;
+                    const idx2 = c * 2 + 1;
+                    if (parejasRonda[idx1] && parejasRonda[idx2]) {
+                        matches.push({
+                            p1: parejasRonda[idx1],
+                            p2: parejasRonda[idx2],
+                            score1: 0,
+                            score2: 0,
+                            jugado: false
+                        });
+                    }
                 }
 
-                for (let p = numPistas * 2; p < parejasRonda.length; p++) {
-                    descansan.push(parejasRonda[p][0]);
-                    descansan.push(parejasRonda[p][1]);
-                }
-
-                r.push({ matches, descansan: descansan.filter(x => x !== "BYE") });
-                const fixed = rotation[0];
-                const rest = rotation.slice(1);
-                rest.unshift(rest.pop());
-                rotation = [fixed, ...rest];
+                rondasGeneradas.push({
+                    matches: matches,
+                    descansan: descansanRonda
+                });
             }
-            return r;
+
+            return rondasGeneradas;
         }
         function iniciarJornadaConfirmada() {
             const nom = document.getElementById("jornadaNombreInput").value.trim() || "Jornada";
@@ -5679,44 +5753,36 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
 
         function agregarRondaExtra8Loco() {
             if (!jornadaActiva) return;
-            let fixture = null;
-            if (modoSeleccionado === 'teams') {
-                fixture = generarRondasTeams(jornadaActiva.parejas || []);
-            } else {
-                fixture = generarRondas8Loco(jornadaActiva.convocados || []);
+
+            const jugadoresConvocados = modoSeleccionado === 'teams' 
+                ? (jornadaActiva.parejas || []) 
+                : (jornadaActiva.convocados || []);
+
+            if (!jugadoresConvocados || jugadoresConvocados.length === 0) {
+                showToast("No hay suficientes jugadores para generar rondas", "error");
+                return;
             }
 
-            if (!fixture || fixture.length === 0) {
-                showToast("No hay suficientes jugadores para generar rondas", "error");
+            // Genera una tanda o ciclo completo según el modo
+            let tandaCompleta = null;
+            if (modoSeleccionado === 'teams') {
+                tandaCompleta = generarRondasTeams(jugadoresConvocados);
+            } else {
+                tandaCompleta = generarRondas8Loco(jugadoresConvocados);
+            }
+
+            if (!tandaCompleta || tandaCompleta.length === 0) {
+                showToast("Error al generar las rondas", "error");
                 return;
             }
 
             if (!jornadaActiva.rounds) jornadaActiva.rounds = [];
 
-            const esSeisJugadores = (modoSeleccionado !== 'teams' && (jornadaActiva.convocados || []).length === 6);
+            const inicioNuevaTanda = jornadaActiva.rounds.length + 1;
+            const cantidadRondasNuevas = tandaCompleta.length;
 
-            if (esSeisJugadores) {
-                // Inserta el ciclo completo de 6 partidos para que todos queden parejos (+4 partidos c/u)
-                const inicioNuevaTanda = jornadaActiva.rounds.length + 1;
-                fixture.forEach(plantillaRonda => {
-                    jornadaActiva.rounds.push({
-                        matches: plantillaRonda.matches.map(m => ({
-                            p1: [...m.p1],
-                            p2: [...m.p2],
-                            score1: 0,
-                            score2: 0,
-                            jugado: false
-                        })),
-                        descansan: [...plantillaRonda.descansan]
-                    });
-                });
-                jornadaActiva.currentRound = inicioNuevaTanda;
-                showToast(`¡Se agregaron 6 juegos extra balanceados!`);
-            } else {
-                // Comportamiento normal de 1 en 1 para 4, 8 o más jugadores
-                const indiceRotativo = jornadaActiva.rounds.length % fixture.length;
-                const plantillaRonda = fixture[indiceRotativo];
-
+            // Inserta el ciclo completo con marcadores limpios
+            tandaCompleta.forEach(plantillaRonda => {
                 jornadaActiva.rounds.push({
                     matches: (plantillaRonda.matches || []).map(m => ({
                         p1: [...(m.p1 || [])],
@@ -5727,16 +5793,20 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                     })),
                     descansan: [...(plantillaRonda.descansan || [])]
                 });
-                jornadaActiva.currentRound = jornadaActiva.rounds.length;
-                showToast(`¡Ronda ${jornadaActiva.currentRound} agregada!`);
-            }
+            });
+
+            // Ubicar la vista en la primera ronda de la nueva tanda
+            jornadaActiva.currentRound = inicioNuevaTanda;
 
             saveLigaActiva();
             render8LocoNav();
             show8LocoRound(jornadaActiva.currentRound);
+
             if (typeof dispararAutoSincronizacionNube === 'function') {
                 dispararAutoSincronizacionNube();
             }
+
+            showToast(`¡Se agregaron ${cantidadRondasNuevas} rondas extra completas!`);
         }
 
         function eliminarUltimaRonda8Loco() {

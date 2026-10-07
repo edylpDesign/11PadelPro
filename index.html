@@ -2353,6 +2353,13 @@
                     <span id="ligaDetalleNombre">Liga</span>
                     <button class="btn btn-sm btn-danger" onclick="terminarLigaOficial()">🏁 Cerrar Liga</button>
                 </div>
+                <!-- LISTA DE COLABORADORES Y EDITORES ASIGNADOS -->
+                <div id="colaboradoresLigaContainer" style="background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; padding:8px 12px; margin-bottom:12px; display:none;">
+                    <div style="font-size:0.7rem; font-weight:800; color:var(--txt-muted); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-users-cog" style="color:var(--padel-volt);"></i> Colaboradores con Acceso:
+                    </div>
+                    <div id="colaboradoresLigaBadges" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+                </div>
                 <div class="tabs">
                     <div class="tab active" onclick="switchLigaTab('tabla')">📊 TABLA GENERAL</div>
                     <div class="tab" onclick="switchLigaTab('jornadas')">📅 JORNADAS</div>
@@ -4606,6 +4613,26 @@
             }
 
             document.getElementById("ligaDetalleNombre").textContent = ligaActiva.nombre;
+            // Renderizar editores y visores asignados a esta liga
+         const colabCont = document.getElementById("colaboradoresLigaContainer");
+         const colabBadges = document.getElementById("colaboradoresLigaBadges");
+         if (colabCont && colabBadges) {
+             const editores = Object.keys(ligaActiva.editores || {});
+             const visores = Object.keys(ligaActiva.espectadores || {});
+
+             if (editores.length === 0 && visores.length === 0) {
+                 colabCont.style.display = "none";
+             } else {
+                 colabCont.style.display = "block";
+                 colabBadges.innerHTML = "";
+                 editores.forEach(tel => {
+                     colabBadges.innerHTML += `<span style="background:rgba(0,230,118,0.15); color:var(--padel-volt); border:1px solid rgba(0,230,118,0.3); padding:3px 8px; border-radius:6px; font-size:0.68rem; font-weight:800;"><i class="fas fa-user-edit"></i> Editor: ${tel}</span>`;
+                 });
+                 visores.forEach(tel => {
+                     colabBadges.innerHTML += `<span style="background:rgba(56,189,248,0.15); color:var(--padel-blue-glow); border:1px solid rgba(56,189,248,0.3); padding:3px 8px; border-radius:6px; font-size:0.68rem; font-weight:800;"><i class="fas fa-eye"></i> Visor: ${tel}</span>`;
+                 });
+             }
+         }
             renderTablaGeneralLiga();
             renderListaJornadasLiga();
             
@@ -6498,8 +6525,9 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             try {
                 if (!usuarioActivo) return;
                 const uid = usuarioActivo.uid;
+                const miTel = (document.getElementById("perfilTelefonoInput")?.value || "").trim();
 
-                // 1. Sincronizar Directorio / Padrón personal
+                // 1. Sincronizar Padrón personal
                 const resJugadores = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios_directorio/${uid}.json`);
                 if (resJugadores.ok) {
                     const cloudJugadores = await resJugadores.json();
@@ -6511,7 +6539,7 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                     }
                 }
 
-                // 2. Descargar todos los torneos guardados en la nube
+                // 2. Descargar torneos propios Y torneos compartidos
                 const resTorneos = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/torneos_cloud.json`);
                 if (resTorneos.ok) {
                     const cloudTorneos = await resTorneos.json();
@@ -6524,15 +6552,18 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                         Object.values(cloudTorneos).forEach(torneoNube => {
                             if (!torneoNube || !torneoNube.id) return;
                             
-                            // Si eres el creador o no tiene creador asignado
-                            if (torneoNube.creadorUid === uid || !torneoNube.creadorUid) {
+                            // Permite si es creador, si no tiene creador, o si su teléfono está en editores/espectadores
+                            const esCreador = torneoNube.creadorUid === uid || !torneoNube.creadorUid;
+                            const esEditor = miTel && torneoNube.editores && torneoNube.editores[miTel];
+                            const esVisor = miTel && torneoNube.espectadores && torneoNube.espectadores[miTel];
+
+                            if (esCreador || esEditor || esVisor) {
                                 const fusionar = (arr) => {
                                     const idx = arr.findIndex(x => x.id === torneoNube.id);
                                     if (idx !== -1) arr[idx] = torneoNube;
                                     else arr.unshift(torneoNube);
                                 };
 
-                                // Clasificación estricta analizando tanto .modo como sus jornadas internas
                                 const j0 = (torneoNube.jornadas && torneoNube.jornadas[0]) || {};
                                 const esPozo = torneoNube.modo === 'pozo' || j0.rondas !== undefined;
                                 const esTeams = torneoNube.modo === 'teams' || torneoNube.parejas !== undefined || j0.parejas !== undefined;
@@ -6549,7 +6580,6 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
 
                         saveUserData(localData);
 
-                        // Si estás en la pantalla de lista de ligas, redibujar inmediatamente
                         if (typeof renderLigasDelModo === 'function' && modoSeleccionado) {
                             renderLigasDelModo();
                         }

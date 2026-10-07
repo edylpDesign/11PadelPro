@@ -3387,29 +3387,29 @@
         }
 
         function ocultarTodasLasVistas() {
-            // 1. Ocultar las 5 pestañas de la barra inferior
-            const tabs = ['tabSectionHome', 'tabSectionJugar', 'tabSectionTorneoOficial', 'tabSectionExplorar', 'tabSectionPerfil'];
-            tabs.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.classList.add("hidden");
-                    el.style.display = "none";
-                }
-            });
+         // 1. Ocultar las 5 pestañas maestras
+         const tabs = ['tabSectionHome', 'tabSectionJugar', 'tabSectionTorneoOficial', 'tabSectionExplorar', 'tabSectionPerfil'];
+         tabs.forEach(id => {
+             const el = document.getElementById(id);
+             if (el) {
+                 el.classList.add("hidden");
+                 el.style.display = "none";
+             }
+         });
 
-            // 2. Ocultar todas las subvistas
-            const subvistas = ['viewLigasModo', 'viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
-            subvistas.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.classList.add("hidden");
-                    el.style.display = "none";
-                }
-            });
+         // 2. Ocultar todas las subvistas secundarias
+         const subvistas = ['viewLigasModo', 'viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
+         subvistas.forEach(id => {
+             const el = document.getElementById(id);
+             if (el) {
+                 el.classList.add("hidden");
+                 el.style.display = "none";
+             }
+         });
 
-            const waBtn = document.getElementById("globalFloatingWaBtn");
-            if (waBtn) waBtn.classList.add("hidden");
-        }
+         const waBtn = document.getElementById("globalFloatingWaBtn");
+         if (waBtn) waBtn.classList.add("hidden");
+     }
 
         function seleccionarPestañaNavegador(tabId) {
             pestañaActivaId = tabId;
@@ -4395,62 +4395,73 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function backToHubModos() {
-            // 1. Ocultar todas las subpantallas (incluido el Padrón)
-            const subVistas = [
-                'viewPadron', 
-                'viewLigasModo', 
-                'viewLigaDetalle', 
-                'viewPartidoVivo', 
-                'viewJornadaPozoVivo', 
-                'viewJornada8LocoVivo', 
-                'viewAdmin'
-            ];
-            subVistas.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.classList.add('hidden');
-                    el.style.display = 'none';
-                }
-            });
+        let seccionPreviaPadron = 'explorar'; // Guarda de dónde venía el usuario
 
-            // 2. Ocultar botón flotante de WhatsApp
-            const waFloat = document.getElementById('globalFloatingWaBtn');
-            if (waFloat) waFloat.classList.add('hidden');
+     function abrirPadronJugadores() {
+         // Guardar la sección activa antes de abrir el padrón
+         const itemActivo = document.querySelector('.bottom-nav-item.active');
+         if (itemActivo) {
+             const attr = itemActivo.getAttribute('onclick') || '';
+             if (attr.includes('explorar')) seccionPreviaPadron = 'explorar';
+             else if (attr.includes('jugar')) seccionPreviaPadron = 'jugar';
+             else if (attr.includes('inicio')) seccionPreviaPadron = 'inicio';
+             else if (attr.includes('perfil')) seccionPreviaPadron = 'perfil';
+         }
 
-            // 3. Restaurar y mostrar la sección JUGAR (donde están tus ligas y padrón)
-            const secJugar = document.getElementById('secJugar');
-            if (secJugar) {
-                secJugar.classList.remove('hidden');
-                secJugar.style.display = 'block';
-            }
+         ocultarTodasLasVistas();
+         const vPadron = document.getElementById("viewPadron");
+         if (vPadron) {
+             vPadron.classList.remove("hidden");
+             vPadron.style.display = "block";
+         }
+         renderPadron();
+         if (typeof actualizarTituloPestañaActiva === 'function') {
+             actualizarTituloPestañaActiva('Padrón', 'viewPadron');
+         }
+         window.scrollTo({ top: 0, behavior: 'smooth' });
+     }
 
-            // Si tienes el hub de modos principal, asegurarlo visible
-            const hubModos = document.getElementById('hubModos');
-            if (hubModos) {
-                hubModos.classList.remove('hidden');
-                hubModos.style.display = 'block';
-            }
+     function backToHubModos() {
+         // 1. Ocultar todas las subpantallas internas
+         const subVistas = [
+             'viewPadron', 
+             'viewLigasModo', 
+             'viewLigaDetalle', 
+             'viewPartidoVivo', 
+             'viewJornadaPozoVivo', 
+             'viewJornada8LocoVivo', 
+             'viewAdmin'
+         ];
+         subVistas.forEach(id => {
+             const el = document.getElementById(id);
+             if (el) {
+                 el.classList.add('hidden');
+                 el.style.display = 'none';
+             }
+         });
 
-            // 4. Asegurar que el icono de Jugar en la barra inferior quede activo
-            document.querySelectorAll('.bottom-nav-item').forEach(it => it.classList.remove('active'));
-            const btnJugarNav = document.querySelector('.bottom-nav-item:nth-child(2)');
-            if (btnJugarNav) btnJugarNav.classList.add('active');
+         // 2. Ocultar botón flotante de WhatsApp
+         const waFloat = document.getElementById('globalFloatingWaBtn');
+         if (waFloat) waFloat.classList.add('hidden');
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+         // 3. Regresar a la vista principal correcta (usando cambiarSeccionApp oficial)
+         // Si vino desde la Lupa (Padrón), regresa a Explorar; si vino desde Modos, regresa a Jugar
+         const destino = seccionPreviaPadron || 'jugar';
+         cambiarSeccionApp(destino);
 
-        function abrirPadronJugadores() {
-            ocultarTodasLasVistas();
-            const vPadron = document.getElementById("viewPadron");
-            if (vPadron) {
-                vPadron.classList.remove("hidden");
-                vPadron.style.display = "block";
-            }
-            renderPadron();
-            actualizarTituloPestañaActiva('Padrón', 'viewPadron');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+         // 4. Restaurar el display de la sección para evitar pantallas en negro
+         const idContenedor = destino === 'inicio' ? 'tabSectionHome' :
+                              destino === 'jugar' ? 'tabSectionJugar' :
+                              destino === 'explorar' ? 'tabSectionExplorar' :
+                              destino === 'perfil' ? 'tabSectionPerfil' : 'tabSectionTorneoOficial';
+         const contenedor = document.getElementById(idContenedor);
+         if (contenedor) {
+             contenedor.classList.remove('hidden');
+             contenedor.style.display = 'block';
+         }
+
+         window.scrollTo({ top: 0, behavior: 'smooth' });
+     }
 
         function renderLigasDelModo() {
             const d = getUserData();
@@ -5891,10 +5902,14 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
         }
 
         function salirDePartidoVivo() {
-            document.getElementById("viewPartidoVivo").classList.add("hidden");
-            document.getElementById("viewHubModos").classList.remove("hidden");
-            actualizarTituloPestañaActiva('Menú Principal', 'viewHubModos', null);
-        }
+         const vPart = document.getElementById("viewPartidoVivo");
+         if (vPart) {
+             vPart.classList.add("hidden");
+             vPart.style.display = "none";
+         }
+         cambiarSeccionApp('jugar');
+         actualizarTituloPestañaActiva('Jugar', 'tabSectionJugar', null);
+     }
 
         function alternarServidorPartido() {
             if (!partidoState) return;
@@ -7722,7 +7737,10 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             const subVistas = ['viewLigasModo', 'viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
             subVistas.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.classList.add('hidden');
+                if (el) {
+                    el.classList.add('hidden');
+                    el.style.display = 'none';
+                }
             });
             const waFloat = document.getElementById('globalFloatingWaBtn');
             if (waFloat) waFloat.classList.add('hidden');
@@ -7731,37 +7749,44 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             const tabs = ['tabSectionHome', 'tabSectionJugar', 'tabSectionTorneoOficial', 'tabSectionExplorar', 'tabSectionPerfil'];
             tabs.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.classList.add('hidden');
+                if (el) {
+                    el.classList.add('hidden');
+                    el.style.display = 'none';
+                }
             });
 
             // 5. Mostrar únicamente la sección solicitada
-            if (seccion === 'inicio') {
-                const h = document.getElementById('tabSectionHome');
-                if (h) h.classList.remove('hidden');
-            } else if (seccion === 'jugar') {
-                const j = document.getElementById('tabSectionJugar');
-                if (j) j.classList.remove('hidden');
-            } else if (seccion === 'torneo_oficial') {
-                const t = document.getElementById('tabSectionTorneoOficial');
-                if (t) t.classList.remove('hidden');
-            } else if (seccion === 'explorar') {
-                const e = document.getElementById('tabSectionExplorar');
-                if (e) e.classList.remove('hidden');
-                renderRetasAbiertas();
-            } else if (seccion === 'perfil') {
-                const p = document.getElementById('tabSectionPerfil');
-                if (p) p.classList.remove('hidden');
-                // Sincronizar stats y datos en la vista de perfil
-                if (usuarioActivo) {
-                    const nom = document.getElementById('dashNombreJugadorTab');
-                    const tel = document.getElementById('dashTelJugadorTab');
-                    if (nom) nom.textContent = usuarioActivo.displayName || 'Jugador 11Padel';
-                    const telVal = document.getElementById('perfilTelefonoInput')?.value.trim();
-                    if (tel && telVal) tel.textContent = 'WhatsApp: ' + telVal;
-                    document.getElementById('dashStatPjTab').textContent = document.getElementById('dashStatPj')?.textContent || '0';
-                    document.getElementById('dashStatPgTab').textContent = document.getElementById('dashStatPg')?.textContent || '0';
-                    document.getElementById('dashStatCagsTab').textContent = document.getElementById('dashStatCags')?.textContent || '0';
-                }
+            const seccionMap = {
+                'inicio': 'tabSectionHome',
+                'jugar': 'tabSectionJugar',
+                'torneo_oficial': 'tabSectionTorneoOficial',
+                'explorar': 'tabSectionExplorar',
+                'perfil': 'tabSectionPerfil'
+            };
+            const idTarget = seccionMap[seccion] || 'tabSectionHome';
+            const contTarget = document.getElementById(idTarget);
+            if (contTarget) {
+                contTarget.classList.remove('hidden');
+                contTarget.style.display = 'block';
+            }
+
+            if (seccion === 'explorar') renderRetasAbiertas();
+
+            if (seccion === 'perfil' && typeof usuarioActivo !== 'undefined' && usuarioActivo) {
+                const nom = document.getElementById('dashNombreJugadorTab');
+                const tel = document.getElementById('dashTelJugadorTab');
+                if (nom) nom.textContent = usuarioActivo.displayName || 'Jugador 11Padel';
+                const telVal = document.getElementById('perfilTelefonoInput')?.value.trim();
+                if (tel && telVal) tel.textContent = 'WhatsApp: ' + telVal;
+                const dPj = document.getElementById('dashStatPj');
+                const dPg = document.getElementById('dashStatPg');
+                const dCags = document.getElementById('dashStatCags');
+                const tabPj = document.getElementById('dashStatPjTab');
+                const tabPg = document.getElementById('dashStatPgTab');
+                const tabCags = document.getElementById('dashStatCagsTab');
+                if (tabPj && dPj) tabPj.textContent = dPj.textContent || '0';
+                if (tabPg && dPg) tabPg.textContent = dPg.textContent || '0';
+                if (tabCags && dCags) tabCags.textContent = dCags.textContent || '0';
             }
 
             window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -2318,6 +2318,21 @@
                     <div class="tab" onclick="switchLigaTab('jornadas')">📅 JORNADAS</div>
                 </div>
                 <div id="tabLigaTabla" class="tab-content active">
+                    <!-- FILTRO DE ORDENAMIENTO -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#0b1120; padding:6px 10px; border-radius:10px; border:1px solid var(--border-glow);">
+                        <span style="font-size:0.72rem; color:var(--txt-muted); font-weight:800;">
+                            <i class="fas fa-sort-amount-down" style="color:var(--padel-volt);"></i> Ordenar por:
+                        </span>
+                        <div style="display:flex; gap:6px;">
+                            <button type="button" class="btn btn-sm btn-green" id="btnFiltroPts" style="padding:4px 8px; font-size:0.7rem;" onclick="cambiarCriterioOrdenTabla('pts')">
+                                Puntos
+                            </button>
+                            <button type="button" class="btn btn-sm btn-dark" id="btnFiltroDiff" style="padding:4px 8px; font-size:0.7rem;" onclick="cambiarCriterioOrdenTabla('diff')">
+                                Dif (+/-)
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
                         <table id="tablaLigaGeneral">
                             <thead id="tablaLigaHead"></thead>
@@ -3537,7 +3552,7 @@
             document.getElementById("modalEditarJugador").classList.add("active");
         }
 
-        function guardarEdicionJugador() {
+        async function guardarEdicionJugador() {
             const idx = parseInt(document.getElementById("editJugadorIndex").value);
             const nuevoNom = document.getElementById("editJugadorNombre").value.trim();
             const nuevoTel = document.getElementById("editJugadorTelefono").value.trim().replace(/\D/g, '');
@@ -3546,11 +3561,30 @@
 
             const d = getUserData();
             if (isNaN(idx) || !d.jugadores[idx]) return;
-            d.jugadores[idx] = { nombre: nuevoNom, telefono: nuevoTel, categoria: nuevaCat };
+
+            d.jugadores[idx] = { 
+                nombre: nuevoNom, 
+                telefono: nuevoTel, 
+                categoria: nuevaCat 
+            };
             saveUserData(d);
+
+            // Sincronizar de inmediato al directorio en la nube si hay sesión activa
+            if (usuarioActivo && d.jugadores.length > 0) {
+                try {
+                    await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios_directorio/${usuarioActivo.uid}.json`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(d.jugadores)
+                    });
+                } catch (e) {
+                    console.warn("Respaldo nube pendiente:", e);
+                }
+            }
+
             closeModal("modalEditarJugador");
             renderPadron();
-            showToast("Información actualizada");
+            showToast("¡Jugador y teléfono guardados!");
         }
 
         let retasAbiertas = JSON.parse(localStorage.getItem("11padel_retas_abiertas")) || [];
@@ -4362,7 +4396,7 @@
         }
 
         function backToHubModos() {
-            // 1. Ocultar todas las subpantallas abiertas
+            // 1. Ocultar todas las subpantallas internas
             const subVistas = ['viewLigasModo', 'viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
             subVistas.forEach(id => {
                 const el = document.getElementById(id);
@@ -4375,25 +4409,20 @@
             const waFloat = document.getElementById('globalFloatingWaBtn');
             if (waFloat) waFloat.classList.add('hidden');
 
-            // 2. Comprobar en qué botón de la barra estábamos para regresar al lugar correcto
+            // 2. Identificar qué botón de la barra inferior estaba activo
             const btnActivo = document.querySelector('.bottom-nav-item.active');
-            if (btnActivo && btnActivo.getAttribute('onclick')?.includes('explorar')) {
-                // Si veníamos de la Lupa (Padrón de jugadores), volver a Explorar
-                const exp = document.getElementById('tabSectionExplorar');
-                if (exp) {
-                    exp.classList.remove('hidden');
-                    exp.style.display = 'block';
-                }
-                if (typeof renderRetasAbiertas === 'function') renderRetasAbiertas();
-            } else {
-                // Si veníamos de la Pelota, volver al menú de Modos de Juego
-                const jug = document.getElementById('tabSectionJugar');
-                if (jug) {
-                    jug.classList.remove('hidden');
-                    jug.style.display = 'block';
-                }
+            let seccionDestino = 'jugar';
+
+            if (btnActivo) {
+                const clickAttr = btnActivo.getAttribute('onclick') || '';
+                if (clickAttr.includes('explorar')) seccionDestino = 'explorar';
+                else if (clickAttr.includes('inicio')) seccionDestino = 'inicio';
+                else if (clickAttr.includes('perfil')) seccionDestino = 'perfil';
+                else if (clickAttr.includes('torneo_oficial')) seccionDestino = 'torneo_oficial';
             }
 
+            // 3. Cambiar de sección de forma limpia con el controlador oficial
+            cambiarSeccionApp(seccionDestino);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -4755,7 +4784,24 @@
             if (pos === 3) return '<span class="podium-icon">🥉</span>';
             return pos;
         }
+let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
 
+        function cambiarCriterioOrdenTabla(criterio) {
+            criterioOrdenTablaActual = criterio;
+            const btnPts = document.getElementById("btnFiltroPts");
+            const btnDiff = document.getElementById("btnFiltroDiff");
+
+            if (btnPts && btnDiff) {
+                if (criterio === 'pts') {
+                    btnPts.className = "btn btn-sm btn-green";
+                    btnDiff.className = "btn btn-sm btn-dark";
+                } else {
+                    btnPts.className = "btn btn-sm btn-dark";
+                    btnDiff.className = "btn btn-sm btn-green";
+                }
+            }
+            renderTablaGeneralLiga();
+        }
         function renderTablaGeneralLiga() {
             const th = document.getElementById("tablaLigaHead");
             const tb = document.getElementById("tablaLigaBody");
@@ -4866,11 +4912,17 @@
                     }
                 });
 
-                // Orden por Puntos anotados reales > Diferencia de puntos > Victorias
+                // Orden dinámico según el filtro seleccionado
                 const sorted = Object.entries(stats).sort((a, b) => {
-                    if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
-                    if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
-                    return b[1].w - a[1].w;
+                    if (criterioOrdenTablaActual === 'diff') {
+                        if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
+                        if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
+                        return b[1].w - a[1].w;
+                    } else {
+                        if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
+                        if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
+                        return b[1].w - a[1].w;
+                    }
                 });
 
                 sorted.forEach(([p, dat], idx) => {
@@ -5074,16 +5126,21 @@
 
             // CASO ESPECÍFICO: 6 JUGADORES
             if (n === 6) {
-                const [A, B, C, D, E, F] = players;
-                return [
-                    { matches: [{ p1: [A, B], p2: [C, D], score1: 0, score2: 0, jugado: false }], descansan: [E, F] },
-                    { matches: [{ p1: [E, F], p2: [A, C], score1: 0, score2: 0, jugado: false }], descansan: [B, D] },
-                    { matches: [{ p1: [B, D], p2: [E, A], score1: 0, score2: 0, jugado: false }], descansan: [C, F] },
-                    { matches: [{ p1: [C, F], p2: [B, E], score1: 0, score2: 0, jugado: false }], descansan: [A, D] },
-                    { matches: [{ p1: [A, D], p2: [F, B], score1: 0, score2: 0, jugado: false }], descansan: [C, E] },
-                    { matches: [{ p1: [C, E], p2: [D, F], score1: 0, score2: 0, jugado: false }], descansan: [A, B] }
-                ];
-            }
+            // Cada jugador juega 4 partidos y descansa 2 partidos
+            const combinaciones6 = [
+                { p1: [jugadores[0], jugadores[1]], p2: [jugadores[2], jugadores[3]], descansan: [jugadores[4], jugadores[5]] },
+                { p1: [jugadores[4], jugadores[2]], p2: [jugadores[0], jugadores[5]], descansan: [jugadores[1], jugadores[3]] },
+                { p1: [jugadores[1], jugadores[3]], p2: [jugadores[4], jugadores[5]], descansan: [jugadores[0], jugadores[2]] },
+                { p1: [jugadores[0], jugadores[4]], p2: [jugadores[1], jugadores[2]], descansan: [jugadores[3], jugadores[5]] },
+                { p1: [jugadores[2], jugadores[5]], p2: [jugadores[3], jugadores[4]], descansan: [jugadores[0], jugadores[1]] },
+                { p1: [jugadores[0], jugadores[3]], p2: [jugadores[1], jugadores[5]], descansan: [jugadores[2], jugadores[4]] }
+            ];
+
+            return combinaciones6.map(c => ({
+                matches: [{ p1: c.p1, p2: c.p2, score1: 0, score2: 0, jugado: false }],
+                descansan: c.descansan
+            }));
+        }
 
             // CASO ESPECÍFICO: 9 JUGADORES (2 pistas completas, 1 descanso por ronda rotativo)
             if (n === 9) {
@@ -5175,6 +5232,16 @@
         }
 
         let jornadaActiva = null;
+        let timerAutoSyncNube = null;
+        function dispararAutoSincronizacionNube() {
+            if (timerAutoSyncNube) clearTimeout(timerAutoSyncNube);
+            timerAutoSyncNube = setTimeout(() => {
+                if (typeof sincronizarTorneoActualANube === 'function') {
+                    // Sincroniza silenciosamente sin bloquear controles
+                    sincronizarTorneoActualANube();
+                }
+            }, 1200); // 1.2 segundos después del último toque
+        }
         function cargarJornadaEnVivo(id) {
             jornadaActiva = (ligaActiva.jornadas || []).find(x => x.id === id);
             if (!jornadaActiva) return;
@@ -5393,18 +5460,20 @@
         }
 
         function modificarPuntosPozo(roundNum, player, cambio) {
-            const rData = jornadaActiva.rondas[roundNum - 1];
-            const actual = parseInt(rData[player]) || 0;
-            rData[player] = Math.max(0, actual + cambio);
-            saveLigaActiva();
-            showPozoRound(roundNum);
-        }
+         const rData = jornadaActiva.rondas[roundNum - 1];
+         const actual = parseInt(rData[player]) || 0;
+         rData[player] = Math.max(0, actual + cambio);
+         saveLigaActiva();
+         showPozoRound(roundNum);
+         dispararAutoSincronizacionNube();
+     }
 
-        function escribirPuntosPozo(roundNum, player, val) {
-            const rData = jornadaActiva.rondas[roundNum - 1];
-            rData[player] = Math.max(0, parseInt(val) || 0);
-            saveLigaActiva();
-        }
+     function escribirPuntosPozo(roundNum, player, val) {
+         const rData = jornadaActiva.rondas[roundNum - 1];
+         rData[player] = Math.max(0, parseInt(val) || 0);
+         saveLigaActiva();
+         dispararAutoSincronizacionNube();
+     }
 
         function showPozoRound(n) {
             jornadaActiva.rondaActual = n;
@@ -5471,21 +5540,23 @@
         }
 
         function cambiarPuntos8Loco(roundIdx, matchIdx, parejaNum, cambio) {
-            const match = jornadaActiva.rounds[roundIdx].matches[matchIdx];
-            match.jugado = true;
-            if (parejaNum === 1) match.score1 = Math.max(0, (parseInt(match.score1) || 0) + cambio);
-            else match.score2 = Math.max(0, (parseInt(match.score2) || 0) + cambio);
-            saveLigaActiva();
-            show8LocoRound(roundIdx + 1);
-        }
+         const match = jornadaActiva.rounds[roundIdx].matches[matchIdx];
+         match.jugado = true;
+         if (parejaNum === 1) match.score1 = Math.max(0, (parseInt(match.score1) || 0) + cambio);
+         else match.score2 = Math.max(0, (parseInt(match.score2) || 0) + cambio);
+         saveLigaActiva();
+         show8LocoRound(roundIdx + 1);
+         dispararAutoSincronizacionNube();
+     }
 
-        function escribirPuntos8Loco(roundIdx, matchIdx, parejaNum, val) {
-            const match = jornadaActiva.rounds[roundIdx].matches[matchIdx];
-            match.jugado = true;
-            const num = Math.max(0, parseInt(val) || 0);
-            if (parejaNum === 1) match.score1 = num; else match.score2 = num;
-            saveLigaActiva();
-        }
+     function escribirPuntos8Loco(roundIdx, matchIdx, parejaNum, val) {
+         const match = jornadaActiva.rounds[roundIdx].matches[matchIdx];
+         match.jugado = true;
+         const num = Math.max(0, parseInt(val) || 0);
+         if (parejaNum === 1) match.score1 = num; else match.score2 = num;
+         saveLigaActiva();
+         dispararAutoSincronizacionNube();
+     }
 
         function show8LocoRound(n) {
             jornadaActiva.currentRound = n; render8LocoNav();
@@ -5595,27 +5666,52 @@
                 return;
             }
 
-            // Selecciona la siguiente ronda rotativa sin repetir siempre la primera
-            const proximoIndice = (jornadaActiva.rounds ? jornadaActiva.rounds.length : 0) % fixture.length;
-            const nuevaRonda = JSON.parse(JSON.stringify(fixture[proximoIndice]));
-
-            // Reinicia marcadores en 0
-            if (nuevaRonda.matches) {
-                nuevaRonda.matches.forEach(m => {
-                    m.score1 = 0;
-                    m.score2 = 0;
-                    m.jugado = false;
-                });
-            }
-
             if (!jornadaActiva.rounds) jornadaActiva.rounds = [];
-            jornadaActiva.rounds.push(nuevaRonda);
-            jornadaActiva.currentRound = jornadaActiva.rounds.length;
+
+            const esSeisJugadores = (modoSeleccionado !== 'teams' && (jornadaActiva.convocados || []).length === 6);
+
+            if (esSeisJugadores) {
+                // Inserta el ciclo completo de 6 partidos para que todos queden parejos (+4 partidos c/u)
+                const inicioNuevaTanda = jornadaActiva.rounds.length + 1;
+                fixture.forEach(plantillaRonda => {
+                    jornadaActiva.rounds.push({
+                        matches: plantillaRonda.matches.map(m => ({
+                            p1: [...m.p1],
+                            p2: [...m.p2],
+                            score1: 0,
+                            score2: 0,
+                            jugado: false
+                        })),
+                        descansan: [...plantillaRonda.descansan]
+                    });
+                });
+                jornadaActiva.currentRound = inicioNuevaTanda;
+                showToast(`¡Se agregaron 6 juegos extra balanceados!`);
+            } else {
+                // Comportamiento normal de 1 en 1 para 4, 8 o más jugadores
+                const indiceRotativo = jornadaActiva.rounds.length % fixture.length;
+                const plantillaRonda = fixture[indiceRotativo];
+
+                jornadaActiva.rounds.push({
+                    matches: (plantillaRonda.matches || []).map(m => ({
+                        p1: [...(m.p1 || [])],
+                        p2: [...(m.p2 || [])],
+                        score1: 0,
+                        score2: 0,
+                        jugado: false
+                    })),
+                    descansan: [...(plantillaRonda.descansan || [])]
+                });
+                jornadaActiva.currentRound = jornadaActiva.rounds.length;
+                showToast(`¡Ronda ${jornadaActiva.currentRound} agregada!`);
+            }
 
             saveLigaActiva();
             render8LocoNav();
-            show8LocoRound(jornadaActiva.rounds.length);
-            showToast(`¡Ronda ${jornadaActiva.rounds.length} generada con éxito!`);
+            show8LocoRound(jornadaActiva.currentRound);
+            if (typeof dispararAutoSincronizacionNube === 'function') {
+                dispararAutoSincronizacionNube();
+            }
         }
 
         function eliminarUltimaRonda8Loco() {

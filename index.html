@@ -4329,32 +4329,37 @@
             const adminCard = document.getElementById("viewAdmin");
             if (!adminCard) return;
 
+            // Mostrar forzosamente la tarjeta del panel
             adminCard.classList.remove("hidden");
+            adminCard.style.display = "block";
 
-            document.getElementById("adminAppLogoUrl").value = appConfig.appLogoUrl || "";
-            document.getElementById("adminMainSponsorName").value = appConfig.mainSponsorName || "";
-            document.getElementById("adminMainSponsorUrl").value = appConfig.mainUrl || "";
-            document.getElementById("adminNewsClub").value = appConfig.newsClub || "";
-            document.getElementById("adminNewsLink").value = appConfig.newsLink || "";
-            document.getElementById("adminNewsDesc").value = appConfig.newsDesc || "";
+            try {
+                if (document.getElementById("adminAppLogoUrl")) document.getElementById("adminAppLogoUrl").value = appConfig.appLogoUrl || "";
+                if (document.getElementById("adminMainSponsorName")) document.getElementById("adminMainSponsorName").value = appConfig.mainSponsorName || "";
+                if (document.getElementById("adminMainSponsorUrl")) document.getElementById("adminMainSponsorUrl").value = appConfig.mainUrl || "";
+                if (document.getElementById("adminNewsClub")) document.getElementById("adminNewsClub").value = appConfig.newsClub || "";
+                if (document.getElementById("adminNewsLink")) document.getElementById("adminNewsLink").value = appConfig.newsLink || "";
+                if (document.getElementById("adminNewsDesc")) document.getElementById("adminNewsDesc").value = appConfig.newsDesc || "";
 
-            const msgInput = document.getElementById("adminWaCustomMsg");
-            if (msgInput) {
-                msgInput.value = appConfig.waCustomMsg || "";
-                actualizarPreviewWhatsApp(msgInput.value);
-                msgInput.oninput = function () { actualizarPreviewWhatsApp(this.value); };
+                const msgInput = document.getElementById("adminWaCustomMsg");
+                if (msgInput) {
+                    msgInput.value = appConfig.waCustomMsg || "";
+                    actualizarPreviewWhatsApp(msgInput.value);
+                    msgInput.oninput = function () { actualizarPreviewWhatsApp(this.value); };
+                }
+
+                for (let i = 1; i <= 6; i++) {
+                    const bInp = document.getElementById(`adminBanner${i}Url`);
+                    if (bInp) bInp.value = appConfig[`banner${i}Url`] || "";
+                }
+
+                if (typeof renderAdminTorneosControls === 'function') renderAdminTorneosControls();
+                if (typeof renderAdminListaFotos === 'function') renderAdminListaFotos();
+                if (typeof switchAdminSubTab === 'function') switchAdminSubTab('banners');
+            } catch (err) {
+                console.warn("Aviso al poblar campos de admin:", err);
             }
 
-            document.getElementById("adminBanner1Url").value = appConfig.banner1Url || "";
-            document.getElementById("adminBanner2Url").value = appConfig.banner2Url || "";
-            document.getElementById("adminBanner3Url").value = appConfig.banner3Url || "";
-            document.getElementById("adminBanner4Url").value = appConfig.banner4Url || "";
-            document.getElementById("adminBanner5Url").value = appConfig.banner5Url || "";
-            document.getElementById("adminBanner6Url").value = appConfig.banner6Url || "";
-
-            renderAdminTorneosControls();
-            renderAdminListaFotos();
-            switchAdminSubTab('banners');
             window.scrollTo({ top: 0, behavior: 'smooth' });
             showToast("Acceso Autorizado");
         }

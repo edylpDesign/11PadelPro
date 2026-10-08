@@ -3575,19 +3575,36 @@
             });
         }
 
-        function agregarJugadorPadron() {
+        async function agregarJugadorPadron() {
             const inp = document.getElementById("inputNuevoJugador");
-            const nom = inp.value.trim();
-            if (!nom) return;
+            const nom = inp ? inp.value.trim() : "";
+            if (!nom) return showToast("Escribe un nombre", "error");
+
             const d = getUserData();
-            const yaExiste = (d.jugadores || []).some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
+            if (!d.jugadores) d.jugadores = [];
+
+            const yaExiste = d.jugadores.some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
             if (yaExiste) return showToast("Jugador ya registrado", "error");
 
-            d.jugadores.push({ nombre: nom, telefono: "", categoria: "Sin Categoría" });
+            const nuevo = { nombre: nom, telefono: "", categoria: "Sin Categoría" };
+            d.jugadores.push(nuevo);
             saveUserData(d);
             inp.value = "";
             renderPadron();
             showToast("Jugador agregado al padrón");
+
+            // Respaldo inmediato en la nube para que la sincronización no lo sobreescriba
+            if (usuarioActivo && d.jugadores.length > 0) {
+                try {
+                    await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios_directorio/${usuarioActivo.uid}.json`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(d.jugadores)
+                    });
+                } catch (e) {
+                    console.warn("Respaldo nube pendiente:", e);
+                }
+            }
         }
 
         function borrarJugadorPadron(idx) {
@@ -3945,8 +3962,42 @@
                 if (valorPorDefecto) sel.value = valorPorDefecto;
             });
         }
+async function registrarJugadorExpress() {
+            const inp = document.getElementById("inputRegistroExpress");
+            const nom = inp ? inp.value.trim() : "";
+            if (!nom) return showToast("Escribe el nombre del jugador", "error");
 
-        function registrarJugadorExpressDesdeModal(origen) {
+            const d = getUserData();
+            if (!d.jugadores) d.jugadores = [];
+
+            const yaExiste = d.jugadores.some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
+            if (!yaExiste) {
+                d.jugadores.push({ nombre: nom, telefono: "", categoria: "Sin Categoría" });
+                saveUserData(d);
+
+                if (usuarioActivo && d.jugadores.length > 0) {
+                    try {
+                        await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios_directorio/${usuarioActivo.uid}.json`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(d.jugadores)
+                        });
+                    } catch (e) {
+                        console.warn("Respaldo en nube:", e);
+                    }
+                }
+            }
+
+            // Seleccionar automáticamente al nuevo jugador en la jornada
+            if (!convocadosSeleccionados.includes(nom)) {
+                convocadosSeleccionados.push(nom);
+            }
+
+            inp.value = "";
+            renderPills();
+            showToast(`¡${nom} añadido a los convocados!`);
+        }
+        async function registrarJugadorExpressDesdeModal(origen) {
             let inputId = "inputRegistroExpress";
             if (origen === 'partido') inputId = "inputRegistroExpressPartido";
             else if (origen === 'teams') inputId = "inputRegistroExpressTeams";
@@ -3957,10 +4008,25 @@
             if (!nom) return showToast("Escribe un nombre", "error");
 
             const d = getUserData();
-            const yaExiste = (d.jugadores || []).some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
+            if (!d.jugadores) d.jugadores = [];
+            const yaExiste = d.jugadores.some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
+            
             if (!yaExiste) {
                 d.jugadores.push({ nombre: nom, telefono: "", categoria: "Sin Categoría" });
                 saveUserData(d);
+
+                // Respaldo inmediato en Firebase para evitar que se borre
+                if (usuarioActivo && d.jugadores.length > 0) {
+                    try {
+                        await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios_directorio/${usuarioActivo.uid}.json`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(d.jugadores)
+                        });
+                    } catch (e) {
+                        console.warn("Respaldo nube pendiente:", e);
+                    }
+                }
             }
             inp.value = "";
             showToast(`¡${nom} registrado en el padrón!`);
@@ -4558,11 +4624,20 @@
             document.getElementById("modalCrearLiga").classList.add("active");
         }
 
-        function guardarNuevaLiga() {
+        async function guardarNuevaLiga() {
             const nom = document.getElementById("ligaNombreInput").value.trim();
             if (!nom) return;
             const d = getUserData();
-            const n = { id: "l_" + Date.now(), nombre: nom, finalizada: false, jornadas: [] };
+            const nuevoId = "l_" + Date.now();
+            const n = { 
+                id: nuevoId, 
+                nombre: nom, 
+                modo: modoSeleccionado,
+                creadorUid: usuarioActivo ? usuarioActivo.uid : null,
+                creadorEmail: usuarioActivo ? (usuarioActivo.email || "") : "",
+                finalizada: false, 
+                jornadas: [] 
+            };
 
             if (modoSeleccionado === 'americano') {
                 if (!d.ligasAmericano) d.ligasAmericano = [];
@@ -4578,6 +4653,19 @@
             closeModal("modalCrearLiga");
             renderLigasDelModo();
             showToast("Liga creada con éxito");
+
+            // Subir la estructura base a la nube de inmediato
+            if (usuarioActivo) {
+                try {
+                    await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/torneos_cloud/${nuevoId}.json`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(n)
+                    });
+                } catch (e) {
+                    console.warn("Respaldo nube liga pendiente:", e);
+                }
+            }
         }
 
         function eliminarLiga(id) {
@@ -6536,13 +6624,27 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                 const uid = usuarioActivo.uid;
                 const miTel = (document.getElementById("perfilTelefonoInput")?.value || "").trim();
 
-                // 1. Sincronizar Padrón personal
+                // 1. Sincronizar Padrón personal (Fusión bidireccional)
                 const resJugadores = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/usuarios_directorio/${uid}.json`);
                 if (resJugadores.ok) {
                     const cloudJugadores = await resJugadores.json();
-                    if (cloudJugadores && Array.isArray(cloudJugadores) && cloudJugadores.length > 0) {
+                    if (cloudJugadores && Array.isArray(cloudJugadores)) {
                         const localData = getUserData();
-                        localData.jugadores = cloudJugadores;
+                        const mapaJugadores = {};
+
+                        // Mezcla la lista de la nube con la local sin duplicar ni borrar a nadie
+                        (cloudJugadores || []).forEach(j => {
+                            const n = obtenerNombreJugador(j);
+                            if (n) mapaJugadores[n.toLowerCase()] = normalizarJugador(j);
+                        });
+                        (localData.jugadores || []).forEach(j => {
+                            const n = obtenerNombreJugador(j);
+                            if (n && !mapaJugadores[n.toLowerCase()]) {
+                                mapaJugadores[n.toLowerCase()] = normalizarJugador(j);
+                            }
+                        });
+
+                        localData.jugadores = Object.values(mapaJugadores);
                         saveUserData(localData);
                         if (typeof renderPadron === 'function') renderPadron();
                     }

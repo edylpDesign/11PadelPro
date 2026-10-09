@@ -5077,6 +5077,9 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                 (ligaActiva.jornadas || []).forEach(j => {
                     if (j.rounds) {
                         j.rounds.forEach(r => {
+                            const esEspecial = r.esRondaEspecial === true;
+                            const comodines = r.jugadoresComodin || [];
+
                             (r.matches || []).forEach(m => {
                                 const s1 = parseInt(m.score1, 10) || 0;
                                 const s2 = parseInt(m.score2, 10) || 0;
@@ -5085,6 +5088,9 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                                 if (esJugado) {
                                     (m.p1 || []).forEach(p => {
                                         if (!p || p === "BYE") return;
+                                        // SI ES COMODÍN EN RONDA ESPECIAL, NO SUMA NADA
+                                        if (esEspecial && comodines.includes(p)) return;
+
                                         stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
                                         stats[p].pj++;
                                         stats[p].pts += s1;
@@ -5093,6 +5099,9 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                                     });
                                     (m.p2 || []).forEach(p => {
                                         if (!p || p === "BYE") return;
+                                        // SI ES COMODÍN EN RONDA ESPECIAL, NO SUMA NADA
+                                        if (esEspecial && comodines.includes(p)) return;
+
                                         stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
                                         stats[p].pj++;
                                         stats[p].pts += s2;
@@ -5602,19 +5611,38 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
 
                 if (jornadaActiva.rounds) {
                     jornadaActiva.rounds.forEach(r => {
-                        r.matches.forEach(m => {
-                            const esJugado = m.jugado || (parseInt(m.score1) > 0 || parseInt(m.score2) > 0);
+                        const esEspecial = r.esRondaEspecial === true;
+                        const comodines = r.jugadoresComodin || [];
+
+                        (r.matches || []).forEach(m => {
+                            const s1 = parseInt(m.score1, 10) || 0;
+                            const s2 = parseInt(m.score2, 10) || 0;
+                            const esJugado = m.jugado === true || (s1 > 0 || s2 > 0);
+
                             if (esJugado) {
-                                const s1 = parseInt(m.score1) || 0;
-                                const s2 = parseInt(m.score2) || 0;
-                                const t1 = m.p1.join(' & ');
-                                const t2 = m.p2.join(' & ');
-                                stats[t1] = stats[t1] || { pj: 0, pg: 0, pts: 0, diff: 0, cags: 0 };
-                                stats[t2] = stats[t2] || { pj: 0, pg: 0, pts: 0, diff: 0, cags: 0 };
-                                stats[t1].pj++; stats[t2].pj++;
-                                stats[t1].diff += (s1 - s2); stats[t2].diff += (s2 - s1);
-                                stats[t1].pts += s1; stats[t2].pts += s2;
-                                if (s1 > s2) stats[t1].pg++; else if (s2 > s1) stats[t2].pg++;
+                                (m.p1 || []).forEach(p => {
+                                    if (!p || p === "BYE") return;
+                                    // SI ES COMODÍN EN RONDA ESPECIAL, NO SUMA NADA
+                                    if (esEspecial && comodines.includes(p)) return;
+
+                                    if (!stats[p]) stats[p] = { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
+                                    stats[p].pj++;
+                                    stats[p].pts += s1;
+                                    stats[p].diff += (s1 - s2);
+                                    if (s1 > s2) stats[p].w++;
+                                });
+
+                                (m.p2 || []).forEach(p => {
+                                    if (!p || p === "BYE") return;
+                                    // SI ES COMODÍN EN RONDA ESPECIAL, NO SUMA NADA
+                                    if (esEspecial && comodines.includes(p)) return;
+
+                                    if (!stats[p]) stats[p] = { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
+                                    stats[p].pj++;
+                                    stats[p].pts += s2;
+                                    stats[p].diff += (s2 - s1);
+                                    if (s2 > s1) stats[p].w++;
+                                });
                             }
                         });
                     });

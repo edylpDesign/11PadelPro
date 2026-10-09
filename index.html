@@ -5355,20 +5355,20 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                     { matches: [{ p1: [j[9], j[2]], p2: [j[8], j[0]], score1: 0, score2: 0, jugado: false }, { p1: [j[3], j[1]], p2: [j[5], j[7]], score1: 0, score2: 0, jugado: false }], descansan: [j[4], j[6]] },
                     // Ronda 11: descansan 5, 7
                     { matches: [{ p1: [j[4], j[1]], p2: [j[8], j[6]], score1: 0, score2: 0, jugado: false }, { p1: [j[9], j[3]], p2: [j[0], j[2]], score1: 0, score2: 0, jugado: false }], descansan: [j[5], j[7]] },
-                    // Ronda 12: RONDA ESPECIAL DE NIVELACIÓN
-                    // Rezagan j[8] y j[9] que descansaron 3 veces. Se enfrentan como rivales con 2 comodines (j[0] y j[1]).
+                    // Ronda 12: RONDA ESPECIAL DE NIVELACIÓN (1 vs 1 en App)
+                    // Solo compiten j[8] y j[9] para completar sus 9 partidos.
                     {
                         esRondaEspecial: true,
-                        jugadoresValidos: [j[8], j[9]],
-                        jugadoresComodin: [j[0], j[1]],
+                        jugador1: j[8],
+                        jugador2: j[9],
                         matches: [{
-                            p1: [j[8], j[0]], // j[8] compite, j[0] es comodín
-                            p2: [j[9], j[1]], // j[9] compite, j[1] es comodín
+                            p1: [j[8]], // Solo el jugador 1 rezagado
+                            p2: [j[9]], // Solo el jugador 2 rezagado
                             score1: 0,
                             score2: 0,
                             jugado: false
                         }],
-                        descansan: [j[2], j[3], j[4], j[5], j[6], j[7]]
+                        descansan: [j[0], j[1], j[2], j[3], j[4], j[5], j[6], j[7]]
                     }
                 ];
                 return c10;
@@ -5868,11 +5868,11 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                     noticeCont.innerHTML = `
                         <div style="background:rgba(245,158,11,0.2); border:2px solid var(--padel-orange); border-radius:12px; padding:12px 16px; margin-bottom:14px; text-align:center;">
                             <span style="color:var(--padel-orange); font-size:0.95rem; font-weight:900; letter-spacing:1px; display:block; margin-bottom:4px;">
-                                ⚡ RONDA ESPECIAL DE NIVELACIÓN (RONDA 12)
+                                ⚡ RONDA ESPECIAL DE NIVELACIÓN (1 vs 1 EN APP)
                             </span>
                             <p style="font-size:0.75rem; color:#fef3c7; line-height:1.4; margin:0;">
-                                Partida exclusiva para nivelar partidos jugados: <strong>${curr.jugadoresValidos.join(' y ')}</strong> disputan sus puntos faltantes.<br>
-                                <span style="color:var(--padel-volt); font-weight:800;">* Los compañeros comodines (${curr.jugadoresComodin.join(' y ')}) NO sumarán puntos a la tabla general.</span>
+                                Solo compiten por sus estadísticas faltantes: <strong>${curr.jugador1}</strong> vs <strong>${curr.jugador2}</strong>.<br>
+                                <span style="color:var(--padel-volt); font-weight:800;">📢 En la cancha física agreguen un compañero al azar a cada uno para jugar dobles; ese compañero NO aparece en la app ni sumará puntos.</span>
                             </p>
                         </div>
                     `;
@@ -5896,15 +5896,40 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             }
 
             curr.matches.forEach((m, idx) => {
-                const p1A = m.p1[0]; const p1B = m.p1[1];
-                const p2A = m.p2[0]; const p2B = m.p2[1];
-                const cags1A = jornadaActiva.caguamas[p1A] || 0;
-                const cags1B = jornadaActiva.caguamas[p1B] || 0;
-                const cags2A = jornadaActiva.caguamas[p2A] || 0;
-                const cags2B = jornadaActiva.caguamas[p2B] || 0;
+                const p1A = m.p1[0]; 
+                const p1B = m.p1[1];
+                const p2A = m.p2[0]; 
+                const p2B = m.p2[1];
+
+                const cags1A = (jornadaActiva.caguamas && jornadaActiva.caguamas[p1A]) || 0;
+                const cags2A = (jornadaActiva.caguamas && jornadaActiva.caguamas[p2A]) || 0;
 
                 const disableAttr = esVisor ? 'disabled style="display:none;"' : '';
                 const readonlyAttr = esVisor ? 'readonly style="background:#0b1120 !important; cursor:default;"' : '';
+
+                // Fila segundo jugador Lado 1 (o compañero informal en pista si es 1 vs 1)
+                const filaP1B = p1B ? `
+                    <div class="player-row-unit">
+                        <span class="player-name-txt">${p1B}</span>
+                        <button type="button" class="btn-caguama-ind" ${esVisor ? 'disabled' : `onclick="modificarCaguamaJugador('${p1B}', 1,${n})"`} title="Caguamas">🍺 ${(jornadaActiva.caguamas && jornadaActiva.caguamas[p1B]) || 0}</button>
+                    </div>
+                ` : `
+                    <div class="player-row-unit" style="opacity:0.6; font-style:italic;">
+                        <span class="player-name-txt" style="font-size:0.75rem; color:var(--txt-muted);">+ Compañero en pista (No suma en app)</span>
+                    </div>
+                `;
+
+                // Fila segundo jugador Lado 2 (o compañero informal en pista si es 1 vs 1)
+                const filaP2B = p2B ? `
+                    <div class="player-row-unit">
+                        <span class="player-name-txt">${p2B}</span>
+                        <button type="button" class="btn-caguama-ind" ${esVisor ? 'disabled' : `onclick="modificarCaguamaJugador('${p2B}', 1,${n})"`} title="Caguamas">🍺 ${(jornadaActiva.caguamas && jornadaActiva.caguamas[p2B]) || 0}</button>
+                    </div>
+                ` : `
+                    <div class="player-row-unit" style="opacity:0.6; font-style:italic;">
+                        <span class="player-name-txt" style="font-size:0.75rem; color:var(--txt-muted);">+ Compañero en pista (No suma en app)</span>
+                    </div>
+                `;
 
                 cont.innerHTML += `
                 <div class="padel-court-card">
@@ -5915,10 +5940,7 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                                 <span class="player-name-txt">${p1A}</span>
                                 <button type="button" class="btn-caguama-ind" ${esVisor ? 'disabled' : `onclick="modificarCaguamaJugador('${p1A}', 1,${n})"`} title="Caguamas">🍺 ${cags1A}</button>
                             </div>
-                            <div class="player-row-unit">
-                                <span class="player-name-txt">${p1B}</span>
-                                <button type="button" class="btn-caguama-ind" ${esVisor ? 'disabled' : `onclick="modificarCaguamaJugador('${p1B}', 1,${n})"`} title="Caguamas">🍺 ${cags1B}</button>
-                            </div>
+                            ${filaP1B}
                         </div>
                         <div class="score-ctrl">
                             <button type="button" class="score-btn" ${disableAttr} onclick="cambiarPuntos8Loco(${n - 1}, ${idx}, 1, -1)">−</button>
@@ -5933,10 +5955,7 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                                 <span class="player-name-txt">${p2A}</span>
                                 <button type="button" class="btn-caguama-ind" ${esVisor ? 'disabled' : `onclick="modificarCaguamaJugador('${p2A}', 1,${n})"`} title="Caguamas">🍺 ${cags2A}</button>
                             </div>
-                            <div class="player-row-unit">
-                                <span class="player-name-txt">${p2B}</span>
-                                <button type="button" class="btn-caguama-ind" ${esVisor ? 'disabled' : `onclick="modificarCaguamaJugador('${p2B}', 1,${n})"`} title="Caguamas">🍺 ${cags2B}</button>
-                            </div>
+                            ${filaP2B}
                         </div>
                         <div class="score-ctrl">
                             <button type="button" class="score-btn" ${disableAttr} onclick="cambiarPuntos8Loco(${n - 1}, ${idx}, 2, -1)">−</button>

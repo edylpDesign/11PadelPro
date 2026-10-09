@@ -4597,10 +4597,11 @@ async function registrarJugadorExpress() {
      }
 
      function crearJornadaUnicaExpress() {
+            const modoActual = modoSeleccionado;
             const fechaHoy = new Date().toLocaleDateString("es-MX", { day: '2-digit', month: 'short' });
             let nombreModo = "8 Loco";
-            if (modoSeleccionado === 'pozo') nombreModo = "Pozo Pro";
-            if (modoSeleccionado === 'teams') nombreModo = "Americano Teams";
+            if (modoActual === 'pozo') nombreModo = "Pozo Pro";
+            if (modoActual === 'teams') nombreModo = "Americano Teams";
 
             const nombre = prompt("Nombre de la Jornada Relámpago:", `⚡ Relámpago ${nombreModo} (${fechaHoy})`);
             if (!nombre || !nombre.trim()) return;
@@ -4608,35 +4609,28 @@ async function registrarJugadorExpress() {
             const nuevaJornadaUnica = {
                 id: "ju_" + Date.now(),
                 nombre: nombre.trim(),
+                modo: modoActual,
+                tipo: modoActual,
                 fechaCreacion: new Date().toISOString(),
                 esJornadaUnica: true,
-                jornadas: [
-                    {
-                        numero: 1,
-                        nombre: "Jornada Única",
-                        convocados: [],
-                        rondas: [],
-                        completada: false,
-                        caguamas: {}
-                    }
-                ]
+                jornadas: []
             };
 
             const d = getUserData();
-            if (modoSeleccionado === 'americano') {
+            if (modoActual === 'americano') {
                 d.ligasAmericano = d.ligasAmericano || [];
                 d.ligasAmericano.unshift(nuevaJornadaUnica);
-            } else if (modoSeleccionado === 'pozo') {
+            } else if (modoActual === 'pozo') {
                 d.ligasPozo = d.ligasPozo || [];
                 d.ligasPozo.unshift(nuevaJornadaUnica);
-            } else if (modoSeleccionado === 'teams') {
+            } else if (modoActual === 'teams') {
                 d.ligasTeams = d.ligasTeams || [];
                 d.ligasTeams.unshift(nuevaJornadaUnica);
             }
 
             saveUserData(d);
 
-            // Respaldo inmediato en Firebase
+            // Respaldo en Firebase
             try {
                 fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/torneos_cloud/${nuevaJornadaUnica.id}.json`, {
                     method: 'PUT',
@@ -4647,11 +4641,9 @@ async function registrarJugadorExpress() {
                 console.warn(e);
             }
 
-            // Abre de inmediato la liga y la jornada para convocar jugadores
+            // Abre la liga y directo la ventana de elegir jugadores
             abrirLigaDetalle(nuevaJornadaUnica.id);
-            if (typeof abrirJornadaDetalle === 'function') {
-                abrirJornadaDetalle(0);
-            }
+            abrirModalNuevaJornada();
         }
         function renderLigasDelModo() {
             const d = getUserData();
@@ -5276,11 +5268,12 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
         let filtroBusquedaConvocados = "";
 
      function abrirModalNuevaJornada() {
-         document.getElementById("jornadaNombreInput").value = `Jornada ${(ligaActiva.jornadas || []).length + 1}`;
-         const isTeams = modoSeleccionado === 'teams';
-         document.getElementById("teamsConfigZone").classList.toggle("hidden", !isTeams);
-         document.getElementById("individualConfigZone").classList.toggle("hidden", isTeams);
-         document.getElementById("modalJornadaTitulo").textContent = isTeams ? "Convocatoria por Parejas Fijas" : "Convocatoria de Jornada";
+    const esRelampago = ligaActiva && ligaActiva.esJornadaUnica;
+    document.getElementById("jornadaNombreInput").value = esRelampago ? "Jornada Única" : `Jornada ${(ligaActiva.jornadas || []).length + 1}`;
+    const isTeams = modoSeleccionado === 'teams';
+    document.getElementById("teamsConfigZone").classList.toggle("hidden", !isTeams);
+    document.getElementById("individualConfigZone").classList.toggle("hidden", isTeams);
+    document.getElementById("modalJornadaTitulo").textContent = esRelampago ? "⚡ Convocar Jugadores (Jornada Única)" : (isTeams ? "Convocatoria por Parejas Fijas" : "Convocatoria de Jornada");
 
          if (isTeams) {
              parejasFijasSeleccionadas = [];
@@ -6862,8 +6855,8 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                                 };
 
                                 const j0 = (torneoNube.jornadas && torneoNube.jornadas[0]) || {};
-                                const esPozo = torneoNube.modo === 'pozo' || j0.rondas !== undefined;
-                                const esTeams = torneoNube.modo === 'teams' || torneoNube.parejas !== undefined || j0.parejas !== undefined;
+                                const esPozo = torneoNube.modo === 'pozo' || (!torneoNube.modo && j0.rondas !== undefined);
+                    const esTeams = torneoNube.modo === 'teams' || (!torneoNube.modo && (torneoNube.parejas !== undefined || j0.parejas !== undefined));
 
                                 if (esPozo) {
                                     fusionar(localData.ligasPozo);

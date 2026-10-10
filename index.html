@@ -7179,7 +7179,7 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
             if (!modal || !cont) return;
 
             regresarAListaHistorial();
-            cont.innerHTML = `<div style="text-align:center; padding:24px; font-size:0.75rem; color:var(--txt-dim);"><i class="fas fa-spinner fa-spin fa-2x" style="color:var(--padel-volt); margin-bottom:8px; display:block;"></i>Cargando tu historial deportivo...</div>`;
+            cont.innerHTML = `<div style="text-align:center; padding:24px; font-size:0.75rem; color:var(--txt-dim);"><i class="fas fa-spinner fa-spin fa-2x" style="color:var(--padel-volt); margin-bottom:8px; display:block;"></i>Cargando y sincronizando tu historial deportivo...</div>`;
             modal.classList.add("active");
 
             const inputTel = document.getElementById("perfilTelefonoInput");
@@ -7198,10 +7198,44 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
             }
 
             try {
+                // 1. Obtener los torneos activos reales en la nube
+                const resTorneos = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/torneos_cloud.json`);
+                const torneosActivos = resTorneos.ok ? (await resTorneos.json() || {}) : {};
+
+                // 2. Obtener el historial del usuario
                 const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/jugadores_partidos/${tel}.json`);
                 if (res.ok) {
-                    const data = await res.json();
-                    cacheHistorialPartidos = data ? Object.values(data).reverse() : [];
+                    const data = await res.json() || {};
+                    const listaPartidos = [];
+                    const promesasLimpieza = [];
+
+                    // 3. Purgar partidos de ligas que ya fueron eliminadas
+                    for (const [matchKey, p] of Object.entries(data)) {
+                        if (!p) continue;
+                        
+                        // Si es Partido Pro amistoso directo, se conserva
+                        const esPartidoProDirecto = p.torneoId === "PARTIDOS_PRO_DIRECTOS" || p.modo === "PARTIDO_PRO";
+                        
+                        // Si es una liga y todavía existe en torneos_cloud, se conserva
+                        const ligaExiste = p.torneoId && torneosActivos[p.torneoId];
+
+                        if (esPartidoProDirecto || ligaExiste) {
+                            listaPartidos.push(p);
+                        } else {
+                            // Liga huérfana detectada: se borra de Firebase para siempre
+                            promesasLimpieza.push(
+                                fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/jugadores_partidos/${tel}/${matchKey}.json`, {
+                                    method: "DELETE"
+                                })
+                            );
+                        }
+                    }
+
+                    if (promesasLimpieza.length > 0) {
+                        await Promise.all(promesasLimpieza);
+                    }
+
+                    cacheHistorialPartidos = listaPartidos.reverse();
                     llenarSelectorTorneosHistorial();
                     aplicarFiltrosHistorialUI();
                 } else {

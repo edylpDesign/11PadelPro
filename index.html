@@ -3231,6 +3231,45 @@
             </div>
         </div>
     </div>
+    <!-- BOTÓN FLOTANTE DEL ASISTENTE IA -->
+    <div id="btnAbrirAsistenteIA" onclick="abrirModalAsistenteIA()" title="Asistente 11Padel IA"
+         style="position:fixed; bottom:92px; right:20px; width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, #6366f1 0%, #00e676 100%); color:#080d1a; display:flex; align-items:center; justify-content:center; font-size:1.4rem; box-shadow:0 6px 18px rgba(99,102,241,0.4); z-index:998; cursor:pointer; border:2px solid #080d1a;">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <!-- MODAL DEL ASISTENTE IA -->
+    <div id="modalAsistenteIA" class="modal" onclick="closeModalOnBackdrop(event, 'modalAsistenteIA')">
+        <div class="modal-content" style="max-width:440px; display:flex; flex-direction:column; max-height:85vh; padding:18px;">
+            <button type="button" class="modal-close-icon" onclick="closeModal('modalAsistenteIA')">×</button>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; border-bottom:1px solid var(--border-glow); padding-bottom:8px;">
+                <span style="width:34px; height:34px; border-radius:10px; background:rgba(99,102,241,0.2); color:#6366f1; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                    <i class="fas fa-robot"></i>
+                </span>
+                <div>
+                    <h3 style="font-size:0.95rem; font-weight:800; color:var(--txt-main); margin:0;">Asistente 11Padel IA</h3>
+                    <small style="font-size:0.68rem; color:var(--txt-muted);">Reglas, dudas y patrocinadores oficiales</small>
+                </div>
+            </div>
+
+            <div id="chatAsistenteLog" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; max-height:42vh; padding-right:4px; margin-bottom:10px;">
+                <div style="background:#0b1120; border:1px solid var(--border-glow); padding:10px; border-radius:12px; font-size:0.75rem; color:var(--txt-main); line-height:1.4;">
+                    ¡Hola! Soy el asistente oficial de <strong>11Padel Point Pro</strong>. Puedes preguntarme sobre las reglas de 8 Loco, Pozo Pro, Partido Pro o consultar información de nuestros patrocinadores (SB Total Padel, Chuleta Snkrs, Motio, Room). ¿En qué te ayudo?
+                </div>
+            </div>
+
+            <!-- CHIPS DE CONSULTA RÁPIDA -->
+            <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:8px;">
+                <button type="button" class="btn btn-sm btn-dark" style="font-size:0.68rem; white-space:nowrap; padding:4px 8px;" onclick="enviarPreguntaRapidaIA('¿Cómo se juega y califica 8 Loco?')">🎾 ¿Cómo es 8 Loco?</button>
+                <button type="button" class="btn btn-sm btn-dark" style="font-size:0.68rem; white-space:nowrap; padding:4px 8px;" onclick="enviarPreguntaRapidaIA('¿Cómo funciona Pozo Pro?')">👑 ¿Cómo es Pozo?</button>
+                <button type="button" class="btn btn-sm btn-dark" style="font-size:0.68rem; white-space:nowrap; padding:4px 8px;" onclick="enviarPreguntaRapidaIA('¿Qué patrocinadores oficiales tiene la app y qué ofrecen?')">⭐ Patrocinadores</button>
+            </div>
+
+            <div style="display:flex; gap:6px;">
+                <input type="text" id="inputAsistentePrompt" placeholder="Pregunta sobre reglas, torneos o marcas..." style="margin:0; font-size:0.78rem;" onkeydown="if(event.key==='Enter') enviarMensajeAsistenteIA()">
+                <button type="button" class="btn btn-green btn-sm" id="btnEnviarAsistenteIA" onclick="enviarMensajeAsistenteIA()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
     <!-- MODAL DE ACCESO / PERFIL CON CELULAR 10 DÍGITOS -->
     <div id="modalAuthUsuario" class="modal" onclick="closeModalOnBackdrop(event, 'modalAuthUsuario')">
         <div class="modal-content" style="max-width:380px; text-align:center;">
@@ -6702,6 +6741,148 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
         function compartirWhatsAppRapido() {
             if (modoSeleccionado === 'pozo') compartirWhatsAppPozo();
             else compartirWhatsApp8Loco();
+        }
+
+        let geminiApiKeyCache = null;
+
+        async function obtenerGeminiApiKey() {
+            if (geminiApiKeyCache) return geminiApiKeyCache;
+
+            const localKey = localStorage.getItem("11padel_gemini_api_key");
+            if (localKey && localKey.trim()) {
+                geminiApiKeyCache = localKey.trim();
+                return geminiApiKeyCache;
+            }
+
+            try {
+                const res = await fetch("https://padel-pro-4c4d7-default-rtdb.firebaseio.com/gemini_config/apiKey.json");
+                if (res.ok) {
+                    const cloudKey = await res.json();
+                    if (cloudKey && typeof cloudKey === 'string' && cloudKey.trim()) {
+                        geminiApiKeyCache = cloudKey.trim();
+                        localStorage.setItem("11padel_gemini_api_key", geminiApiKeyCache);
+                        return geminiApiKeyCache;
+                    }
+                }
+            } catch (err) {
+                console.warn("No se pudo obtener la clave de Gemini desde Firebase:", err);
+            }
+
+            return null;
+        }
+
+        function abrirModalAsistenteIA() {
+            const modal = document.getElementById("modalAsistenteIA");
+            if (modal) modal.classList.add("active");
+            setTimeout(() => {
+                const inp = document.getElementById("inputAsistentePrompt");
+                if (inp) inp.focus();
+            }, 150);
+        }
+
+        function enviarPreguntaRapidaIA(txt) {
+            const inp = document.getElementById("inputAsistentePrompt");
+            if (inp) {
+                inp.value = txt;
+                enviarMensajeAsistenteIA();
+            }
+        }
+
+        async function enviarMensajeAsistenteIA() {
+            const inp = document.getElementById("inputAsistentePrompt");
+            const txt = inp ? inp.value.trim() : "";
+            if (!txt) return;
+
+            const apiKey = await obtenerGeminiApiKey();
+            if (!apiKey) {
+                showToast("Se requiere la API Key de Gemini", "error");
+                return;
+            }
+
+            const chatLog = document.getElementById("chatAsistenteLog");
+            const btn = document.getElementById("btnEnviarAsistenteIA");
+
+            // Mostrar el mensaje del usuario en pantalla
+            chatLog.innerHTML += `
+                <div style="background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.3); padding:8px 10px; border-radius:12px; font-size:0.75rem; color:var(--txt-main); align-self:flex-end; max-width:85%;">
+                    ${txt}
+                </div>
+            `;
+            inp.value = "";
+            chatLog.scrollTop = chatLog.scrollHeight;
+
+            // Indicador de carga
+            const tempId = "ia_loading_" + Date.now();
+            chatLog.innerHTML += `
+                <div id="${tempId}" style="background:#0b1120; border:1px solid var(--border-glow); padding:8px 10px; border-radius:12px; font-size:0.75rem; color:var(--txt-dim); align-self:flex-start;">
+                    <i class="fas fa-spinner fa-spin"></i> Consultando a Gemini...
+                </div>
+            `;
+            chatLog.scrollTop = chatLog.scrollHeight;
+            if (btn) btn.disabled = true;
+
+            // Prompt del sistema con todo el contexto de la app y sus marcas
+            const systemPrompt = `Eres el asistente virtual oficial de '11Padel Point Pro', una aplicación de gestión de torneos de pádel en Aguascalientes, México.
+Tu tono es conciso, profesional, motivador y con lenguaje padelero mexicano amigable.
+Responde en 1 a 2 párrafos breves o con viñetas concisas.
+
+CONOCIMIENTO OFICIAL DE LA APP:
+1. 8 Loco: Formato dinámico individual con parejas rotativas en cada ronda. Cada jugador suma sus propios puntos/games de cancha. Los descansos se alternan equitativamente.
+2. Pozo Pro (Rey de pista): Puntuación individual directa por ronda. Suben de pista los ganadores o se suman puntos acumulativos.
+3. Americano Teams: Torneo round-robin por duplas fijas con tabla general.
+4. Partido Pro: Oficial FIP a 2 sets con Punto de Oro (sin ventajas), Tie-Break tradicional y Super Tie-Break a 10 puntos en el tercer set.
+5. 🍺 Contador de Caguamas: Función social de la app para registrar de broma las cervezas que debe o ha consumido cada jugador en la jornada.
+
+PATROCINADORES OFICIALES EN AGUASCALIENTES:
+- Patrocinador Principal: SB TOTAL PADEL (tienda, palas, accesorios, encordados e indumentaria pro).
+- Chuleta Snkrs: Sneakers exclusivos y calzado deportivo de moda urbana.
+- Motio: Fisioterapia deportiva, prevención de lesiones y rehabilitación para deportistas.
+- Room: Espacio de estilo de vida, moda y complementos.
+
+Si el usuario pregunta por material o dónde comprar, recomienda siempre a SB TOTAL PADEL.
+Si pregunta por calzado, sugiere Chuleta Snkrs.
+Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
+
+            try {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                const resp = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [
+                            { role: "user", parts: [{ text: `${systemPrompt}\n\nPregunta del usuario: ${txt}` }] }
+                        ]
+                    })
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    throw new Error(err.error?.message || "Error al conectar con Gemini");
+                }
+
+                const data = await resp.json();
+                const respuesta = data.candidates[0].content.parts[0].text;
+
+                const loader = document.getElementById(tempId);
+                if (loader) loader.remove();
+
+                chatLog.innerHTML += `
+                    <div style="background:#0b1120; border:1px solid rgba(99,102,241,0.4); padding:10px; border-radius:12px; font-size:0.75rem; color:var(--txt-main); line-height:1.4; align-self:flex-start; max-width:92%;">
+                        ${respuesta.replace(/\n/g, '<br>')}
+                    </div>
+                `;
+            } catch (err) {
+                const loader = document.getElementById(tempId);
+                if (loader) loader.remove();
+                chatLog.innerHTML += `
+                    <div style="background:rgba(239,68,68,0.15); border:1px solid var(--padel-red); padding:8px 10px; border-radius:12px; font-size:0.72rem; color:var(--padel-red); align-self:flex-start;">
+                        Error: ${err.message}
+                    </div>
+                `;
+            } finally {
+                chatLog.scrollTop = chatLog.scrollHeight;
+                if (btn) btn.disabled = false;
+            }
         }
 
         function showToast(msg, type = "info") {

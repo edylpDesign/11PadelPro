@@ -2792,6 +2792,7 @@
             <div>Desarrollado por <strong>EdyLPDSng</strong> • 11Padel Point Pro© 2026</div>
             <div style="font-size:0.68rem; color:var(--txt-dim); margin-top:4px;">
                 Reportes o sugerencias: <a href="mailto:11padelpoint.pro@gmail.com" style="color:var(--padel-volt); text-decoration:none; font-weight:700;">11padelpoint.pro@gmail.com</a>
+                • <a href="javascript:void(0)" onclick="abrirModalPrivacidad()" style="color:var(--txt-muted); text-decoration:underline;">Aviso de Privacidad</a>
             </div>
         </footer>
     </div>
@@ -3229,6 +3230,56 @@
                 <div id="detalleTablaContenido">
                 </div>
             </div>
+        </div>
+    </div>
+    <!-- MODAL AVISO DE PRIVACIDAD -->
+    <div id="modalAvisoPrivacidad" class="modal" onclick="closeModalOnBackdrop(event, 'modalAvisoPrivacidad')">
+        <div class="modal-content" style="max-width:520px; max-height:85vh; display:flex; flex-direction:column; padding:20px; text-align:left;">
+            <button type="button" class="modal-close-icon" onclick="closeModal('modalAvisoPrivacidad')">×</button>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; border-bottom:1px solid var(--border-glow); padding-bottom:8px;">
+                <span style="font-size:1.3rem; color:var(--padel-volt);"><i class="fas fa-user-shield"></i></span>
+                <h3 style="font-size:1rem; font-weight:800; color:var(--txt-main); margin:0;">Aviso de Privacidad</h3>
+            </div>
+            
+            <div style="overflow-y:auto; flex:1; font-size:0.75rem; color:var(--txt-muted); line-height:1.5; padding-right:6px; display:flex; flex-direction:column; gap:10px;">
+                <p>
+                    <strong>11Padel Point Pro</strong> (Aguascalientes, México), es responsable del tratamiento y protección de sus datos personales en apego a la <em>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</em>.
+                </p>
+                <div>
+                    <strong style="color:var(--txt-main);">1. Datos recopilados:</strong>
+                    <ul style="margin-left:16px; margin-top:4px;">
+                        <li>Nombre o alias del jugador.</li>
+                        <li>Número de teléfono celular (10 dígitos) para vinculación de estadísticas y contacto vía WhatsApp.</li>
+                        <li>Correo electrónico y credenciales básicas de autenticación.</li>
+                        <li>Estadísticas deportivas (marcadores, puntos y partidos disputados).</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong style="color:var(--txt-main);">2. Finalidad del tratamiento:</strong>
+                    <p style="margin-top:2px;">
+                        Los datos se utilizan exclusivamente para la gestión operativa de ligas, retas ("¡Falta 1!"), cálculo de clasificaciones oficiales, comunicación organizativa y funcionamiento del asistente virtual con inteligencia artificial.
+                    </p>
+                </div>
+                <div>
+                    <strong style="color:var(--txt-main);">3. Transferencia a terceros:</strong>
+                    <p style="margin-top:2px;">
+                        Sus datos personales no son comercializados, vendidos ni compartidos con empresas externas ajenas al funcionamiento técnico del circuito y la infraestructura en la nube de Firebase / Google Cloud.
+                    </p>
+                </div>
+                <div>
+                    <strong style="color:var(--txt-main);">4. Derechos ARCO:</strong>
+                    <p style="margin-top:2px;">
+                        Usted puede solicitar en cualquier momento el Acceso, Rectificación, Cancelación u Oposición de sus datos o la eliminación de su cuenta escribiendo a: <strong style="color:var(--padel-volt);">11padelpoint.pro@gmail.com</strong>.
+                    </p>
+                </div>
+                <p style="font-size:0.7rem; color:var(--txt-dim); margin-top:6px;">
+                    Última actualización: 2026. Al utilizar esta aplicación, aceptas los términos de este aviso de privacidad.
+                </p>
+            </div>
+
+            <button type="button" class="btn btn-green btn-sm" style="margin-top:14px; width:100%;" onclick="closeModal('modalAvisoPrivacidad')">
+                Entendido y Aceptar
+            </button>
         </div>
     </div>
     <!-- BOTÓN FLOTANTE DEL ASISTENTE IA -->
@@ -6799,6 +6850,10 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             return null;
         }
 
+        function abrirModalPrivacidad() {
+            const modal = document.getElementById("modalAvisoPrivacidad");
+            if (modal) modal.classList.add("active");
+        }
         function abrirModalAsistenteIA() {
             const modal = document.getElementById("modalAsistenteIA");
             if (modal) modal.classList.add("active");

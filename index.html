@@ -6844,7 +6844,7 @@ Si pregunta por calzado, sugiere Chuleta Snkrs.
 Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
 
             try {
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
                 const resp = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

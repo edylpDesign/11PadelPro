@@ -4758,7 +4758,7 @@ async function registrarJugadorExpress() {
         }
 
         async function eliminarLiga(id) {
-            if (confirm("¿Eliminar esta liga definitivamente? Se borrará de este dispositivo y de la nube.")) {
+            if (confirm("¿Eliminar esta liga definitivamente? Se borrará de este dispositivo, de la nube y del historial de todos los jugadores.")) {
                 const d = getUserData();
                 if (modoSeleccionado === 'americano') d.ligasAmericano = (d.ligasAmericano || []).filter(x => x.id !== id);
                 else if (modoSeleccionado === 'pozo') d.ligasPozo = (d.ligasPozo || []).filter(x => x.id !== id);
@@ -4766,16 +4766,44 @@ async function registrarJugadorExpress() {
                 
                 saveUserData(d);
                 renderLigasDelModo();
-                showToast("Eliminando liga...");
+                showToast("Eliminando liga e historiales...");
 
-                // Borrar definitivamente de Firebase en la nube
                 try {
+                    // 1. Borrar la liga principal de la nube
                     await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/torneos_cloud/${id}.json`, {
                         method: 'DELETE'
                     });
-                    showToast("Liga eliminada de la nube");
+
+                    // 2. Limpiar en cascada los partidos de esta liga en el historial de los jugadores
+                    const resHistoriales = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/jugadores_partidos.json`);
+                    if (resHistoriales.ok) {
+                        const todosHistoriales = await resHistoriales.json();
+                        if (todosHistoriales) {
+                            const promesasBorrado = [];
+                            
+                            // Recorrer cada teléfono registrado
+                            for (const [tel, partidos] of Object.entries(todosHistoriales)) {
+                                if (partidos && typeof partidos === 'object') {
+                                    for (const [matchKey, pData] of Object.entries(partidos)) {
+                                        // Si el partido pertenece a esta liga, eliminarlo
+                                        if (pData && (pData.torneoId === id || matchKey.startsWith(id))) {
+                                            promesasBorrado.push(
+                                                fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/jugadores_partidos/${tel}/${matchKey}.json`, {
+                                                    method: 'DELETE'
+                                                })
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                            await Promise.all(promesasBorrado);
+                        }
+                    }
+
+                    showToast("Liga e historial deportivo eliminados por completo");
                 } catch (err) {
-                    console.warn("No se pudo borrar de la nube:", err);
+                    console.warn("Error al borrar en cascada:", err);
+                    showToast("Error de conexión al limpiar la nube", "error");
                 }
             }
         }
@@ -6851,7 +6879,13 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
                     body: JSON.stringify({
                         contents: [
                             { role: "user", parts: [{ text: `${systemPrompt}\n\nPregunta del usuario: ${txt}` }] }
-                        ]
+                        ],
+                        generationConfig: {
+                            thinkingConfig: {
+                                thinkingBudget: 0
+                            },
+                            maxOutputTokens: 250
+                        }
                     })
                 });
 

@@ -5581,6 +5581,73 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
          renderPills();
      }
 
+     function renderParejasFijasModal() {
+            const cont = document.getElementById("listaParejasFijasContainer");
+            const countEl = document.getElementById("countTeamsRegistrados");
+            if (!cont) return;
+            cont.innerHTML = "";
+
+            if (!parejasFijasSeleccionadas || parejasFijasSeleccionadas.length === 0) {
+                cont.innerHTML = `<span style="font-size:0.75rem; color:var(--txt-dim); padding:6px; text-align:center;">No hay parejas agregadas. Añade una arriba.</span>`;
+                if (countEl) countEl.textContent = "0";
+                return;
+            }
+
+            parejasFijasSeleccionadas.forEach((pair, idx) => {
+                cont.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#0b1120; border:1px solid var(--border-glow); padding:6px 10px; border-radius:8px;">
+                        <span style="font-size:0.78rem; font-weight:800; color:var(--padel-volt);">${pair[0]} & ${pair[1]}</span>
+                        <button type="button" class="btn btn-sm btn-danger" style="padding:2px 6px; font-size:0.65rem;" onclick="eliminarParejaFijaModal(${idx})">🗑</button>
+                    </div>
+                `;
+            });
+
+            if (countEl) countEl.textContent = parejasFijasSeleccionadas.length;
+        }
+
+        function agregarParejaFijaExpress() {
+            const p1 = (document.getElementById("teamInputP1")?.value || "").trim();
+            const p2 = (document.getElementById("teamInputP2")?.value || "").trim();
+
+            if (!p1 || !p2) {
+                return showToast("Debes escribir o elegir a ambos jugadores", "error");
+            }
+            if (p1.toLowerCase() === p2.toLowerCase()) {
+                return showToast("No puedes poner al mismo jugador dos veces", "error");
+            }
+
+            const yaExiste = parejasFijasSeleccionadas.some(pair => 
+                (pair[0].toLowerCase() === p1.toLowerCase() && pair[1].toLowerCase() === p2.toLowerCase()) ||
+                (pair[0].toLowerCase() === p2.toLowerCase() && pair[1].toLowerCase() === p1.toLowerCase())
+            );
+
+            if (yaExiste) {
+                return showToast("Esta pareja ya está en la lista", "error");
+            }
+
+            // Registrar en el padrón si no estaban
+            const d = getUserData();
+            if (!d.jugadores) d.jugadores = [];
+            [p1, p2].forEach(nom => {
+                const existe = d.jugadores.some(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
+                if (!existe) d.jugadores.push({ nombre: nom, telefono: "", categoria: "Sin Categoría" });
+            });
+            saveUserData(d);
+
+            parejasFijasSeleccionadas.push([p1, p2]);
+            document.getElementById("teamInputP1").value = "";
+            document.getElementById("teamInputP2").value = "";
+            document.getElementById("selectTeamP1").value = "";
+            document.getElementById("selectTeamP2").value = "";
+
+            renderParejasFijasModal();
+            showToast(`¡Pareja agregada! (${parejasFijasSeleccionadas.length})`);
+        }
+
+        function eliminarParejaFijaModal(idx) {
+            parejasFijasSeleccionadas.splice(idx, 1);
+            renderParejasFijasModal();
+        }
         function generarRondasTeams(teams) {
             let pool = [...teams];
             const n = pool.length;

@@ -5951,81 +5951,57 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             }
         }
 
-        function renderTablaPozoLive() {
-            const tb = document.getElementById("tablaPozoLiveBody");
-            tb.innerHTML = "";
-            const totJornada = {};
-            jornadaActiva.convocados.forEach(p => { totJornada[p] = 0; });
-            (jornadaActiva.rondas || []).forEach(r => {
-                jornadaActiva.convocados.forEach(p => { totJornada[p] += (parseInt(r[p]) || 0); });
-            });
-            const sorted = Object.entries(totJornada).sort((a, b) => b[1] - a[1]);
-            sorted.forEach(([p, v], idx) => {
-                tb.innerHTML += `
-                    <tr class="${idx === 0 ? 'podium-1' : ''}">
-                        <td>${obtenerIconoPosicion(idx + 1)}</td>
-                        <td><strong>${p}</strong></td>
-                        <td style="color:var(--padel-volt); font-weight:900; font-size:1.05rem;">${v}</td>
-                        <td style="color:var(--padel-orange); font-weight:800;">🍺 ${jornadaActiva.caguamas[p] || 0}</td>
-                    </tr>
-                `;
-            });
-        }
-
         function renderTabla8LocoLive() {
             const th = document.getElementById("headTabla8LocoLive");
             const tb = document.getElementById("tabla8LocoLiveBody");
+            if (!th || !tb) return;
             tb.innerHTML = "";
 
             if (modoSeleccionado === 'teams') {
                 th.innerHTML = `<tr><th>Pos</th><th>Pareja</th><th>PJ</th><th>PG</th><th>Pts</th><th>+/-</th><th>🍺</th></tr>`;
                 const stats = {};
+                
                 (jornadaActiva.parejas || []).forEach(pair => {
-                    stats[pair.join(' & ')] = { pj: 0, pg: 0, pts: 0, diff: 0, cags: ((jornadaActiva.caguamas && jornadaActiva.caguamas[pair[0]]) || 0) + ((jornadaActiva.caguamas && jornadaActiva.caguamas[pair[1]]) || 0) };
+                    const teamKey = pair.join(' & ');
+                    const c1 = (jornadaActiva.caguamas && jornadaActiva.caguamas[pair[0]]) || 0;
+                    const c2 = (jornadaActiva.caguamas && jornadaActiva.caguamas[pair[1]]) || 0;
+                    stats[teamKey] = { pj: 0, pg: 0, pts: 0, diff: 0, cags: c1 + c2 };
                 });
 
                 if (jornadaActiva.rounds) {
                     jornadaActiva.rounds.forEach(r => {
-                        const esEspecial = r.esRondaEspecial === true;
-                        const comodines = r.jugadoresComodin || [];
-
                         (r.matches || []).forEach(m => {
                             const s1 = parseInt(m.score1, 10) || 0;
                             const s2 = parseInt(m.score2, 10) || 0;
                             const esJugado = m.jugado === true || (s1 > 0 || s2 > 0);
 
                             if (esJugado) {
-                                (m.p1 || []).forEach(p => {
-                                    if (!p || p === "BYE") return;
-                                    // SI ES COMODÍN EN RONDA ESPECIAL, NO SUMA NADA
-                                    if (esEspecial && comodines.includes(p)) return;
+                                const t1 = (m.p1 || []).join(' & ');
+                                const t2 = (m.p2 || []).join(' & ');
 
-                                    if (!stats[p]) stats[p] = { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
-                                    stats[p].pj++;
-                                    stats[p].pts += s1;
-                                    stats[p].diff += (s1 - s2);
-                                    if (s1 > s2) stats[p].w++;
-                                });
-
-                                (m.p2 || []).forEach(p => {
-                                    if (!p || p === "BYE") return;
-                                    // SI ES COMODÍN EN RONDA ESPECIAL, NO SUMA NADA
-                                    if (esEspecial && comodines.includes(p)) return;
-
-                                    if (!stats[p]) stats[p] = { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
-                                    stats[p].pj++;
-                                    stats[p].pts += s2;
-                                    stats[p].diff += (s2 - s1);
-                                    if (s2 > s1) stats[p].w++;
-                                });
+                                if (stats[t1]) {
+                                    stats[t1].pj++;
+                                    stats[t1].pts += s1;
+                                    stats[t1].diff += (s1 - s2);
+                                    if (s1 > s2) stats[t1].pg++;
+                                }
+                                if (stats[t2]) {
+                                    stats[t2].pj++;
+                                    stats[t2].pts += s2;
+                                    stats[t2].diff += (s2 - s1);
+                                    if (s2 > s1) stats[t2].pg++;
+                                }
                             }
                         });
                     });
                 }
+
                 const sorted = Object.entries(stats).sort((a, b) => {
-                    if (b[1].pg !== a[1].pg) return b[1].pg - a[1].pg;
-                    return b[1].diff - a[1].diff;
+                    if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
+                    if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
+                    return b[1].pg - a[1].pg;
                 });
+
                 sorted.forEach(([t, dat], idx) => {
                     tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
                         <td>${obtenerIconoPosicion(idx + 1)}</td>
@@ -6062,7 +6038,7 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                                     if (!p || p === "BYE") return;
                                     if (!stats[p]) stats[p] = { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
                                     stats[p].pj++;
-                                    stats[p].pts += s1; // Suma los puntos/games exactos anotados por su pareja
+                                    stats[p].pts += s1;
                                     stats[p].diff += (s1 - s2);
                                     if (s1 > s2) stats[p].w++;
                                 });
@@ -6071,7 +6047,7 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                                     if (!p || p === "BYE") return;
                                     if (!stats[p]) stats[p] = { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
                                     stats[p].pj++;
-                                    stats[p].pts += s2; // Suma los puntos/games exactos anotados por su pareja
+                                    stats[p].pts += s2;
                                     stats[p].diff += (s2 - s1);
                                     if (s2 > s1) stats[p].w++;
                                 });
@@ -6080,7 +6056,6 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                     });
                 }
 
-                // Criterio oficial 8 Loco: Puntos anotados en cancha > Diferencia de puntos > Victorias
                 const sorted = Object.entries(stats).sort((a, b) => {
                     if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
                     if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
@@ -6100,7 +6075,6 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                 });
             }
         }
-
         function modificarCaguamaJugador(player, cambio, roundNum = null) {
             if (!jornadaActiva.caguamas) jornadaActiva.caguamas = {};
             const actual = jornadaActiva.caguamas[player] || 0;

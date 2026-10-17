@@ -2005,7 +2005,7 @@
         </div>
         <div class="splash-info-center">
             <div class="splash-title-app">11PADEL POINT PRO</div>
-            <div class="splash-sub-partner" id="splashPartnerTitle">Presentado por SB TOTAL PADEL</div>
+            <div class="splash-sub-partner" id="splashPartnerTitle">Presentado por JAVER</div>
             <p style="font-size:0.75rem; color:var(--txt-muted); margin-top:8px;">Circuito & Torneos Oficiales
                 Aguascalientes</p>
         </div>
@@ -3304,7 +3304,7 @@
 
             <div id="chatAsistenteLog" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; max-height:42vh; padding-right:4px; margin-bottom:10px;">
                 <div style="background:#0b1120; border:1px solid var(--border-glow); padding:10px; border-radius:12px; font-size:0.75rem; color:var(--txt-main); line-height:1.4;">
-                    ¡Hola! Soy el asistente oficial de <strong>11Padel Point Pro</strong>. Puedes preguntarme sobre las reglas de 8 Loco, Pozo Pro, Partido Pro o consultar información de nuestros patrocinadores (SB Total Padel, Chuleta Snkrs, Motio, Room). ¿En qué te ayudo?
+                    ¡Hola! Soy el asistente oficial de <strong>11Padel Point Pro</strong>. Puedes preguntarme sobre las reglas de 8 Loco, Pozo Pro, Partido Pro o consultar información de nuestros patrocinadores (Casas Javer, Chuleta Snkrs, Motio, Room). ¿En qué te ayudo?
                 </div>
             </div>
 
@@ -6429,13 +6429,17 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
         }
 
         function mostrarVistaPartidoEnVivo() {
-            document.getElementById("viewHubModos").classList.add("hidden");
-            document.getElementById("viewPartidoVivo").classList.remove("hidden");
-            actualizarTableroPartido();
-            renderHistorialPartidos();
-            actualizarTituloPestañaActiva(`⚡ Partido Pro`, 'viewPartidoVivo');
-            sincronizarPartidosProDesdeNube();
-        }
+    ocultarTodasLasVistas();
+    const vPart = document.getElementById("viewPartidoVivo");
+    if (vPart) {
+        vPart.classList.remove("hidden");
+        vPart.style.setProperty("display", "block", "important");
+    }
+    actualizarTableroPartido();
+    renderHistorialPartidos();
+    actualizarTituloPestañaActiva(`⚡ Partido Pro`, 'viewPartidoVivo');
+    sincronizarPartidosProDesdeNube();
+}
 
         function salirDePartidoVivo() {
          const vPart = document.getElementById("viewPartidoVivo");
@@ -6917,12 +6921,11 @@ CONOCIMIENTO OFICIAL DE LA APP:
 5. 🍺 Contador de Caguamas: Función social de la app para registrar de broma las cervezas que debe o ha consumido cada jugador en la jornada.
 
 PATROCINADORES OFICIALES EN AGUASCALIENTES:
-- Patrocinador Principal: SB TOTAL PADEL (tienda, palas, accesorios, encordados e indumentaria pro).
+- Patrocinador Principal: grupo JAVER.
 - Chuleta Snkrs: Sneakers exclusivos y calzado deportivo de moda urbana.
 - Motio: Fisioterapia deportiva, prevención de lesiones y rehabilitación para deportistas.
 - Room: Espacio de estilo de vida, moda y complementos.
 
-Si el usuario pregunta por material o dónde comprar, recomienda siempre a SB TOTAL PADEL.
 Si pregunta por calzado, sugiere Chuleta Snkrs.
 Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
 

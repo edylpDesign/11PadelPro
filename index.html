@@ -2481,6 +2481,35 @@
             </div>
         </div>
 
+        <!-- VISTA PRINCIPAL: HUB / HISTORIAL PARTIDO PRO -->
+        <div id="viewPartidoHub" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <button class="btn btn-sm btn-dark" onclick="salirDePartidoHub()"><i class="fas fa-arrow-left"></i> Volver</button>
+                <h3 style="font-size:1rem; color:var(--txt-main); font-weight:800; margin:0;"><i class="fas fa-baseball-ball" style="color:var(--padel-orange);"></i> PARTIDO PRO</h3>
+                <button class="btn btn-sm btn-dark" onclick="sincronizarPartidosProDesdeNube(true)" title="Actualizar"><i class="fas fa-sync-alt"></i></button>
+            </div>
+
+            <!-- BOTÓN GRANDE DESTACADO PARA NUEVO PARTIDO -->
+            <div class="card" style="padding:16px; margin-bottom:14px; text-align:center; background:linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(239, 68, 68, 0.08) 100%); border:1.5px solid rgba(245, 158, 11, 0.35);">
+                <button type="button" class="btn" style="width:100%; padding:15px; font-size:1rem; font-weight:900; background:linear-gradient(135deg, var(--padel-orange) 0%, #ef4444 100%); color:#080d1a; border:none; border-radius:12px; box-shadow:0 4px 15px rgba(245, 158, 11, 0.35); cursor:pointer;" onclick="iniciarConfiguracionNuevoPartido()">
+                    <i class="fas fa-play"></i> + COMENZAR NUEVO PARTIDO
+                </button>
+                <div id="bannerReanudarPartido" style="display:none; margin-top:10px;">
+                    <button type="button" class="btn btn-green btn-sm" style="width:100%; padding:8px;" onclick="mostrarVistaPartidoEnVivo()">
+                        ⚡ Reanudar partido en curso
+                    </button>
+                </div>
+            </div>
+
+            <!-- LISTADO DE HISTORIAL DE PARTIDOS -->
+            <div class="card" style="padding:14px;">
+                <div class="card-header" style="margin:-14px -14px 12px -14px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.85rem;"><i class="fas fa-history" style="color:var(--padel-orange);"></i> Historial de Partidos Terminados</span>
+                    <button class="btn btn-sm btn-danger" style="padding:3px 8px; font-size:0.68rem;" onclick="limpiarHistorialPartidos()">Borrar Historial</button>
+                </div>
+                <div id="partidosHistorialContainerHub" style="display:flex; flex-direction:column; gap:8px; max-height:420px; overflow-y:auto;"></div>
+            </div>
+        </div>
         <div id="viewPartidoVivo" class="hidden">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                 <button class="btn btn-sm btn-dark" onclick="salirDePartidoVivo()"><i class="fas fa-arrow-left"></i>
@@ -3550,7 +3579,7 @@
          });
 
          // 2. Ocultar todas las subvistas secundarias
-         const subvistas = ['viewLigasModo', 'viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
+         const subvistas = ['viewLigasModo', 'viewPadron', 'viewLigaDetalle', 'viewPartidoVivo', 'viewPartidoHub', 'viewJornadaPozoVivo', 'viewJornada8LocoVivo', 'viewAdmin'];
          subvistas.forEach(id => {
              const el = document.getElementById(id);
              if (el) {
@@ -6328,69 +6357,92 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
         }
 
         function renderHistorialPartidos() {
-            const cont = document.getElementById("partidosHistorialContainer");
-            if (!cont) return;
-            cont.innerHTML = "";
+            const contVivo = document.getElementById("partidosHistorialContainer");
+            const contHub = document.getElementById("partidosHistorialContainerHub");
             const lista = obtenerHistorialPartidosTerminados();
+
+            let contenidoHtml = "";
             if (lista.length === 0) {
-                cont.innerHTML = "<p style='color:var(--txt-dim); font-size:0.75rem; text-align:center; padding:10px;'>Aún no hay partidos terminados.</p>";
-                return;
+                contenidoHtml = "<p style='color:var(--txt-dim); font-size:0.75rem; text-align:center; padding:14px;'>Aún no hay partidos terminados.</p>";
+            } else {
+                lista.forEach((p) => {
+                    let s1 = `${p.sets.s1.p1}-${p.sets.s1.p2}${p.sets.s1.tb ? '(' + p.sets.s1.tb + ')' : ''}`;
+                    let s2 = p.sets.s2.p1 || p.sets.s2.p2 ? `${p.sets.s2.p1}-${p.sets.s2.p2}${p.sets.s2.tb ? '(' + p.sets.s2.tb + ')' : ''}` : "";
+                    let s3 = p.sets.s3.p1 || p.sets.s3.p2 ? `STB: ${p.sets.s3.p1}-${p.sets.s3.p2}` : "";
+                    let scoreFormat = [s1, s2, s3].filter(Boolean).join(" | ");
+                    const winP1 = p.ganador === 1;
+
+                    contenidoHtml += `
+                        <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:10px; display:flex; flex-direction:column; gap:6px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <small style="font-size:0.68rem; font-weight:800; color:var(--txt-muted);"><i class="fas fa-calendar-alt"></i> ${p.fecha}</small>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <span style="font-size:0.65rem; font-weight:900; background:rgba(0, 230, 118, 0.15); color:var(--padel-volt); padding:2px 8px; border-radius:6px;">FINALIZADO</span>
+                                    <button type="button" class="btn btn-sm btn-danger" style="padding:2px 6px; font-size:0.65rem;" onclick="eliminarPartidoProIndividual('${p.id}')" title="Eliminar partido">🗑</button>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; font-weight:800;">
+                                <span style="color:${winP1 ? 'var(--padel-volt)' : 'var(--txt-muted)'};">${winP1 ? '🏆 ' : ''}${p.p1.join(' & ')}</span>
+                                <span style="color:var(--txt-main);">${scoreFormat}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; font-weight:800;">
+                                <span style="color:${!winP1 ? 'var(--padel-orange)' : 'var(--txt-muted)'};">${!winP1 ? '🏆 ' : ''}${p.p2.join(' & ')}</span>
+                                <small style="font-size:0.68rem; color:var(--txt-dim);">🍺 Total: ${(p.caguamas.p1A + p.caguamas.p1B + p.caguamas.p2A + p.caguamas.p2B) || 0}</small>
+                            </div>
+                        </div>
+                    `;
+                });
             }
 
-            lista.forEach((p) => {
-                let s1 = `${p.sets.s1.p1}-${p.sets.s1.p2}${p.sets.s1.tb ? '(' + p.sets.s1.tb + ')' : ''}`;
-                let s2 = p.sets.s2.p1 || p.sets.s2.p2 ? `${p.sets.s2.p1}-${p.sets.s2.p2}${p.sets.s2.tb ? '(' + p.sets.s2.tb + ')' : ''}` : "";
-                let s3 = p.sets.s3.p1 || p.sets.s3.p2 ? `STB: ${p.sets.s3.p1}-${p.sets.s3.p2}` : "";
-                let scoreFormat = [s1, s2, s3].filter(Boolean).join(" | ");
-                const winP1 = p.ganador === 1;
-
-                cont.innerHTML += `
-                    <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:10px; display:flex; flex-direction:column; gap:6px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <small style="font-size:0.68rem; font-weight:800; color:var(--txt-muted);"><i class="fas fa-calendar-alt"></i> ${p.fecha}</small>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                            <span style="font-size:0.65rem; font-weight:900; background:rgba(0, 230, 118, 0.15); color:var(--padel-volt); padding:2px 8px; border-radius:6px;">FINALIZADO</span>
-                            <button type="button" class="btn btn-sm btn-danger" style="padding:2px 6px; font-size:0.65rem;" onclick="eliminarPartidoProIndividual('${p.id}')" title="Eliminar partido">🗑</button>
-                        </div>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; font-weight:800;">
-                            <span style="color:${winP1 ? 'var(--padel-volt)' : 'var(--txt-muted)'};">${winP1 ? '🏆 ' : ''}${p.p1.join(' & ')}</span>
-                            <span style="color:var(--txt-main);">${scoreFormat}</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; font-weight:800;">
-                            <span style="color:${!winP1 ? 'var(--padel-orange)' : 'var(--txt-muted)'};">${!winP1 ? '🏆 ' : ''}${p.p2.join(' & ')}</span>
-                            <small style="font-size:0.68rem; color:var(--txt-dim);">🍺 Total: ${(p.caguamas.p1A + p.caguamas.p1B + p.caguamas.p2A + p.caguamas.p2B) || 0}</small>
-                        </div>
-                    </div>
-                `;
-            });
+            if (contHub) contHub.innerHTML = contenidoHtml;
+            if (contVivo) contVivo.innerHTML = contenidoHtml;
         }
 
-        function abrirConfiguracionPartido(forzarNuevo = false) {
-            llenarSelectoresPadron(["selectPartidoP1A", "selectPartidoP1B", "selectPartidoP2A", "selectPartidoP2B"]);
-            if (!forzarNuevo && partidoState && !partidoState.finalizado) {
-                mostrarVistaPartidoEnVivo();
-                showToast("Reanudando Partido Pro...");
-                return;
+        function abrirConfiguracionPartido() {
+            ocultarTodasLasVistas();
+            const hub = document.getElementById("viewPartidoHub");
+            if (hub) {
+                hub.classList.remove("hidden");
+                hub.style.setProperty("display", "block", "important");
             }
+
+            const bannerReanudar = document.getElementById("bannerReanudarPartido");
+            if (bannerReanudar) {
+                bannerReanudar.style.display = (partidoState && !partidoState.finalizado) ? "block" : "none";
+            }
+
+            renderHistorialPartidos();
+            sincronizarPartidosProDesdeNube();
+            if (typeof actualizarTituloPestañaActiva === 'function') {
+                actualizarTituloPestañaActiva('Partido Pro', 'viewPartidoHub');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function iniciarConfiguracionNuevoPartido() {
+            llenarSelectoresPadron(["selectPartidoP1A", "selectPartidoP1B", "selectPartidoP2A", "selectPartidoP2B"]);
 
             const d = getUserData();
             const j = d.jugadores || [];
-            const j0 = j[0] ? obtenerNombreJugador(j[0]) : "";
-            const j1 = j[1] ? obtenerNombreJugador(j[1]) : "";
-            const j2 = j[2] ? obtenerNombreJugador(j[2]) : "";
-            const j3 = j[3] ? obtenerNombreJugador(j[3]) : "";
+            document.getElementById("partidoP1A").value = j[0] ? obtenerNombreJugador(j[0]) : "";
+            document.getElementById("partidoP1B").value = j[1] ? obtenerNombreJugador(j[1]) : "";
+            document.getElementById("partidoP2A").value = j[2] ? obtenerNombreJugador(j[2]) : "";
+            document.getElementById("partidoP2B").value = j[3] ? obtenerNombreJugador(j[3]) : "";
 
-            document.getElementById("partidoP1A").value = j0;
-            document.getElementById("partidoP1B").value = j1;
-            document.getElementById("partidoP2A").value = j2;
-            document.getElementById("partidoP2B").value = j3;
+            const modal = document.getElementById("modalConfigPartido");
+            if (modal) modal.classList.add("active");
+        }
 
-            if (document.getElementById("selectPartidoP1A")) document.getElementById("selectPartidoP1A").value = j0;
-            if (document.getElementById("selectPartidoP1B")) document.getElementById("selectPartidoP1B").value = j1;
-            if (document.getElementById("selectPartidoP2A")) document.getElementById("selectPartidoP2A").value = j2;
-            if (document.getElementById("selectPartidoP2B")) document.getElementById("selectPartidoP2B").value = j3;
-            document.getElementById("modalConfigPartido").classList.add("active");
+        function salirDePartidoHub() {
+            const hub = document.getElementById("viewPartidoHub");
+            if (hub) {
+                hub.classList.add("hidden");
+                hub.style.display = "none";
+            }
+            cambiarSeccionApp('jugar');
+            if (typeof actualizarTituloPestañaActiva === 'function') {
+                actualizarTituloPestañaActiva('Jugar', 'tabSectionJugar', null);
+            }
         }
 
         function comenzarPartidoOficial() {

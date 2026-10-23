@@ -2439,7 +2439,7 @@
                             </button>
                         </div>
                     </div>
-
+                    <div id="filtroJornadaSelectorCont" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:#0b1120; padding:8px 12px; border-radius:10px; border:1px solid var(--border-glow);"></div>
                     <div class="table-responsive">
                         <table id="tablaLigaGeneral">
                             <thead id="tablaLigaHead"></thead>
@@ -5316,22 +5316,38 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
         }
 
         function renderTablaGeneralLiga() {
-            const th = document.getElementById("tablaLigaHead");
-            const tb = document.getElementById("tablaLigaBody");
-            if (!th || !tb || !ligaActiva) return;
+            let th = document.getElementById("tablaLigaHead");
+            let tb = document.getElementById("tablaLigaBody");
+            const tablaEl = document.getElementById("tablaLigaGeneral");
+
+            if (!tablaEl) return;
+
+            // Si por alguna razón faltan thead o tbody en el HTML, los creamos automáticamente
+            if (!th) {
+                th = document.createElement("thead");
+                th.id = "tablaLigaHead";
+                tablaEl.appendChild(th);
+            }
+            if (!tb) {
+                tb = document.createElement("tbody");
+                tb.id = "tablaLigaBody";
+                tablaEl.appendChild(tb);
+            }
+
             tb.innerHTML = "";
+            if (!ligaActiva) return;
 
             const jornadas = ligaActiva.jornadas || [];
 
-            // Contenedor del selector de jornada (lo insertamos o actualizamos dinámicamente)
+            // Contenedor del selector de jornada
             let contFiltro = document.getElementById("filtroJornadaSelectorCont");
             if (!contFiltro) {
-                const contenedorPadre = document.getElementById("tabLigaTabla");
-                if (contenedorPadre) {
+                const parentBox = tablaEl.closest(".card") || tablaEl.parentElement;
+                if (parentBox) {
                     contFiltro = document.createElement("div");
                     contFiltro.id = "filtroJornadaSelectorCont";
-                    contFiltro.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#0b1120; padding:8px 12px; border-radius:10px; border:1px solid var(--border-glow);";
-                    contenedorPadre.insertBefore(contFiltro, contenedorPadre.firstChild);
+                    contFiltro.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:#0b1120; padding:8px 12px; border-radius:10px; border:1px solid var(--border-glow);";
+                    parentBox.insertBefore(contFiltro, parentBox.firstChild);
                 }
             }
 
@@ -5353,7 +5369,7 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             }
 
             const esVistaTotal = (filtroJornadaTablaGeneral === 'todas');
-            const jIndexFiltro = esVistaTotal ? null : parseInt(filtroJornadaTablaGeneral);
+            const jIndexFiltro = esVistaTotal ? null : parseInt(filtroJornadaTablaGeneral, 10);
 
             // ==========================================
             // MODO 1: POZO PRO
@@ -5376,25 +5392,30 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                         Object.keys(stats).forEach(p => {
                             let ptsJornada = 0;
                             if (j.rondas && (j.convocados || []).includes(p)) {
-                                j.rondas.forEach(r => { ptsJornada += (parseInt(r[p]) || 0); });
+                                j.rondas.forEach(r => { ptsJornada += (parseInt(r[p], 10) || 0); });
                             }
                             stats[p].list.push(ptsJornada);
                             stats[p].total += ptsJornada;
-                            stats[p].cags += (j.caguamas && j.caguamas[p] ? parseInt(j.caguamas[p]) || 0 : 0);
+                            stats[p].cags += (j.caguamas && j.caguamas[p] ? parseInt(j.caguamas[p], 10) || 0 : 0);
                         });
                     });
 
                     const sorted = Object.entries(stats).sort((a, b) => b[1].total - a[1].total);
+                    if (sorted.length === 0) {
+                        tb.innerHTML = `<tr><td colspan="${4 + jornadas.length}" style="text-align:center; padding:16px; color:var(--txt-dim);">No hay registros de puntos en esta liga.</td></tr>`;
+                        return;
+                    }
+
                     sorted.forEach(([p, dat], idx) => {
                         let columnasJornadas = "";
                         dat.list.forEach(v => {
-                            columnasJornadas += `<td style="color:var(--txt-muted);">${v}</td>`;
+                            columnasJornadas += `<td style="color:var(--txt-muted); font-weight:700;">${v}</td>`;
                         });
 
                         tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
                             <td>${obtenerIconoPosicion(idx + 1)}</td>
                             <td><strong>${p}</strong></td>
-                            <td style="color:var(--padel-volt); font-weight:900; font-size:1rem;">${dat.total}</td>
+                            <td style="color:var(--padel-volt); font-weight:900; font-size:1.05rem;">${dat.total}</td>
                             ${columnasJornadas}
                             <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
                         </tr>`;
@@ -5407,16 +5428,21 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                         const statsJ = {};
                         (jAct.convocados || []).forEach(p => {
                             let pts = 0;
-                            jAct.rondas.forEach(r => { pts += (parseInt(r[p]) || 0); });
+                            jAct.rondas.forEach(r => { pts += (parseInt(r[p], 10) || 0); });
                             statsJ[p] = { pts: pts, cags: (jAct.caguamas && jAct.caguamas[p]) || 0 };
                         });
 
                         const sorted = Object.entries(statsJ).sort((a, b) => b[1].pts - a[1].pts);
+                        if (sorted.length === 0) {
+                            tb.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:16px; color:var(--txt-dim);">Sin puntos en esta fecha.</td></tr>`;
+                            return;
+                        }
+
                         sorted.forEach(([p, dat], idx) => {
                             tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
                                 <td>${obtenerIconoPosicion(idx + 1)}</td>
                                 <td><strong>${p}</strong></td>
-                                <td style="color:var(--padel-volt); font-weight:900; font-size:1rem;">${dat.pts}</td>
+                                <td style="color:var(--padel-volt); font-weight:900; font-size:1.05rem;">${dat.pts}</td>
                                 <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
                             </tr>`;
                         });
@@ -5446,8 +5472,8 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                         if (j.rounds) {
                             j.rounds.forEach(r => {
                                 (r.matches || []).forEach(m => {
-                                    const s1 = parseInt(m.score1) || 0;
-                                    const s2 = parseInt(m.score2) || 0;
+                                    const s1 = parseInt(m.score1, 10) || 0;
+                                    const s2 = parseInt(m.score2, 10) || 0;
                                     if (m.jugado || s1 > 0 || s2 > 0) {
                                         const t1 = (m.p1 || []).join(' & ');
                                         const t2 = (m.p2 || []).join(' & ');
@@ -5478,9 +5504,14 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                         return b[1].pg - a[1].pg;
                     });
 
+                    if (sorted.length === 0) {
+                        tb.innerHTML = `<tr><td colspan="${7 + jornadas.length}" style="text-align:center; padding:16px; color:var(--txt-dim);">No hay registros aún.</td></tr>`;
+                        return;
+                    }
+
                     sorted.forEach(([team, dat], idx) => {
                         let colsJ = "";
-                        dat.list.forEach(v => { colsJ += `<td style="color:var(--txt-muted);">${v}</td>`; });
+                        dat.list.forEach(v => { colsJ += `<td style="color:var(--txt-muted); font-weight:700;">${v}</td>`; });
 
                         tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
                             <td>${obtenerIconoPosicion(idx + 1)}</td>
@@ -5503,8 +5534,8 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                         });
                         jAct.rounds.forEach(r => {
                             (r.matches || []).forEach(m => {
-                                const s1 = parseInt(m.score1) || 0;
-                                const s2 = parseInt(m.score2) || 0;
+                                const s1 = parseInt(m.score1, 10) || 0;
+                                const s2 = parseInt(m.score2, 10) || 0;
                                 if (m.jugado || s1 > 0 || s2 > 0) {
                                     const t1 = (m.p1 || []).join(' & ');
                                     const t2 = (m.p2 || []).join(' & ');
@@ -5611,7 +5642,7 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
 
                     sorted.forEach(([p, dat], idx) => {
                         let colsJ = "";
-                        dat.list.forEach(v => { colsJ += `<td style="color:var(--txt-muted);">${v}</td>`; });
+                        dat.list.forEach(v => { colsJ += `<td style="color:var(--txt-muted); font-weight:700;">${v}</td>`; });
 
                         tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
                             <td>${obtenerIconoPosicion(idx + 1)}</td>
@@ -6153,20 +6184,38 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                 const btnT = document.getElementById("tabLiveBtnPozoTabla");
                 const viewP = document.getElementById("pozoLivePartidosView");
                 const viewT = document.getElementById("pozoLiveTablaView");
-                btnP.classList.toggle("active", vista === 'pistas');
-                btnT.classList.toggle("active", vista === 'tabla');
-                viewP.classList.toggle("hidden", vista !== 'pistas');
-                viewT.classList.toggle("hidden", vista !== 'tabla');
+
+                if (btnP) btnP.classList.toggle("active", vista === 'pistas');
+                if (btnT) btnT.classList.toggle("active", vista === 'tabla');
+
+                if (viewP) {
+                    viewP.classList.toggle("hidden", vista !== 'pistas');
+                    viewP.style.display = (vista === 'pistas') ? 'block' : 'none';
+                }
+                if (viewT) {
+                    viewT.classList.toggle("hidden", vista !== 'tabla');
+                    viewT.style.display = (vista === 'tabla') ? 'block' : 'none';
+                }
+
                 if (vista === 'tabla') renderTablaPozoLive();
             } else {
                 const btnP = document.getElementById("tabLiveBtn8LocoPistas");
                 const btnT = document.getElementById("tabLiveBtn8LocoTabla");
                 const viewP = document.getElementById("amLivePartidosView");
                 const viewT = document.getElementById("amLiveTablaView");
-                btnP.classList.toggle("active", vista === 'pistas');
-                btnT.classList.toggle("active", vista === 'tabla');
-                viewP.classList.toggle("hidden", vista !== 'pistas');
-                viewT.classList.toggle("hidden", vista !== 'tabla');
+
+                if (btnP) btnP.classList.toggle("active", vista === 'pistas');
+                if (btnT) btnT.classList.toggle("active", vista === 'tabla');
+
+                if (viewP) {
+                    viewP.classList.toggle("hidden", vista !== 'pistas');
+                    viewP.style.display = (vista === 'pistas') ? 'block' : 'none';
+                }
+                if (viewT) {
+                    viewT.classList.toggle("hidden", vista !== 'tabla');
+                    viewT.style.display = (vista === 'tabla') ? 'block' : 'none';
+                }
+
                 if (vista === 'tabla') renderTabla8LocoLive();
             }
         }

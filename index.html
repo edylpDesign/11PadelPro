@@ -6220,6 +6220,57 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             }
         }
 
+        function renderTablaPozoLive() {
+            const tb = document.getElementById("tablaPozoLiveBody");
+            if (!tb || !jornadaActiva) return;
+            tb.innerHTML = "";
+
+            // 1. Detectar jugadores desde convocados, jugadores o las rondas existentes
+            let listaJugadores = [];
+            if (Array.isArray(jornadaActiva.convocados) && jornadaActiva.convocados.length > 0) {
+                listaJugadores = [...jornadaActiva.convocados];
+            } else if (Array.isArray(jornadaActiva.jugadores) && jornadaActiva.jugadores.length > 0) {
+                listaJugadores = [...jornadaActiva.jugadores];
+            } else if (Array.isArray(jornadaActiva.rondas) && jornadaActiva.rondas.length > 0) {
+                const keysSet = new Set();
+                jornadaActiva.rondas.forEach(r => {
+                    Object.keys(r || {}).forEach(k => keysSet.add(k));
+                });
+                listaJugadores = Array.from(keysSet);
+            }
+
+            const totJornada = {};
+            listaJugadores.forEach(p => { totJornada[p] = 0; });
+
+            // 2. Acumular puntos de todas las rondas
+            (jornadaActiva.rondas || []).forEach(r => {
+                if (!r) return;
+                Object.entries(r).forEach(([p, val]) => {
+                    if (totJornada[p] === undefined) totJornada[p] = 0;
+                    totJornada[p] += (parseInt(val, 10) || 0);
+                });
+            });
+
+            const sorted = Object.entries(totJornada).sort((a, b) => b[1] - a[1]);
+
+            if (sorted.length === 0) {
+                tb.innerHTML = `<tr><td colspan="4" style="color:var(--txt-dim); text-align:center; padding:16px;">No hay jugadores o puntos registrados en esta fecha.</td></tr>`;
+                return;
+            }
+
+            // 3. Renderizar filas con formato y medallas
+            sorted.forEach(([p, v], idx) => {
+                const cags = (jornadaActiva.caguamas && jornadaActiva.caguamas[p]) || 0;
+                tb.innerHTML += `
+                    <tr class="${idx === 0 ? 'podium-1' : ''}">
+                        <td>${obtenerIconoPosicion(idx + 1)}</td>
+                        <td><strong>${p}</strong></td>
+                        <td style="color:var(--padel-volt); font-weight:900; font-size:1.05rem;">${v}</td>
+                        <td style="color:var(--padel-orange); font-weight:800;">🍺 ${cags}</td>
+                    </tr>
+                `;
+            });
+        }
         function renderTabla8LocoLive() {
             const th = document.getElementById("headTabla8LocoLive");
             const tb = document.getElementById("tabla8LocoLiveBody");

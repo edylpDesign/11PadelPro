@@ -5308,149 +5308,369 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             }
             renderTablaGeneralLiga();
         }
+        let filtroJornadaTablaGeneral = 'todas';
+
+        function cambiarFiltroJornadaTabla(val) {
+            filtroJornadaTablaGeneral = val;
+            renderTablaGeneralLiga();
+        }
+
         function renderTablaGeneralLiga() {
             const th = document.getElementById("tablaLigaHead");
             const tb = document.getElementById("tablaLigaBody");
+            if (!th || !tb || !ligaActiva) return;
             tb.innerHTML = "";
 
+            const jornadas = ligaActiva.jornadas || [];
+
+            // Contenedor del selector de jornada (lo insertamos o actualizamos dinámicamente)
+            let contFiltro = document.getElementById("filtroJornadaSelectorCont");
+            if (!contFiltro) {
+                const contenedorPadre = document.getElementById("tabLigaTabla");
+                if (contenedorPadre) {
+                    contFiltro = document.createElement("div");
+                    contFiltro.id = "filtroJornadaSelectorCont";
+                    contFiltro.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#0b1120; padding:8px 12px; border-radius:10px; border:1px solid var(--border-glow);";
+                    contenedorPadre.insertBefore(contFiltro, contenedorPadre.firstChild);
+                }
+            }
+
+            if (contFiltro) {
+                let optionsHtml = `<option value="todas" ${filtroJornadaTablaGeneral === 'todas' ? 'selected' : ''}>📊 Acumulado Total (Todas las Jornadas)</option>`;
+                jornadas.forEach((j, i) => {
+                    const idxStr = String(i);
+                    optionsHtml += `<option value="${idxStr}" ${filtroJornadaTablaGeneral === idxStr ? 'selected' : ''}>📅 ${j.nombre || `Jornada ${i + 1}`}</option>`;
+                });
+
+                contFiltro.innerHTML = `
+                    <span style="font-size:0.75rem; font-weight:800; color:var(--txt-muted);">
+                        <i class="fas fa-filter" style="color:var(--padel-volt);"></i> Vista de Tabla:
+                    </span>
+                    <select onchange="cambiarFiltroJornadaTabla(this.value)" style="width:auto; margin:0; padding:5px 10px; font-size:0.75rem; font-weight:800; background:var(--bg-card-subtle); color:var(--txt-main); border:1px solid var(--border-glow); border-radius:8px;">
+                        ${optionsHtml}
+                    </select>
+                `;
+            }
+
+            const esVistaTotal = (filtroJornadaTablaGeneral === 'todas');
+            const jIndexFiltro = esVistaTotal ? null : parseInt(filtroJornadaTablaGeneral);
+
+            // ==========================================
+            // MODO 1: POZO PRO
+            // ==========================================
             if (modoSeleccionado === 'pozo') {
-                let h = "<tr><th>Pos</th><th>Jugador</th><th>Total</th>";
-                (ligaActiva.jornadas || []).forEach((j, idx) => { h += `<th>J${idx + 1}</th>`; });
-                h += "<th>🍺</th></tr>";
-                th.innerHTML = h;
+                if (esVistaTotal) {
+                    let headHtml = "<tr><th>Pos</th><th>Jugador</th><th>Total</th>";
+                    jornadas.forEach((j, idx) => { headHtml += `<th>J${idx + 1}</th>`; });
+                    headHtml += "<th>🍺</th></tr>";
+                    th.innerHTML = headHtml;
 
-                const stats = {};
-                (ligaActiva.jornadas || []).forEach(j => {
-                    (j.convocados || []).forEach(p => { if (!stats[p]) stats[p] = { total: 0, list: [], cags: 0 }; });
-                });
-
-                (ligaActiva.jornadas || []).forEach(j => {
-                    Object.keys(stats).forEach(p => {
-                        let ptsJornada = 0;
-                        if (j.rondas && (j.convocados || []).includes(p)) {
-                            j.rondas.forEach(r => { ptsJornada += (parseInt(r[p]) || 0); });
-                        }
-                        stats[p].list.push(ptsJornada); stats[p].total += ptsJornada;
-                        stats[p].cags += (j.caguamas && j.caguamas[p] ? j.caguamas[p] : 0);
+                    const stats = {};
+                    jornadas.forEach(j => {
+                        (j.convocados || []).forEach(p => { 
+                            if (!stats[p]) stats[p] = { total: 0, list: [], cags: 0 }; 
+                        });
                     });
-                });
 
-                const sorted = Object.entries(stats).sort((a, b) => b[1].total - a[1].total);
-                sorted.forEach(([p, dat], idx) => {
-                    const desglose = dat.list.map((v, i) => `J${i + 1}:${v}`).join(' | ');
-                    tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
-                        <td>${obtenerIconoPosicion(idx + 1)}</td>
-                        <td><strong>${p}</strong></td>
-                        <td style="color:var(--padel-volt); font-weight:900;">${dat.total}</td>
-                        <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
-                    </tr>`;
-                });
-            } else if (modoSeleccionado === 'teams') {
-                th.innerHTML = "<tr><th>Pos</th><th>Pareja / Equipo</th><th>PJ</th><th>PG</th><th>Pts</th><th>+/-</th><th>🍺</th></tr>";
-                const stats = {};
-                (ligaActiva.jornadas || []).forEach(j => {
-                    if (j.rounds) {
-                        j.rounds.forEach(r => {
+                    jornadas.forEach(j => {
+                        Object.keys(stats).forEach(p => {
+                            let ptsJornada = 0;
+                            if (j.rondas && (j.convocados || []).includes(p)) {
+                                j.rondas.forEach(r => { ptsJornada += (parseInt(r[p]) || 0); });
+                            }
+                            stats[p].list.push(ptsJornada);
+                            stats[p].total += ptsJornada;
+                            stats[p].cags += (j.caguamas && j.caguamas[p] ? parseInt(j.caguamas[p]) || 0 : 0);
+                        });
+                    });
+
+                    const sorted = Object.entries(stats).sort((a, b) => b[1].total - a[1].total);
+                    sorted.forEach(([p, dat], idx) => {
+                        let columnasJornadas = "";
+                        dat.list.forEach(v => {
+                            columnasJornadas += `<td style="color:var(--txt-muted);">${v}</td>`;
+                        });
+
+                        tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
+                            <td>${obtenerIconoPosicion(idx + 1)}</td>
+                            <td><strong>${p}</strong></td>
+                            <td style="color:var(--padel-volt); font-weight:900; font-size:1rem;">${dat.total}</td>
+                            ${columnasJornadas}
+                            <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
+                        </tr>`;
+                    });
+                } else {
+                    const jAct = jornadas[jIndexFiltro];
+                    th.innerHTML = `<tr><th>Pos</th><th>Jugador</th><th>Puntos (${jAct ? (jAct.nombre || `J${jIndexFiltro + 1}`) : ''})</th><th>🍺</th></tr>`;
+                    
+                    if (jAct && jAct.rondas) {
+                        const statsJ = {};
+                        (jAct.convocados || []).forEach(p => {
+                            let pts = 0;
+                            jAct.rondas.forEach(r => { pts += (parseInt(r[p]) || 0); });
+                            statsJ[p] = { pts: pts, cags: (jAct.caguamas && jAct.caguamas[p]) || 0 };
+                        });
+
+                        const sorted = Object.entries(statsJ).sort((a, b) => b[1].pts - a[1].pts);
+                        sorted.forEach(([p, dat], idx) => {
+                            tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
+                                <td>${obtenerIconoPosicion(idx + 1)}</td>
+                                <td><strong>${p}</strong></td>
+                                <td style="color:var(--padel-volt); font-weight:900; font-size:1rem;">${dat.pts}</td>
+                                <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
+                            </tr>`;
+                        });
+                    }
+                }
+            } 
+            // ==========================================
+            // MODO 2: AMERICANO TEAMS
+            // ==========================================
+            else if (modoSeleccionado === 'teams') {
+                if (esVistaTotal) {
+                    let headHtml = "<tr><th>Pos</th><th>Pareja / Equipo</th><th>Total</th>";
+                    jornadas.forEach((j, idx) => { headHtml += `<th>J${idx + 1}</th>`; });
+                    headHtml += "<th>PJ</th><th>PG</th><th>+/-</th><th>🍺</th></tr>";
+                    th.innerHTML = headHtml;
+
+                    const stats = {};
+                    jornadas.forEach(j => {
+                        (j.parejas || []).forEach(pair => {
+                            const tName = pair.join(' & ');
+                            if (!stats[tName]) stats[tName] = { total: 0, list: [], pj: 0, pg: 0, diff: 0, cags: 0 };
+                        });
+                    });
+
+                    jornadas.forEach(j => {
+                        const ptsJornadaMap = {};
+                        if (j.rounds) {
+                            j.rounds.forEach(r => {
+                                (r.matches || []).forEach(m => {
+                                    const s1 = parseInt(m.score1) || 0;
+                                    const s2 = parseInt(m.score2) || 0;
+                                    if (m.jugado || s1 > 0 || s2 > 0) {
+                                        const t1 = (m.p1 || []).join(' & ');
+                                        const t2 = (m.p2 || []).join(' & ');
+                                        if (t1 && t2) {
+                                            if (!stats[t1]) stats[t1] = { total: 0, list: [], pj: 0, pg: 0, diff: 0, cags: 0 };
+                                            if (!stats[t2]) stats[t2] = { total: 0, list: [], pj: 0, pg: 0, diff: 0, cags: 0 };
+                                            ptsJornadaMap[t1] = (ptsJornadaMap[t1] || 0) + s1;
+                                            ptsJornadaMap[t2] = (ptsJornadaMap[t2] || 0) + s2;
+                                            stats[t1].pj++; stats[t2].pj++;
+                                            stats[t1].diff += (s1 - s2); stats[t2].diff += (s2 - s1);
+                                            if (s1 > s2) stats[t1].pg++; else if (s2 > s1) stats[t2].pg++;
+                                        }
+                                    }
+                                });
+                            });
+                        }
+
+                        Object.keys(stats).forEach(t => {
+                            const pJor = ptsJornadaMap[t] || 0;
+                            stats[t].list.push(pJor);
+                            stats[t].total += pJor;
+                        });
+                    });
+
+                    const sorted = Object.entries(stats).sort((a, b) => {
+                        if (b[1].total !== a[1].total) return b[1].total - a[1].total;
+                        if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
+                        return b[1].pg - a[1].pg;
+                    });
+
+                    sorted.forEach(([team, dat], idx) => {
+                        let colsJ = "";
+                        dat.list.forEach(v => { colsJ += `<td style="color:var(--txt-muted);">${v}</td>`; });
+
+                        tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
+                            <td>${obtenerIconoPosicion(idx + 1)}</td>
+                            <td><strong>${team}</strong></td>
+                            <td style="color:var(--padel-volt); font-weight:900;">${dat.total}</td>
+                            ${colsJ}
+                            <td>${dat.pj}</td>
+                            <td>${dat.pg}</td>
+                            <td>${dat.diff > 0 ? '+' + dat.diff : dat.diff}</td>
+                            <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
+                        </tr>`;
+                    });
+                } else {
+                    const jAct = jornadas[jIndexFiltro];
+                    th.innerHTML = `<tr><th>Pos</th><th>Pareja</th><th>PJ</th><th>PG</th><th>Pts</th><th>+/-</th><th>🍺</th></tr>`;
+                    const statsJ = {};
+                    if (jAct && jAct.rounds) {
+                        (jAct.parejas || []).forEach(pair => {
+                            statsJ[pair.join(' & ')] = { pj: 0, pg: 0, pts: 0, diff: 0, cags: 0 };
+                        });
+                        jAct.rounds.forEach(r => {
                             (r.matches || []).forEach(m => {
                                 const s1 = parseInt(m.score1) || 0;
                                 const s2 = parseInt(m.score2) || 0;
-                                const esJugado = m.jugado || (s1 > 0 || s2 > 0);
-                                if (esJugado) {
-                                    const t1Name = (m.p1 || []).join(' & ');
-                                    const t2Name = (m.p2 || []).join(' & ');
-                                    if (t1Name && t2Name) {
-                                        stats[t1Name] = stats[t1Name] || { pj: 0, pg: 0, pts: 0, diff: 0, cags: 0 };
-                                        stats[t2Name] = stats[t2Name] || { pj: 0, pg: 0, pts: 0, diff: 0, cags: 0 };
-                                        stats[t1Name].pj++; stats[t2Name].pj++;
-                                        stats[t1Name].diff += (s1 - s2); stats[t2Name].diff += (s2 - s1);
-                                        stats[t1Name].pts += s1; stats[t2Name].pts += s2;
-                                        if (s1 > s2) stats[t1Name].pg++; else if (s2 > s1) stats[t2Name].pg++;
+                                if (m.jugado || s1 > 0 || s2 > 0) {
+                                    const t1 = (m.p1 || []).join(' & ');
+                                    const t2 = (m.p2 || []).join(' & ');
+                                    if (statsJ[t1]) {
+                                        statsJ[t1].pj++; statsJ[t1].pts += s1; statsJ[t1].diff += (s1 - s2);
+                                        if (s1 > s2) statsJ[t1].pg++;
+                                    }
+                                    if (statsJ[t2]) {
+                                        statsJ[t2].pj++; statsJ[t2].pts += s2; statsJ[t2].diff += (s2 - s1);
+                                        if (s2 > s1) statsJ[t2].pg++;
                                     }
                                 }
                             });
                         });
                     }
-                });
-                const sorted = Object.entries(stats).sort((a, b) => {
-                    if (b[1].pg !== a[1].pg) return b[1].pg - a[1].pg;
-                    return b[1].diff - a[1].diff;
-                });
-                sorted.forEach(([team, dat], idx) => {
-                    tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}"><td>${obtenerIconoPosicion(idx + 1)}</td><td><strong>${team}</strong></td><td>${dat.pj}</td><td>${dat.pg}</td><td style="color:var(--padel-volt); font-weight:900;">${dat.pts}</td><td>${dat.diff > 0 ? '+' + dat.diff : dat.diff}</td><td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td></tr>`;
-                });
-            } else {
-                th.innerHTML = "<tr><th>Pos</th><th>Jugador</th><th>PJ</th><th>PG</th><th>Pts Anotados</th><th>+/-</th><th>🍺</th></tr>";
-                const stats = {};
-                (ligaActiva.jornadas || []).forEach(j => {
-                    if (j.rounds) {
-                        j.rounds.forEach(r => {
-                            const esEspecial = r.esRondaEspecial === true;
-                            const comodines = r.jugadoresComodin || [];
 
+                    const sorted = Object.entries(statsJ).sort((a, b) => {
+                        if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
+                        if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
+                        return b[1].pg - a[1].pg;
+                    });
+
+                    sorted.forEach(([t, dat], idx) => {
+                        tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
+                            <td>${obtenerIconoPosicion(idx + 1)}</td>
+                            <td><strong>${t}</strong></td>
+                            <td>${dat.pj}</td>
+                            <td>${dat.pg}</td>
+                            <td style="color:var(--padel-volt); font-weight:900;">${dat.pts}</td>
+                            <td>${dat.diff > 0 ? '+' + dat.diff : dat.diff}</td>
+                            <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
+                        </tr>`;
+                    });
+                }
+            } 
+            // ==========================================
+            // MODO 3: 8 LOCO / AMERICANO INDIVIDUAL
+            // ==========================================
+            else {
+                if (esVistaTotal) {
+                    let headHtml = "<tr><th>Pos</th><th>Jugador</th><th>Total</th>";
+                    jornadas.forEach((j, idx) => { headHtml += `<th>J${idx + 1}</th>`; });
+                    headHtml += "<th>PJ</th><th>PG</th><th>+/-</th><th>🍺</th></tr>";
+                    th.innerHTML = headHtml;
+
+                    const stats = {};
+                    jornadas.forEach(j => {
+                        (j.convocados || []).forEach(p => { 
+                            if (!stats[p]) stats[p] = { total: 0, list: [], pj: 0, w: 0, diff: 0, cags: 0 }; 
+                        });
+                    });
+
+                    jornadas.forEach(j => {
+                        const ptsJornadaMap = {};
+                        if (j.rounds) {
+                            j.rounds.forEach(r => {
+                                (r.matches || []).forEach(m => {
+                                    const s1 = parseInt(m.score1, 10) || 0;
+                                    const s2 = parseInt(m.score2, 10) || 0;
+                                    if (m.jugado || s1 > 0 || s2 > 0) {
+                                        (m.p1 || []).forEach(p => {
+                                            if (!p || p === "BYE") return;
+                                            if (!stats[p]) stats[p] = { total: 0, list: [], pj: 0, w: 0, diff: 0, cags: 0 };
+                                            stats[p].pj++;
+                                            ptsJornadaMap[p] = (ptsJornadaMap[p] || 0) + s1;
+                                            stats[p].diff += (s1 - s2);
+                                            if (s1 > s2) stats[p].w++;
+                                        });
+                                        (m.p2 || []).forEach(p => {
+                                            if (!p || p === "BYE") return;
+                                            if (!stats[p]) stats[p] = { total: 0, list: [], pj: 0, w: 0, diff: 0, cags: 0 };
+                                            stats[p].pj++;
+                                            ptsJornadaMap[p] = (ptsJornadaMap[p] || 0) + s2;
+                                            stats[p].diff += (s2 - s1);
+                                            if (s2 > s1) stats[p].w++;
+                                        });
+                                    }
+                                });
+                            });
+                        }
+
+                        if (j.caguamas) {
+                            Object.entries(j.caguamas).forEach(([p, c]) => {
+                                if (stats[p]) stats[p].cags += parseInt(c, 10) || 0;
+                            });
+                        }
+
+                        Object.keys(stats).forEach(p => {
+                            const pJor = ptsJornadaMap[p] || 0;
+                            stats[p].list.push(pJor);
+                            stats[p].total += pJor;
+                        });
+                    });
+
+                    const sorted = Object.entries(stats).sort((a, b) => {
+                        if (criterioOrdenTablaActual === 'diff') {
+                            if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
+                            return b[1].total - a[1].total;
+                        } else {
+                            if (b[1].total !== a[1].total) return b[1].total - a[1].total;
+                            return b[1].diff - a[1].diff;
+                        }
+                    });
+
+                    sorted.forEach(([p, dat], idx) => {
+                        let colsJ = "";
+                        dat.list.forEach(v => { colsJ += `<td style="color:var(--txt-muted);">${v}</td>`; });
+
+                        tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
+                            <td>${obtenerIconoPosicion(idx + 1)}</td>
+                            <td><strong>${p}</strong></td>
+                            <td style="color:var(--padel-volt); font-weight:900;">${dat.total}</td>
+                            ${colsJ}
+                            <td>${dat.pj}</td>
+                            <td>${dat.w}</td>
+                            <td>${dat.diff > 0 ? '+' + dat.diff : dat.diff}</td>
+                            <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
+                        </tr>`;
+                    });
+                } else {
+                    const jAct = jornadas[jIndexFiltro];
+                    th.innerHTML = `<tr><th>Pos</th><th>Jugador</th><th>PJ</th><th>PG</th><th>Pts Anotados</th><th>+/-</th><th>🍺</th></tr>`;
+                    const statsJ = {};
+                    if (jAct && jAct.rounds) {
+                        (jAct.convocados || []).forEach(p => {
+                            statsJ[p] = { pj: 0, w: 0, diff: 0, pts: 0, cags: (jAct.caguamas && jAct.caguamas[p]) || 0 };
+                        });
+                        jAct.rounds.forEach(r => {
                             (r.matches || []).forEach(m => {
                                 const s1 = parseInt(m.score1, 10) || 0;
                                 const s2 = parseInt(m.score2, 10) || 0;
-                                const esJugado = m.jugado === true || (s1 > 0 || s2 > 0);
-
-                                if (esJugado) {
+                                if (m.jugado || s1 > 0 || s2 > 0) {
                                     (m.p1 || []).forEach(p => {
                                         if (!p || p === "BYE") return;
-                                        // SI ES COMODÍN EN RONDA ESPECIAL, NO SUMA NADA
-                                        if (esEspecial && comodines.includes(p)) return;
-
-                                        stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
-                                        stats[p].pj++;
-                                        stats[p].pts += s1;
-                                        stats[p].diff += (s1 - s2);
-                                        if (s1 > s2) stats[p].w++;
+                                        if (!statsJ[p]) statsJ[p] = { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
+                                        statsJ[p].pj++; statsJ[p].pts += s1; statsJ[p].diff += (s1 - s2);
+                                        if (s1 > s2) statsJ[p].w++;
                                     });
                                     (m.p2 || []).forEach(p => {
                                         if (!p || p === "BYE") return;
-                                        // SI ES COMODÍN EN RONDA ESPECIAL, NO SUMA NADA
-                                        if (esEspecial && comodines.includes(p)) return;
-
-                                        stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
-                                        stats[p].pj++;
-                                        stats[p].pts += s2;
-                                        stats[p].diff += (s2 - s1);
-                                        if (s2 > s1) stats[p].w++;
+                                        if (!statsJ[p]) statsJ[p] = { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
+                                        statsJ[p].pj++; statsJ[p].pts += s2; statsJ[p].diff += (s2 - s1);
+                                        if (s2 > s1) statsJ[p].w++;
                                     });
                                 }
                             });
                         });
                     }
-                    if (j.caguamas) {
-                        Object.entries(j.caguamas).forEach(([p, c]) => {
-                            stats[p] = stats[p] || { pj: 0, w: 0, diff: 0, pts: 0, cags: 0 };
-                            stats[p].cags += parseInt(c, 10) || 0;
-                        });
-                    }
-                });
 
-                // Orden dinámico según el filtro seleccionado
-                const sorted = Object.entries(stats).sort((a, b) => {
-                    if (criterioOrdenTablaActual === 'diff') {
-                        if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
+                    const sorted = Object.entries(statsJ).sort((a, b) => {
                         if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
-                        return b[1].w - a[1].w;
-                    } else {
-                        if (b[1].pts !== a[1].pts) return b[1].pts - a[1].pts;
-                        if (b[1].diff !== a[1].diff) return b[1].diff - a[1].diff;
-                        return b[1].w - a[1].w;
-                    }
-                });
+                        return b[1].diff - a[1].diff;
+                    });
 
-                sorted.forEach(([p, dat], idx) => {
-                    tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
-                        <td>${obtenerIconoPosicion(idx + 1)}</td>
-                        <td><strong>${p}</strong></td>
-                        <td>${dat.pj}</td>
-                        <td>${dat.w}</td>
-                        <td style="color:var(--padel-volt); font-weight:900;">${dat.pts}</td>
-                        <td>${dat.diff > 0 ? '+' + dat.diff : dat.diff}</td>
-                        <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
-                    </tr>`;
-                });
+                    sorted.forEach(([p, dat], idx) => {
+                        tb.innerHTML += `<tr class="${idx === 0 ? 'podium-1' : ''}">
+                            <td>${obtenerIconoPosicion(idx + 1)}</td>
+                            <td><strong>${p}</strong></td>
+                            <td>${dat.pj}</td>
+                            <td>${dat.w}</td>
+                            <td style="color:var(--padel-volt); font-weight:900;">${dat.pts}</td>
+                            <td>${dat.diff > 0 ? '+' + dat.diff : dat.diff}</td>
+                            <td style="color:var(--padel-orange); font-weight:800;">🍺 ${dat.cags}</td>
+                        </tr>`;
+                    });
+                }
             }
         }
 

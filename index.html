@@ -5753,27 +5753,18 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
         let filtroBusquedaConvocados = "";
 
      function abrirModalNuevaJornada() {
-    const esRelampago = ligaActiva && ligaActiva.esJornadaUnica;
-    document.getElementById("jornadaNombreInput").value = esRelampago ? "Jornada Única" : `Jornada ${(ligaActiva.jornadas || []).length + 1}`;
-    const isTeams = modoSeleccionado === 'teams';
-    document.getElementById("teamsConfigZone").classList.toggle("hidden", !isTeams);
-    document.getElementById("individualConfigZone").classList.toggle("hidden", isTeams);
-    document.getElementById("modalJornadaTitulo").textContent = esRelampago ? "⚡ Convocar Jugadores (Jornada Única)" : (isTeams ? "Convocatoria por Parejas Fijas" : "Convocatoria de Jornada");
+            const modal = document.getElementById("modalNuevaJornada");
+            if (!modal) return;
 
-         if (isTeams) {
-             parejasFijasSeleccionadas = [];
-             llenarSelectoresPadron(["selectTeamP1", "selectTeamP2"]);
-             renderParejasFijasModal();
-         } else {
-             // Inicia vacío: 0 seleccionados para elegir de 1 en 1
-             convocadosSeleccionados = [];
-             filtroBusquedaConvocados = "";
-             const inpBuscar = document.getElementById("inputBuscarJugadorConvocatoria");
-             if (inpBuscar) inpBuscar.value = "";
-             renderPills();
-         }
-         document.getElementById("modalNuevaJornada").classList.add("active");
-     }
+            const inputNom = document.getElementById("jornadaNombreInput");
+            if (inputNom) {
+                const total = (ligaActiva && ligaActiva.jornadas) ? ligaActiva.jornadas.length + 1 : 1;
+                inputNom.value = `Jornada ${total}`;
+            }
+
+            modal.classList.add("active");
+            modal.style.setProperty("display", "flex", "important");
+        }
 
      function filtrarJugadoresConvocatoria(termino) {
          filtroBusquedaConvocados = (termino || "").toLowerCase().trim();

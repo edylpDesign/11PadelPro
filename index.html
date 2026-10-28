@@ -8923,18 +8923,39 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
         }
 
         async function abrirModalNotificaciones() {
+            // 1. Obtener el teléfono del input, del usuario activo o del localStorage
             const inputTel = document.getElementById("perfilTelefonoInput");
-            const tel = inputTel ? inputTel.value.replace(/\D/g, '') : "";
-            
+            let tel = inputTel ? inputTel.value.replace(/\D/g, '') : "";
+
             if (!tel || tel.length !== 10) {
-                showToast("Ingresa tu WhatsApp en Mi Perfil para ver tus notificaciones", "error");
-                return;
+                tel = (localStorage.getItem("11padel_user_tel") || 
+                       localStorage.getItem("11padel_telefono_perfil") || 
+                       localStorage.getItem("user_phone") || "").replace(/\D/g, '');
+            }
+
+            if (!tel && typeof usuarioActivo !== 'undefined' && usuarioActivo) {
+                tel = (usuarioActivo.phoneNumber || usuarioActivo.telefono || "").replace(/\D/g, '');
             }
 
             const modal = document.getElementById("modalNotificaciones");
             const cont = document.getElementById("listaNotificacionesContainer") || document.getElementById("listaNotificacionesContenedor");
-            
-            // Usar la clase .active estándar de tu app para hacerlo visible
+
+            if (!tel || tel.length !== 10) {
+                if (modal) modal.classList.add("active");
+                if (cont) {
+                    cont.innerHTML = `
+                        <div style="text-align:center; padding:20px;">
+                            <p style="color:var(--padel-orange); font-size:0.85rem; font-weight:800; margin-bottom:12px;">⚠️ No tienes un número vinculado</p>
+                            <p style="color:var(--txt-muted); font-size:0.75rem; margin-bottom:16px;">Ingresa a tu perfil y guarda tu WhatsApp a 10 dígitos para consultar invitaciones.</p>
+                            <button type="button" class="btn btn-sm btn-green" onclick="closeModal('modalNotificaciones'); abrirModalPerfilOAcceso();">
+                                Ir a Mi Perfil
+                            </button>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
             if (modal) modal.classList.add("active");
             if (cont) cont.innerHTML = "<p style='color:var(--txt-dim); text-align:center; padding:16px;'>Consultando notificaciones...</p>";
 

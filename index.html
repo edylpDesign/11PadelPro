@@ -2452,38 +2452,65 @@
                 </div>
             </div>
         </div>
-<!-- SALA PREVIA / LOBBY DE JORNADA -->
+<!-- SALA PREVIA / LOBBY DE JORNADA CON HERRAMIENTAS COMPLETAS -->
         <div id="viewSalaPreviaJornada" class="card hidden">
             <div class="card-header">
                 <div>
                     <span id="salaPreviaTitulo" style="color:var(--padel-volt); font-size:1rem; font-weight:900;">Sala Previa • Convocatoria</span>
-                    <small id="salaPreviaSubtitulo" style="display:block; font-size:0.7rem; color:var(--txt-muted);">Agrega a los jugadores antes de armar las canchas</small>
+                    <small id="salaPreviaSubtitulo" style="display:block; font-size:0.7rem; color:var(--txt-muted);">Gestiona participantes, altas al vuelo y parejas antes de iniciar</small>
                 </div>
                 <button type="button" class="btn btn-sm btn-dark" onclick="backToLigaDetalle()"><i class="fas fa-arrow-left"></i> Volver</button>
             </div>
 
-            <!-- SELECTOR PARA AGREGAR JUGADOR -->
-            <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:12px; margin-bottom:14px;">
-                <label style="font-size:0.75rem; font-weight:800; color:var(--txt-muted); display:block; margin-bottom:6px;">
-                    <i class="fas fa-user-plus" style="color:var(--padel-volt);"></i> Añadir jugador del padrón a la sala:
+            <!-- 1. REGISTRO RÁPIDO AL VUELO -->
+            <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:10px; margin-bottom:12px;">
+                <label style="font-size:0.72rem; font-weight:800; color:var(--padel-volt); display:block; margin-bottom:6px;">
+                    <i class="fas fa-bolt"></i> Registro Rápido al Vuelo (Nuevo Jugador):
                 </label>
                 <div style="display:flex; gap:6px;">
-                    <select id="selectAgregarSalaPrevia" style="margin:0; flex:1;"></select>
-                    <button type="button" class="btn btn-sm btn-green" onclick="agregarJugadorASalaPrevia()">+ Agregar</button>
+                    <input type="text" id="salaPreviaNuevoNombre" placeholder="Nombre y Apellido" style="margin:0; flex:1; font-size:0.8rem;">
+                    <input type="tel" id="salaPreviaNuevoTel" placeholder="WhatsApp (10 dígitos)" maxlength="10" style="margin:0; width:130px; font-size:0.8rem;">
+                    <button type="button" class="btn btn-sm btn-green" onclick="registrarJugadorAlVueloSalaPrevia()">+ Crear</button>
                 </div>
             </div>
 
-            <!-- LISTADO DE JUGADORES EN SALA -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="font-size:0.78rem; font-weight:800; color:var(--txt-main);">
-                    Jugadores confirmados (<strong id="countJugadoresSalaPrevia" style="color:var(--padel-volt);">0</strong>):
-                </span>
-                <small style="color:var(--txt-dim); font-size:0.7rem;">Notificación de visor enviada</small>
+            <!-- 2. SECCIÓN MODO INDIVIDUAL (8 LOCO / POZO): BUSCADOR Y LISTA DEL PADRÓN -->
+            <div id="salaPreviaZonaIndividual" style="margin-bottom:14px;">
+                <div style="display:flex; gap:6px; margin-bottom:8px;">
+                    <div style="position:relative; flex:1;">
+                        <input type="text" id="salaPreviaBuscadorInput" placeholder="🔍 Filtrar jugador del padrón..." oninput="filtrarJugadoresSalaPrevia()" style="margin:0; padding-left:30px; font-size:0.8rem; width:100%;">
+                        <i class="fas fa-search" style="position:absolute; left:10px; top:11px; color:var(--txt-dim); font-size:0.75rem;"></i>
+                    </div>
+                </div>
+
+                <div id="salaPreviaChipsPadron" style="display:flex; flex-wrap:wrap; gap:6px; max-height:120px; overflow-y:auto; padding:6px; background:rgba(0,0,0,0.25); border-radius:8px; border:1px solid rgba(255,255,255,0.05); margin-bottom:12px;">
+                    <!-- Chips clickeables para sumar o quitar -->
+                </div>
             </div>
 
-            <div id="listaJugadoresSalaPreviaCont" style="display:flex; flex-direction:column; gap:6px; max-height:280px; overflow-y:auto; margin-bottom:16px;"></div>
+            <!-- 3. SECCIÓN MODO TEAMS (CONFIGURACIÓN DE PAREJAS FIJAS) -->
+            <div id="salaPreviaZonaTeams" class="hidden" style="margin-bottom:14px; background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:10px;">
+                <label style="font-size:0.75rem; font-weight:800; color:var(--padel-volt); display:block; margin-bottom:6px;">
+                    <i class="fas fa-users"></i> Armar Pareja Fija:
+                </label>
+                <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:6px; margin-bottom:8px;">
+                    <select id="salaPreviaSelectP1" style="margin:0; font-size:0.78rem;"></select>
+                    <select id="salaPreviaSelectP2" style="margin:0; font-size:0.78rem;"></select>
+                    <button type="button" class="btn btn-sm btn-green" onclick="agregarParejaTeamsSalaPrevia()">+ Unir</button>
+                </div>
+            </div>
 
-            <!-- BOTÓN QUE GENERA EL FIXTURE Y ARRANCA -->
+            <!-- 4. LISTADO DE JUGADORES / PAREJAS EN SALA -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:0.78rem; font-weight:800; color:var(--txt-main);">
+                    Confirmados en Sala (<strong id="countJugadoresSalaPrevia" style="color:var(--padel-volt);">0</strong>):
+                </span>
+                <small style="color:var(--txt-dim); font-size:0.68rem;">Notificación de visor enviada</small>
+            </div>
+
+            <div id="listaJugadoresSalaPreviaCont" style="display:flex; flex-direction:column; gap:6px; max-height:260px; overflow-y:auto; margin-bottom:16px;"></div>
+
+            <!-- 5. BOTÓN DE ARRANQUE OFICIAL -->
             <button type="button" class="btn btn-green" style="width:100%; padding:14px; font-size:0.95rem; font-weight:900; letter-spacing:0.5px;" onclick="confirmarEIniciarJornadaOficial()">
                 <i class="fas fa-play"></i> CONFIRMAR E INICIAR JORNADA ➔
             </button>
@@ -2986,96 +3013,23 @@
         </div>
     </div>
 
-    <!-- MODAL NUEVA JORNADA -->
-    <div id="modalNuevaJornada" class="modal" onclick="closeModalOnBackdrop(event, 'modalNuevaJornada')">
-        <div class="modal-content">
-            <button type="button" class="modal-close-icon" onclick="closeModal('modalNuevaJornada')">×</button>
-            <h3 style="color:var(--txt-main); margin-bottom:10px; font-weight:800;" id="modalJornadaTitulo">Convocatoria
-                de Jornada</h3>
-            <input type="text" id="jornadaNombreInput" placeholder="Nombre de la Jornada">
+        <!-- MODAL NUEVA JORNADA -->
+        <div id="modalNuevaJornada" class="modal" onclick="closeModalOnBackdrop(event, 'modalNuevaJornada')">
+            <div class="modal-content">
+                <button type="button" class="modal-close-icon" onclick="closeModal('modalNuevaJornada')">&times;</button>
+                <h3 style="color:var(--txt-main); margin-bottom:12px; font-weight:800;">
+                    <i class="fas fa-calendar-plus" style="color:var(--padel-volt);"></i> Nueva Jornada
+                </h3>
+                
+                <label style="font-size:0.75rem; color:var(--txt-muted); display:block; margin-bottom:6px;">Nombre de la Fecha / Jornada:</label>
+                <input type="text" id="jornadaNombreInput" placeholder="Ej: Jornada 4, Torneo Fin de Mes..." style="margin-bottom:16px;">
 
-            <div id="teamsConfigZone" class="hidden" style="margin-top:12px;">
-                <div
-                    style="background:var(--bg-card-subtle); padding:10px; border-radius:12px; border:1px solid var(--border-glow); margin-bottom:10px;">
-                    <span style="font-size:0.72rem; font-weight:800; color:var(--padel-volt);">+ Registro Rápido al
-                        Vuelo (Padrón):</span>
-                    <div style="display:flex; gap:6px; margin-top:6px;">
-                        <input type="text" id="inputRegistroExpressTeams" placeholder="Nombre de nuevo jugador"
-                            style="margin:0;">
-                        <button type="button" class="btn btn-sm btn-green"
-                            onclick="registrarJugadorExpressDesdeModal('teams')">+</button>
-                    </div>
+                <div style="display:flex; gap:8px; margin-top:14px;">
+                    <button type="button" class="btn btn-dark btn-sm" style="flex:1; padding:12px;" onclick="closeModal('modalNuevaJornada')">Cancelar</button>
+                    <button type="button" class="btn btn-green btn-sm" style="flex:2; padding:12px; font-weight:800;" onclick="iniciarJornadaConfirmada()">Crear Sala Previa ➔</button>
                 </div>
-
-                <div
-                    style="background:var(--bg-card-subtle); padding:10px; border-radius:12px; border:1px solid var(--border-glow); margin-bottom:10px;">
-                    <span style="font-size:0.75rem; font-weight:800; color:var(--txt-muted);">Armar Pareja / Equipo
-                        Fijo:</span>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:6px;">
-                        <div>
-                            <label style="font-size:0.65rem; color:var(--txt-dim);">Jugador 1</label>
-                            <select id="selectTeamP1"
-                                onchange="document.getElementById('teamInputP1').value = this.value;"></select>
-                            <input type="text" id="teamInputP1" placeholder="O escribe nombre">
-                        </div>
-                        <div>
-                            <label style="font-size:0.65rem; color:var(--txt-dim);">Jugador 2</label>
-                            <select id="selectTeamP2"
-                                onchange="document.getElementById('teamInputP2').value = this.value;"></select>
-                            <input type="text" id="teamInputP2" placeholder="O escribe nombre">
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-sm btn-green" style="width:100%; margin-top:8px;"
-                        onclick="agregarParejaFijaExpress()">+ Añadir Pareja</button>
-                </div>
-
-                <div style="font-size:0.75rem; font-weight:800; color:var(--txt-muted); margin-bottom:6px;">Parejas
-                    registradas (<span id="countTeamsRegistrados" style="color:var(--padel-volt);">0</span>):</div>
-                <div id="listaParejasFijasContainer"
-                    style="display:flex; flex-direction:column; gap:6px; max-height:140px; overflow-y:auto; margin-bottom:12px;">
-                </div>
-            </div>
-
-            <div id="individualConfigZone">
-             <div
-                 style="background:var(--bg-card-subtle); padding:12px; border-radius:12px; margin:12px 0; border:1px solid var(--border-glow);">
-                 <span style="font-size:0.75rem; font-weight:800; color:var(--txt-muted);">Registro rápido al vuelo:</span>
-                 <div style="display:flex; gap:6px; margin-top:6px;">
-                     <input type="text" id="inputRegistroExpress" placeholder="Nombre y Apellido" style="margin:0;">
-                     <button type="button" class="btn btn-sm btn-green" onclick="registrarJugadorExpress()">+</button>
-                 </div>
-             </div>
-
-             <!-- BARRA DE BÚSQUEDA RÁPIDA -->
-             <div style="margin-bottom:10px;">
-                 <div style="position:relative;">
-                     <input type="text" id="inputBuscarJugadorConvocatoria" placeholder="🔍 Buscar jugador en el padrón..." 
-                            oninput="filtrarJugadoresConvocatoria(this.value)"
-                            style="margin-top:0; padding-left:34px; background:#0b1120; border-radius:10px; font-size:0.8rem;">
-                     <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--txt-dim); font-size:0.75rem;"></i>
-                 </div>
-             </div>
-
-             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                 <p style="font-size:0.75rem; font-weight:800; color:var(--txt-muted); margin:0;">
-                     Convocados elegidos: (<strong id="countConvocados" style="color:var(--padel-volt);">0</strong>)
-                 </p>
-                 <small style="color:var(--txt-dim); font-size:0.68rem;">Toca para sumar o quitar</small>
-             </div>
-
-             <div id="pillsConvocadosContainer"
-                 style="display:flex; flex-wrap:wrap; gap:6px; max-height:160px; overflow-y:auto; margin-bottom:14px; padding:4px; background:rgba(0,0,0,0.15); border-radius:10px;">
-             </div>
-         </div>
-
-            <div style="display:flex; gap:8px; margin-top:14px;">
-                <button type="button" class="btn btn-dark btn-sm" style="flex:1; padding:12px;"
-                    onclick="closeModal('modalNuevaJornada')">Cancelar</button>
-                <button type="button" class="btn btn-green btn-sm" style="flex:2; padding:12px;"
-                    onclick="iniciarJornadaConfirmada()">Iniciar Jornada Oficial ➔</button>
             </div>
         </div>
-    </div>
 
     <!-- MODAL PARA PUBLICAR RETA (FALTA 1) -->
     <div id="modalPublicarReta" class="modal" onclick="closeModalOnBackdrop(event, 'modalPublicarReta')">
@@ -6211,8 +6165,131 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             }
 
             document.getElementById("salaPreviaTitulo").textContent = `Sala Previa: ${jornadaActiva.nombre}`;
-            llenarSelectoresPadron(["selectAgregarSalaPrevia"]);
+            
+            // Alternar vista según sea individual o teams
+            const esTeams = (modoSeleccionado === 'teams');
+            const zInd = document.getElementById("salaPreviaZonaIndividual");
+            const zTeams = document.getElementById("salaPreviaZonaTeams");
+            if (zInd) zInd.classList.toggle("hidden", esTeams);
+            if (zTeams) zTeams.classList.toggle("hidden", !esTeams);
+
+            if (esTeams) {
+                llenarSelectoresPadron(["salaPreviaSelectP1", "salaPreviaSelectP2"]);
+            } else {
+                renderChipsPadronSalaPrevia();
+            }
+
             renderJugadoresSalaPrevia();
+        }
+
+        // Renderizar botones (chips) del padrón para sumar/quitar con 1 clic
+        function renderChipsPadronSalaPrevia() {
+            const cont = document.getElementById("salaPreviaChipsPadron");
+            if (!cont || !jornadaActiva) return;
+            cont.innerHTML = "";
+
+            const d = getUserData();
+            const padron = d.jugadores || [];
+            const busq = (document.getElementById("salaPreviaBuscadorInput")?.value || "").toLowerCase().trim();
+            const convocados = jornadaActiva.convocados || [];
+
+            padron.forEach(j => {
+                const nom = obtenerNombreJugador(j);
+                if (busq && !nom.toLowerCase().includes(busq)) return;
+
+                const seleccionado = convocados.includes(nom);
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = `btn btn-sm ${seleccionado ? 'btn-green' : 'btn-dark'}`;
+                btn.style.cssText = "font-size:0.72rem; padding:4px 8px; border-radius:15px; margin:2px;";
+                btn.innerHTML = `${seleccionado ? '✓ ' : '+ '} ${nom}`;
+                btn.onclick = () => alternarJugadorEnSalaPrevia(nom);
+                cont.appendChild(btn);
+            });
+        }
+
+        function filtrarJugadoresSalaPrevia() {
+            renderChipsPadronSalaPrevia();
+        }
+
+        async function alternarJugadorEnSalaPrevia(nom) {
+            if (!jornadaActiva) return;
+            jornadaActiva.convocados = jornadaActiva.convocados || [];
+            const idx = jornadaActiva.convocados.indexOf(nom);
+
+            if (idx > -1) {
+                jornadaActiva.convocados.splice(idx, 1);
+                showToast(`${nom} retirado de la sala`);
+            } else {
+                jornadaActiva.convocados.push(nom);
+                showToast(`¡${nom} agregado a la sala!`);
+                enviarNotificacionAJugador(nom, ligaActiva.id, ligaActiva.nombre, jornadaActiva.id, jornadaActiva.nombre, modoSeleccionado);
+            }
+
+            saveLigaActiva();
+            renderChipsPadronSalaPrevia();
+            renderJugadoresSalaPrevia();
+        }
+
+        // Registro de un jugador al vuelo directamente desde la sala previa
+        async function registrarJugadorAlVueloSalaPrevia() {
+            const inNom = document.getElementById("salaPreviaNuevoNombre");
+            const inTel = document.getElementById("salaPreviaNuevoTel");
+            const nom = inNom ? inNom.value.trim() : "";
+            const tel = inTel ? inTel.value.replace(/\D/g, "") : "";
+
+            if (!nom) return showToast("Escribe el nombre del jugador", "error");
+
+            const d = getUserData();
+            d.jugadores = d.jugadores || [];
+
+            let existe = d.jugadores.find(j => obtenerNombreJugador(j).toLowerCase() === nom.toLowerCase());
+            if (!existe) {
+                const nuevo = { nombre: nom, telefono: tel };
+                d.jugadores.push(nuevo);
+                saveUserData(d);
+            }
+
+            inNom.value = "";
+            if (inTel) inTel.value = "";
+
+            if (modoSeleccionado === 'teams') {
+                llenarSelectoresPadron(["salaPreviaSelectP1", "salaPreviaSelectP2"]);
+                showToast(`¡${nom} registrado! Ahora puedes armar su pareja.`);
+            } else {
+                if (!jornadaActiva.convocados.includes(nom)) {
+                    jornadaActiva.convocados.push(nom);
+                    saveLigaActiva();
+                    enviarNotificacionAJugador(nom, ligaActiva.id, ligaActiva.nombre, jornadaActiva.id, jornadaActiva.nombre, modoSeleccionado);
+                }
+                renderChipsPadronSalaPrevia();
+                renderJugadoresSalaPrevia();
+                showToast(`¡${nom} creado y convocado a la sala!`);
+            }
+        }
+
+        // Armar y agregar pareja fija en modo Teams
+        function agregarParejaTeamsSalaPrevia() {
+            const p1 = document.getElementById("salaPreviaSelectP1")?.value.trim();
+            const p2 = document.getElementById("salaPreviaSelectP2")?.value.trim();
+
+            if (!p1 || !p2) return showToast("Selecciona dos jugadores", "error");
+            if (p1 === p2) return showToast("Selecciona dos jugadores distintos", "error");
+
+            jornadaActiva.parejas = jornadaActiva.parejas || [];
+            
+            const yaOcupado = jornadaActiva.parejas.some(par => par.includes(p1) || par.includes(p2));
+            if (yaOcupado) return showToast("Uno de los jugadores ya tiene pareja asignada", "error");
+
+            jornadaActiva.parejas.push([p1, p2]);
+            saveLigaActiva();
+            renderJugadoresSalaPrevia();
+
+            // Notificar a ambos jugadores con acceso de visor
+            enviarNotificacionAJugador(p1, ligaActiva.id, ligaActiva.nombre, jornadaActiva.id, jornadaActiva.nombre, modoSeleccionado);
+            enviarNotificacionAJugador(p2, ligaActiva.id, ligaActiva.nombre, jornadaActiva.id, jornadaActiva.nombre, modoSeleccionado);
+
+            showToast(`Pareja ${p1} & ${p2} agregada`);
         }
 
         function renderJugadoresSalaPrevia() {
@@ -6221,21 +6298,22 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             if (!cont || !jornadaActiva) return;
             cont.innerHTML = "";
 
-            const lista = (modoSeleccionado === 'teams') 
+            const esTeams = (modoSeleccionado === 'teams');
+            const lista = esTeams 
                 ? (jornadaActiva.parejas || []).map(pair => pair.join(' & ')) 
                 : (jornadaActiva.convocados || []);
 
             if (countEl) countEl.textContent = lista.length;
 
             if (lista.length === 0) {
-                cont.innerHTML = `<div style="text-align:center; padding:16px; color:var(--txt-dim); font-size:0.75rem;">No hay jugadores en la sala previa. Agrega uno arriba.</div>`;
+                cont.innerHTML = `<div style="text-align:center; padding:16px; color:var(--txt-dim); font-size:0.75rem;">No hay participantes en la sala previa aún.</div>`;
                 return;
             }
 
             lista.forEach((nom, idx) => {
                 cont.innerHTML += `
                     <div style="display:flex; justify-content:space-between; align-items:center; background:#0b1120; border:1px solid var(--border-glow); padding:8px 12px; border-radius:10px;">
-                        <span style="font-weight:800; font-size:0.85rem; color:var(--txt-main);"><i class="fas fa-user-check" style="color:var(--padel-volt); margin-right:6px;"></i>${nom}</span>
+                        <span style="font-weight:800; font-size:0.85rem; color:var(--txt-main);"><i class="fas ${esTeams ? 'fa-users' : 'fa-user-check'}" style="color:var(--padel-volt); margin-right:6px;"></i>${nom}</span>
                         <button type="button" class="btn btn-sm btn-danger" style="padding:3px 8px; font-size:0.68rem;" onclick="eliminarJugadorDeSalaPrevia(${idx})">
                             <i class="fas fa-trash"></i> Quitar
                         </button>
@@ -6244,34 +6322,16 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             });
         }
 
-        async function agregarJugadorASalaPrevia() {
-            const sel = document.getElementById("selectAgregarSalaPrevia");
-            const nom = sel ? sel.value.trim() : "";
-            if (!nom) return showToast("Selecciona un jugador del padrón", "error");
-
-            if (modoSeleccionado !== 'teams') {
-                if (jornadaActiva.convocados.includes(nom)) {
-                    return showToast("El jugador ya está en la sala", "error");
-                }
-                jornadaActiva.convocados.push(nom);
-                saveLigaActiva();
-                renderJugadoresSalaPrevia();
-                showToast(`¡${nom} agregado a la sala!`);
-
-                // Enviar invitación de visor al jugador agregado
-                enviarNotificacionAJugador(nom, ligaActiva.id, ligaActiva.nombre, jornadaActiva.id, jornadaActiva.nombre, modoSeleccionado);
-            }
-        }
-
         function eliminarJugadorDeSalaPrevia(idx) {
             if (modoSeleccionado === 'teams') {
                 jornadaActiva.parejas.splice(idx, 1);
             } else {
                 jornadaActiva.convocados.splice(idx, 1);
+                renderChipsPadronSalaPrevia();
             }
             saveLigaActiva();
             renderJugadoresSalaPrevia();
-            showToast("Jugador retirado de la sala");
+            showToast("Participante retirado de la sala");
         }
 
         function confirmarEIniciarJornadaOficial() {

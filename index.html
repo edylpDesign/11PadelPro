@@ -6131,28 +6131,10 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                     estado: "pendiente"
                 };
 
-                // Guardar en la bandeja interna de notificaciones (campana)
-                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/notificaciones/${tel}/${notiId}.json`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(notiPayload)
-                });
+                // Guardar directo con el SDK de Firebase
+                await firebase.database().ref(`notificaciones/${tel}/${notiId}`).set(notiPayload);
 
-                console.log(`Notificación enviada a Firebase para ${tel}`);
                 showToast(`Invitación enviada a ${nombreJugador}`);
-
-                // Si coincide con el teléfono de este dispositivo, alertar
-                const miTelLocal = (document.getElementById("perfilTelefonoInput")?.value || "").replace(/\D/g, '');
-                if (miTelLocal === tel) {
-                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                    try {
-                        const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
-                        audio.play().catch(() => {});
-                    } catch(e) {}
-                    if (typeof renderCampanitaNotificaciones === 'function') {
-                        renderCampanitaNotificaciones();
-                    }
-                }
             } catch (err) {
                 console.error("Error al registrar notificación:", err);
             }
@@ -7821,6 +7803,74 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
         let usuarioActivo = null;
 
         // ==========================================
+        // ESCUCHA EN TIEMPO REAL DE NOTIFICACIONES
+        // ==========================================
+        function iniciarEscuchaNotificacionesEnTiempoReal(tel) {
+            if (!tel || tel.length !== 10) return;
+
+            const notiRef = firebase.database().ref(`notificaciones/${tel}`);
+
+            notiRef.on('child_added', (snapshot) => {
+                const noti = snapshot.val();
+                if (!noti) return;
+
+                const guardadas = JSON.parse(localStorage.getItem("padel_notis_procesadas") || "[]");
+                if (guardadas.includes(noti.id)) return;
+
+                guardadas.push(noti.id);
+                if (guardadas.length > 50) guardadas.shift();
+                localStorage.setItem("padel_notis_procesadas", JSON.stringify(guardadas));
+
+                if (navigator.vibrate) {
+                    navigator.vibrate([250, 100, 250, 100, 400]);
+                }
+
+                try {
+                    const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+                    audio.play().catch(e => console.warn("Audio silenciado por navegador:", e));
+                } catch(e) {}
+
+                if (typeof showToast === 'function') {
+                    showToast(`🔔 ${noti.titulo}: ${noti.mensaje}`);
+                }
+
+                actualizarContadorCampanita();
+
+                if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification(noti.titulo || "11Padel Point Pro", {
+                            body: noti.mensaje,
+                            icon: "img/app_icon.png",
+                            badge: "img/app_icon.png",
+                            vibrate: [250, 100, 250, 100, 400],
+                            data: { url: "/" }
+                        });
+                    });
+                }
+
+                     });
+        }
+
+        async function actualizarContadorCampanita() {
+            const inputTel = document.getElementById("perfilTelefonoInput");
+            const tel = inputTel ? inputTel.value.replace(/\D/g, '') : "";
+            if (!tel || tel.length !== 10) return;
+
+            try {
+                const snap = await firebase.database().ref(`notificaciones/${tel}`).once('value');
+                const val = snap.val() || {};
+                const total = Object.keys(val).length;
+                
+                const badge = document.getElementById("badgeNotificacionesCount");
+                if (badge) {
+                    badge.style.display = total > 0 ? "block" : "none";
+                }
+            } catch (e) {
+                console.warn("Error al actualizar contador campana:", e);
+            }
+        }
+
+        // ==========================================
         // CONFIGURACIÓN NOTIFICACIONES PUSH (FCM)
         // ==========================================
         let fcmMessaging = null;
@@ -8114,6 +8164,8 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
 
         async function cargarEstadisticasPersonales(telefono) {
             try {
+                iniciarEscuchaNotificacionesEnTiempoReal(telefono);
+            actualizarContadorCampanita();
                 // Mostrar contenedor nativo en el Hub principal
                 const secDashboard = document.getElementById("sectionPerfilStatsApp");
                 if (secDashboard) {
@@ -8882,11 +8934,11 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
             const cont = document.getElementById("listaNotificacionesContenedor") || document.getElementById("contenidoNotificaciones");
             
             if (modal) modal.classList.remove("hidden");
-            if (cont) cont.innerHTML = "<p style='color:var(--txt-dim); text-align:center; padding:16px;'>Cargando notificaciones...</p>";
+            if (cont) cont.innerHTML = "<p style='color:var(--txt-dim); text-align:center; padding:16px;'>Consultando notificaciones...</p>";
 
             try {
-                const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/notificaciones/${tel}.json`);
-                const data = await res.json();
+                const snapshot = await firebase.database().ref(`notificaciones/${tel}`).once('value');
+                const data = snapshot.val();
 
                 if (!cont) return;
 
@@ -8912,14 +8964,11 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
                                 </button>
                             </div>
                         `;
-                    } else if (noti.tipo === "invitacion") {
+                    } else {
                         accionesHtml = `
                             <div style="margin-top:10px; display:flex; gap:8px;">
-                                <button type="button" class="btn btn-sm btn-green" onclick="responderInvitacion('${noti.id}', '${noti.torneoId}', '${noti.rol}', true)">
-                                    Aceptar
-                                </button>
-                                <button type="button" class="btn btn-sm btn-danger" onclick="responderInvitacion('${noti.id}', '${noti.torneoId}', '${noti.rol}', false)">
-                                    Rechazar
+                                <button type="button" class="btn btn-sm btn-dark" onclick="descartarNotificacion('${tel}', '${noti.id}')">
+                                    Eliminar
                                 </button>
                             </div>
                         `;
@@ -8940,7 +8989,18 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
                 cont.innerHTML = html;
             } catch (err) {
                 console.error("Error al cargar notificaciones:", err);
-                if (cont) cont.innerHTML = "<p style='color:var(--padel-red); text-align:center; padding:16px;'>Error al cargar notificaciones.</p>";
+                if (cont) cont.innerHTML = "<p style='color:var(--padel-red); text-align:center; padding:16px;'>Error al consultar Firebase.</p>";
+            }
+        }
+
+        async function descartarNotificacion(tel, notiId) {
+            try {
+                await firebase.database().ref(`notificaciones/${tel}/${notiId}`).remove();
+                abrirModalNotificaciones();
+                actualizarContadorCampanita();
+                showToast("Notificación descartada");
+            } catch (e) {
+                console.error("Error al descartar:", e);
             }
         }
 

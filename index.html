@@ -5697,21 +5697,34 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
 
         function renderListaJornadasLiga() {
             const cont = document.getElementById("listaJornadasContenedor");
+            if (!cont) return;
             cont.innerHTML = "";
             if (!ligaActiva.jornadas || !ligaActiva.jornadas.length) {
                 cont.innerHTML = "<p style='color:var(--txt-dim); padding:14px; text-align:center;'>No hay jornadas creadas.</p>";
                 return;
             }
             ligaActiva.jornadas.forEach(j => {
-                const desc = modoSeleccionado === 'teams' ? `${(j.parejas || []).length} parejas participantes` : `${(j.convocados || []).length} jugadores convocados`;
+                const esPreparando = (j.estado === 'preparando' || (!j.rounds?.length && !j.rondas?.length));
+                const totalParticipantes = (modoSeleccionado === 'teams') 
+                    ? (j.parejas || []).length 
+                    : (j.convocados || []).length;
+
+                const desc = (modoSeleccionado === 'teams') 
+                    ? `${totalParticipantes} parejas confirmadas` 
+                    : `${totalParticipantes} jugadores convocados`;
+
+                const btnTexto = esPreparando ? '⏳ Sala Previa' : 'Entrar';
+                const btnClase = esPreparando ? 'btn-dark' : 'btn-green';
+                const accionEntrar = esPreparando ? `abrirSalaPrevia('${j.id}')` : `cargarJornadaEnVivo('${j.id}')`;
+
                 cont.innerHTML += `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; margin-bottom:8px;">
                     <div>
                         <strong style="color:var(--txt-main); font-size:0.9rem;">${j.nombre}</strong><br>
-                        <small style="color:var(--txt-muted);">${desc}</small>
+                        <small style="color:var(--txt-muted);">${desc} ${esPreparando ? '• <span style="color:var(--padel-orange);">En espera</span>' : ''}</small>
                     </div>
                     <div style="display:flex; gap:6px; align-items:center;">
-                        <button type="button" class="btn btn-sm ${j.estado === 'preparando' ? 'btn-dark' : 'btn-green'}" onclick="${j.estado === 'preparando' ? `abrirSalaPrevia('${j.id}')` : `cargarJornadaEnVivo('${j.id}')`}">${j.estado === 'preparando' ? '⏳ Sala Previa' : 'Entrar'}</button>
+                        <button type="button" class="btn btn-sm ${btnClase}" onclick="${accionEntrar}">${btnTexto}</button>
                         <button type="button" class="btn btn-sm btn-danger" onclick="eliminarJornadaLiga('${j.id}')" title="Eliminar Jornada">🗑️</button>
                     </div>
                 </div>`;
@@ -6261,6 +6274,9 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             }
 
             saveLigaActiva();
+            if (typeof sincronizarTorneoActualANube === 'function') {
+                sincronizarTorneoActualANube();
+            }
             renderChipsPadronSalaPrevia();
             renderJugadoresSalaPrevia();
         }
@@ -6454,8 +6470,17 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
         }
 
         function backToLigaDetalle() {
-            saveLigaActiva();
-            abrirLigaDetalle(ligaActiva.id);
+            if (jornadaActiva) {
+                saveLigaActiva();
+                if (typeof sincronizarTorneoActualANube === 'function') {
+                    sincronizarTorneoActualANube();
+                }
+            }
+            if (ligaActiva && ligaActiva.id) {
+                abrirLigaDetalle(ligaActiva.id);
+            } else {
+                backToLigasModo();
+            }
         }
 
         function switchLiveTab(modo, vista) {

@@ -3542,6 +3542,7 @@
     <!-- FIREBASE AUTH & CORE SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 
     <script>
         const CLOUD_DB_URL = "https://padel-pro-4c4d7-default-rtdb.firebaseio.com/sponsors.json";
@@ -6086,6 +6087,9 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
 
                 if (tel && tel.length === 10) {
                     const notiId = "inv_visor_" + Date.now();
+                    const tituloNoti = `🎾 Convocado: ${jornadaNombre}`;
+                    const mensajeNoti = `Has sido convocado a la sala previa de "${torneoNombre}". Toca para ver marcadores en vivo.`;
+
                     const notiPayload = {
                         id: notiId,
                         tipo: "invitacion_visor",
@@ -6094,20 +6098,59 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
                         jornadaId: jornadaId,
                         jornadaNombre: jornadaNombre,
                         modo: modo,
-                        titulo: `🎾 Convocado: ${jornadaNombre}`,
-                        mensaje: `Has sido pre-cargado a la sala previa de "${torneoNombre}". Acepta tu acceso como visor para seguir los marcadores en tiempo real.`,
+                        titulo: tituloNoti,
+                        mensaje: mensajeNoti,
                         fecha: new Date().toLocaleTimeString("es-MX", { hour: '2-digit', minute: '2-digit' }),
                         estado: "pendiente"
                     };
 
+                    // 1. Guardar en la bandeja interna de notificaciones (campana)
                     await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/notificaciones/${tel}/${notiId}.json`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(notiPayload)
                     });
+
+                    // 2. Disparar notificación push nativa a los dispositivos registrados del jugador
+                    try {
+                        const resTokens = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/tokens_dispositivos/${tel}.json`);
+                        if (resTokens.ok) {
+                            const tokensObj = await resTokens.json();
+                            if (tokensObj) {
+                                Object.values(tokensObj).forEach(device => {
+                                    if (device && device.token) {
+                                        // Enviar petición de notificación push al dispositivo
+                                        fetch('https://fcm.googleapis.com/fcm/send', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': 'key=AIzaSyA-x62LGZKHJcSY3ry0ZimP6vIAwSniU-4'
+                                            },
+                                            body: JSON.stringify({
+                                                to: device.token,
+                                                notification: {
+                                                    title: tituloNoti,
+                                                    body: mensajeNoti,
+                                                    icon: '/img/app_icon.png',
+                                                    vibrate: [200, 100, 200, 100, 300]
+                                                },
+                                                data: {
+                                                    url: '/',
+                                                    torneoId: torneoId,
+                                                    jornadaId: jornadaId
+                                                }
+                                            })
+                                        }).catch(e => console.warn("Aviso al enviar push a token:", e));
+                                    }
+                                });
+                            }
+                        }
+                    } catch (pushErr) {
+                        console.warn("No se pudo enviar push nativa al dispositivo:", pushErr);
+                    }
                 }
             } catch (err) {
-                console.warn("No se pudo enviar la invitación:", err);
+                console.warn("No se pudo registrar la invitación:", err);
             }
         }
 
@@ -7761,6 +7804,68 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
         const auth = firebase.auth();
         let usuarioActivo = null;
 
+        // ==========================================
+        // CONFIGURACIÓN NOTIFICACIONES PUSH (FCM)
+        // ==========================================
+        let fcmMessaging = null;
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            try {
+                fcmMessaging = firebase.messaging();
+                navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                    .then(reg => {
+                        console.log('Service Worker de Notificaciones registrado con éxito:', reg.scope);
+                    })
+                    .catch(err => {
+                        console.warn('Error al registrar Service Worker:', err);
+                    });
+            } catch (e) {
+                console.warn('FCM no soportado en este navegador:', e);
+            }
+        }
+
+        async function solicitarPermisoNotificacionesPush(telefonoJugador) {
+            if (!fcmMessaging || !('Notification' in window)) return;
+            const tel = telefonoJugador ? telefonoJugador.replace(/\D/g, '') : '';
+            if (tel.length !== 10) return;
+
+            try {
+                const permiso = await Notification.requestPermission();
+                if (permiso === 'granted') {
+                    const token = await fcmMessaging.getToken();
+                    if (token) {
+                        await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/tokens_dispositivos/${tel}/${token.substring(0, 20)}.json`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                token: token,
+                                fechaRegistro: new Date().toISOString(),
+                                plataforma: navigator.userAgent
+                            })
+                        });
+                        console.log('Token Push registrado correctamente para:', tel);
+                    }
+                }
+            } catch (err) {
+                console.warn('Error al obtener token FCM o solicitar permiso:', err);
+            }
+        }
+
+        // Escuchar mensajes cuando la app está abierta en primer plano
+        if (fcmMessaging) {
+            fcmMessaging.onMessage((payload) => {
+                const titulo = payload.notification?.title || payload.data?.title || '11Padel';
+                const cuerpo = payload.notification?.body || payload.data?.body || 'Nueva notificación';
+                
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                try {
+                    const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+                    audio.play().catch(() => {});
+                } catch(e) {}
+
+                showToast(`🔔 ${titulo}: ${cuerpo}`);
+            });
+        }
+
         auth.onAuthStateChanged(async (user) => {
             usuarioActivo = user;
             const btnTop = document.getElementById("btnPerfilUsuarioTop");
@@ -8891,6 +8996,7 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
 
                 closeModal('modalAuthUsuario');
                 cargarEstadisticasPersonales(tel);
+                solicitarPermisoNotificacionesPush(tel);
                 showToast("¡Número vinculado exitosamente!");
             } catch (e) {
                 console.error("Error al guardar teléfono:", e);

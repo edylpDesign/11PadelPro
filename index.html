@@ -8932,9 +8932,10 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
             }
 
             const modal = document.getElementById("modalNotificaciones");
-            const cont = document.getElementById("listaNotificacionesContenedor") || document.getElementById("contenidoNotificaciones");
+            const cont = document.getElementById("listaNotificacionesContainer") || document.getElementById("listaNotificacionesContenedor");
             
-            if (modal) modal.classList.remove("hidden");
+            // Usar la clase .active estándar de tu app para hacerlo visible
+            if (modal) modal.classList.add("active");
             if (cont) cont.innerHTML = "<p style='color:var(--txt-dim); text-align:center; padding:16px;'>Consultando notificaciones...</p>";
 
             try {

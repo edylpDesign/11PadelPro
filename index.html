@@ -6095,97 +6095,66 @@ let criterioOrdenTablaActual = 'pts'; // 'pts' o 'diff'
             try {
                 const d = getUserData();
                 const padron = d.jugadores || [];
-                const jObj = padron.find(j => obtenerNombreJugador(j).toLowerCase() === nombreJugador.toLowerCase());
+                const jObj = padron.find(j => {
+                    const n = (typeof j === 'object' && j !== null) ? (j.nombre || j.name || '') : j;
+                    return n.trim().toLowerCase() === nombreJugador.trim().toLowerCase();
+                });
                 
-                if (!jObj) return;
+                if (!jObj) {
+                    console.warn("Jugador no encontrado en el padrón para notificar:", nombreJugador);
+                    return;
+                }
+
                 const normalizado = normalizarJugador(jObj);
                 const tel = normalizado.telefono ? normalizado.telefono.replace(/\D/g, '') : "";
 
-                if (tel && tel.length === 10) {
-                    const notiId = "inv_visor_" + Date.now();
-                    const tituloNoti = `🎾 Convocado: ${jornadaNombre}`;
-                    const mensajeNoti = `Has sido convocado a la sala previa de "${torneoNombre}". Toca para ver marcadores en vivo.`;
+                if (!tel || tel.length !== 10) {
+                    console.warn(`El jugador ${nombreJugador} no tiene un WhatsApp válido de 10 dígitos.`);
+                    return;
+                }
 
-                    const notiPayload = {
-                        id: notiId,
-                        tipo: "invitacion_visor",
-                        torneoId: torneoId,
-                        torneoNombre: torneoNombre,
-                        jornadaId: jornadaId,
-                        jornadaNombre: jornadaNombre,
-                        modo: modo,
-                        titulo: tituloNoti,
-                        mensaje: mensajeNoti,
-                        fecha: new Date().toLocaleTimeString("es-MX", { hour: '2-digit', minute: '2-digit' }),
-                        estado: "pendiente"
-                    };
+                const notiId = "inv_visor_" + Date.now();
+                const tituloNoti = `🎾 Convocado: ${jornadaNombre || 'Jornada'}`;
+                const mensajeNoti = `Has sido convocado en "${torneoNombre || 'Torneo'}". Toca para unirte como visor en vivo.`;
 
-                    // 1. Guardar en la bandeja interna de notificaciones (campana)
-                    await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/notificaciones/${tel}/${notiId}.json`, {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(notiPayload)
-                    });
+                const notiPayload = {
+                    id: notiId,
+                    tipo: "invitacion_visor",
+                    torneoId: torneoId,
+                    torneoNombre: torneoNombre || "Torneo",
+                    jornadaId: jornadaId,
+                    jornadaNombre: jornadaNombre || "Jornada",
+                    modo: modo || "americano",
+                    titulo: tituloNoti,
+                    mensaje: mensajeNoti,
+                    fecha: new Date().toLocaleTimeString("es-MX", { hour: '2-digit', minute: '2-digit' }),
+                    estado: "pendiente"
+                };
 
-                    // Disparar vibración, sonido y notificación local inmediata en este dispositivo
-                    const miTelLocal = (document.getElementById("perfilTelefonoInput")?.value || "").replace(/\D/g, '');
-                    if (miTelLocal === tel && 'serviceWorker' in navigator && Notification.permission === 'granted') {
-                        navigator.serviceWorker.ready.then(registration => {
-                            registration.showNotification(tituloNoti, {
-                                body: mensajeNoti,
-                                icon: 'img/app_icon.png',
-                                badge: 'img/app_icon.png',
-                                vibrate: [200, 100, 200, 100, 300],
-                                data: { url: '/' }
-                            });
-                        });
-                        if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 300]);
-                        try {
-                            const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
-                            audio.play().catch(() => {});
-                        } catch(e) {}
-                    }
+                // Guardar en la bandeja interna de notificaciones (campana)
+                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/notificaciones/${tel}/${notiId}.json`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(notiPayload)
+                });
 
-                    // 2. Disparar notificación push nativa a los dispositivos registrados del jugador
+                console.log(`Notificación enviada a Firebase para ${tel}`);
+                showToast(`Invitación enviada a ${nombreJugador}`);
+
+                // Si coincide con el teléfono de este dispositivo, alertar
+                const miTelLocal = (document.getElementById("perfilTelefonoInput")?.value || "").replace(/\D/g, '');
+                if (miTelLocal === tel) {
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                     try {
-                        const resTokens = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/tokens_dispositivos/${tel}.json`);
-                        if (resTokens.ok) {
-                            const tokensObj = await resTokens.json();
-                            if (tokensObj) {
-                                Object.values(tokensObj).forEach(device => {
-                                    if (device && device.token) {
-                                        // Enviar petición de notificación push al dispositivo
-                                        fetch('https://fcm.googleapis.com/fcm/send', {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'Authorization': 'key=AIzaSyA-x62LGZKHJcSY3ry0ZimP6vIAwSniU-4'
-                                            },
-                                            body: JSON.stringify({
-                                                to: device.token,
-                                                notification: {
-                                                    title: tituloNoti,
-                                                    body: mensajeNoti,
-                                                    icon: '/img/app_icon.png',
-                                                    vibrate: [200, 100, 200, 100, 300]
-                                                },
-                                                data: {
-                                                    url: '/',
-                                                    torneoId: torneoId,
-                                                    jornadaId: jornadaId
-                                                }
-                                            })
-                                        }).catch(e => console.warn("Aviso al enviar push a token:", e));
-                                    }
-                                });
-                            }
-                        }
-                    } catch (pushErr) {
-                        console.warn("No se pudo enviar push nativa al dispositivo:", pushErr);
+                        const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+                        audio.play().catch(() => {});
+                    } catch(e) {}
+                    if (typeof renderCampanitaNotificaciones === 'function') {
+                        renderCampanitaNotificaciones();
                     }
                 }
             } catch (err) {
-                console.warn("No se pudo registrar la invitación:", err);
+                console.error("Error al registrar notificación:", err);
             }
         }
 
@@ -7872,10 +7841,7 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
 
         async function solicitarPermisoNotificacionesPush(telefonoJugador) {
             if (!('Notification' in window)) {
-                return showToast("Este navegador no soporta notificaciones", "error");
-            }
-            if (!('serviceWorker' in navigator)) {
-                return showToast("Service Worker no disponible", "error");
+                return alert("Tu navegador no soporta notificaciones web.");
             }
 
             const tel = (telefonoJugador || document.getElementById("perfilTelefonoInput")?.value || "").replace(/\D/g, '');
@@ -7884,44 +7850,76 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
             }
 
             try {
-                // Solicitar permiso nativo al sistema operativo
+                // 1. Pedir permiso al sistema
                 const permiso = await Notification.requestPermission();
                 
-                if (permiso === 'denied') {
-                    alert("Las notificaciones están bloqueadas en este navegador. Toca el candado 🔒 junto a la URL arriba para permitirlas.");
+                if (permiso !== 'granted') {
+                    alert("Permiso no concedido. Revisa el candado 🔒 junto a la URL en Chrome y activa 'Notificaciones'.");
                     return;
                 }
 
-                if (permiso === 'granted') {
-                    showToast("Permiso concedido. Vinculando teléfono...");
-                    
-                    if (!fcmMessaging) {
-                        fcmMessaging = firebase.messaging();
-                    }
+                // 2. Tocar sonido y vibrar inmediatamente al tocar el botón (Aceptado por Android)
+                if (navigator.vibrate) {
+                    navigator.vibrate([250, 100, 250, 100, 400]);
+                }
+                try {
+                    const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+                    audio.play().catch(e => console.warn("Audio bloqueado:", e));
+                } catch(e) {}
 
-                    const registration = await navigator.serviceWorker.ready;
-                    
-                    // Obtener token FCM usando el Service Worker activo
-                    const token = await fcmMessaging.getToken({ serviceWorkerRegistration: registration });
-                    
-                    if (token) {
-                        await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/tokens_dispositivos/${tel}/${token.substring(0, 20)}.json`, {
-                            method: "PUT",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                token: token,
-                                fechaRegistro: new Date().toISOString(),
-                                plataforma: navigator.userAgent
-                            })
+                // 3. Registrar o asegurar el Service Worker
+                let reg = null;
+                if ('serviceWorker' in navigator) {
+                    reg = await navigator.serviceWorker.ready.catch(() => null);
+                    if (!reg) {
+                        reg = await navigator.serviceWorker.register('firebase-messaging-sw.js').catch(e => {
+                            console.warn("Fallo al registrar SW:", e);
+                            return null;
                         });
-                        showToast("¡Celular listo para recibir alertas con sonido y vibración!");
-                    } else {
-                        showToast("No se pudo generar el token de notificación", "error");
                     }
                 }
+
+                // 4. Lanzar notificación visible directa en la barra de Android
+                if (reg && reg.showNotification) {
+                    await reg.showNotification("🎾 11Padel Point Pro", {
+                        body: "¡Notificaciones activadas con éxito en tu celular!",
+                        icon: "img/app_icon.png",
+                        badge: "img/app_icon.png",
+                        vibrate: [250, 100, 250, 100, 400],
+                        tag: "test-notification",
+                        renotify: true,
+                        data: { url: "/" }
+                    });
+                } else {
+                    new Notification("🎾 11Padel Point Pro", {
+                        body: "¡Notificaciones activadas con éxito!",
+                        icon: "img/app_icon.png"
+                    });
+                }
+
+                // 5. Vincular token en Firebase
+                if (typeof fcmMessaging !== 'undefined' && fcmMessaging && reg) {
+                    try {
+                        const token = await fcmMessaging.getToken({ serviceWorkerRegistration: reg });
+                        if (token) {
+                            await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/tokens_dispositivos/${tel}/${token.substring(0, 20)}.json`, {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    token: token,
+                                    fechaRegistro: new Date().toISOString(),
+                                    plataforma: navigator.userAgent
+                                })
+                            });
+                        }
+                    } catch(fcmErr) {
+                        console.warn("Aviso token FCM:", fcmErr);
+                    }
+                }
+
+                showToast("¡Prueba de notificación enviada a tu barra!");
             } catch (err) {
-                console.error('Error al activar notificaciones:', err);
-                showToast("Error al activar notificaciones: " + err.message, "error");
+                alert("Error al activar: " + err.message);
             }
         }
 
@@ -8872,61 +8870,89 @@ Si pregunta por dolores o lesiones de pádel, recomienda a Motio.`;
         }
 
         async function abrirModalNotificaciones() {
-            const modal = document.getElementById("modalNotificaciones");
-            const cont = document.getElementById("listaNotificacionesContainer");
-            if (!modal || !cont) return;
-
-            modal.classList.add("active");
-            cont.innerHTML = `<p style="color:var(--txt-dim); font-size:0.75rem; text-align:center; padding:16px;"><i class="fas fa-spinner fa-spin"></i> Cargando invitaciones...</p>`;
-
             const inputTel = document.getElementById("perfilTelefonoInput");
-            const tel = inputTel ? inputTel.value.trim() : "";
-
+            const tel = inputTel ? inputTel.value.replace(/\D/g, '') : "";
+            
             if (!tel || tel.length !== 10) {
-                cont.innerHTML = `<p style="color:var(--padel-orange); font-size:0.75rem; text-align:center; padding:16px;">Registra tu número de 10 dígitos en Perfil para recibir accesos.</p>`;
+                showToast("Ingresa tu WhatsApp en Mi Perfil para ver tus notificaciones", "error");
                 return;
             }
 
+            const modal = document.getElementById("modalNotificaciones");
+            const cont = document.getElementById("listaNotificacionesContenedor") || document.getElementById("contenidoNotificaciones");
+            
+            if (modal) modal.classList.remove("hidden");
+            if (cont) cont.innerHTML = "<p style='color:var(--txt-dim); text-align:center; padding:16px;'>Cargando notificaciones...</p>";
+
             try {
                 const res = await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/notificaciones/${tel}.json`);
-                const data = res.ok ? await res.json() : null;
+                const data = await res.json();
+
+                if (!cont) return;
 
                 if (!data || Object.keys(data).length === 0) {
-                    cont.innerHTML = `<p style="color:var(--txt-muted); font-size:0.75rem; text-align:center; padding:16px;">No tienes invitaciones pendientes.</p>`;
-                    const badge = document.getElementById("badgeNotificacionesCount");
-                    if (badge) badge.style.display = "none";
+                    cont.innerHTML = "<p style='color:var(--txt-dim); text-align:center; padding:20px;'>No tienes notificaciones pendientes.</p>";
                     return;
                 }
 
-                cont.innerHTML = "";
-                const notis = Object.values(data).reverse();
+                let html = "";
+                const notificaciones = Object.values(data).reverse();
 
-                notis.forEach(n => {
-                    const esInvitacion = (n.tipo === 'invitacion_visor');
-                    const estaPendiente = (n.estado === 'pendiente');
+                notificaciones.forEach(noti => {
+                    let accionesHtml = "";
 
-                    cont.innerHTML += `
-                        <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:12px; padding:10px; display:flex; flex-direction:column; gap:6px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <strong style="font-size:0.8rem; color:var(--txt-main);">${n.titulo}</strong>
-                                <small style="font-size:0.65rem; color:var(--txt-dim);">${n.fecha || ''}</small>
+                    if (noti.tipo === "invitacion_visor") {
+                        accionesHtml = `
+                            <div style="margin-top:10px; display:flex; gap:8px;">
+                                <button type="button" class="btn btn-sm btn-green" onclick="aceptarAccesoVisor('${tel}', '${noti.id}', '${noti.torneoId}')">
+                                    👁️ Unirme como Visor
+                                </button>
+                                <button type="button" class="btn btn-sm btn-dark" onclick="descartarNotificacion('${tel}', '${noti.id}')">
+                                    Descartar
+                                </button>
                             </div>
-                            <p style="font-size:0.72rem; color:var(--txt-muted); margin:0;">${n.mensaje}</p>
-                            
-                            ${esInvitacion && estaPendiente ? `
-                                <div style="display:flex; gap:6px; margin-top:4px;">
-                                    <button type="button" class="btn btn-green btn-sm" style="flex:1; padding:6px; font-size:0.7rem;" onclick="aceptarAccesoVisor('${tel}', '${n.id}', '${n.torneoId}')">
-                                        <i class="fas fa-check"></i> Aceptar como Visor
-                                    </button>
-                                </div>
-                            ` : (esInvitacion && !estaPendiente ? `
-                                <span style="font-size:0.65rem; color:var(--padel-volt); font-weight:800;"><i class="fas fa-check-circle"></i> Acceso Aceptado (Disponible en Jugar)</span>
-                            ` : '')}
+                        `;
+                    } else if (noti.tipo === "invitacion") {
+                        accionesHtml = `
+                            <div style="margin-top:10px; display:flex; gap:8px;">
+                                <button type="button" class="btn btn-sm btn-green" onclick="responderInvitacion('${noti.id}', '${noti.torneoId}', '${noti.rol}', true)">
+                                    Aceptar
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="responderInvitacion('${noti.id}', '${noti.torneoId}', '${noti.rol}', false)">
+                                    Rechazar
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    html += `
+                        <div style="background:#0b1120; border:1px solid var(--border-glow); border-radius:10px; padding:12px; margin-bottom:10px; text-align:left;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="color:var(--padel-volt); font-size:0.88rem;">${noti.titulo || 'Notificación'}</strong>
+                                <small style="color:var(--txt-dim); font-size:0.7rem;">${noti.fecha || ''}</small>
+                            </div>
+                            <p style="color:var(--txt-main); font-size:0.82rem; margin:6px 0 0 0;">${noti.mensaje || ''}</p>
+                            ${accionesHtml}
                         </div>
                     `;
                 });
+
+                cont.innerHTML = html;
             } catch (err) {
-                cont.innerHTML = `<p style="color:var(--padel-red); font-size:0.75rem; text-align:center; padding:16px;">Error al conectar con la base de datos.</p>`;
+                console.error("Error al cargar notificaciones:", err);
+                if (cont) cont.innerHTML = "<p style='color:var(--padel-red); text-align:center; padding:16px;'>Error al cargar notificaciones.</p>";
+            }
+        }
+
+        async function descartarNotificacion(tel, notiId) {
+            try {
+                await fetch(`https://padel-pro-4c4d7-default-rtdb.firebaseio.com/notificaciones/${tel}/${notiId}.json`, {
+                    method: "DELETE"
+                });
+                abrirModalNotificaciones();
+                showToast("Notificación descartada");
+            } catch (e) {
+                console.error(e);
             }
         }
 
